@@ -1,5 +1,6 @@
 # Importando bibliotecas
 import random
+import math
 from collections import deque
 
 # -------------------------------------------------------------------------------
@@ -22,6 +23,10 @@ def invert_signal(weighted_inputs):
 def absolute(weighted_inputs):
     return abs(sum(weighted_inputs))
 
+def sin(weighted_inputs):
+    summed_input = sum(weighted_inputs)
+    return math.sin(summed_input)
+
 # -------------------------------------------------------------------------------
 # ------------------------- VARIÁVEIS E LISTAS GLOBAIS --------------------------
 # -------------------------------------------------------------------------------
@@ -30,10 +35,10 @@ def absolute(weighted_inputs):
 CONSTANT_NEURON_VALUE = 1
 
 # Taxas de mutação
-ADD_NEURON_MUTATION_RATE = 0.5 # Taxa de mutação para adição de neurônios
-REMOVE_NEURON_MUTATION_RATE = 0.1 # Taxa de mutação para remoção de neurônios
-ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
-REMOVE_CONNECTION_MUTATION_RATE = 0.1 # Taxa de mutação para remoção de conexões
+ADD_NEURON_MUTATION_RATE = 1 # Taxa de mutação para adição de neurônios
+REMOVE_NEURON_MUTATION_RATE = 0 # Taxa de mutação para remoção de neurônios
+ADD_CONNECTION_MUTATION_RATE = 0 # Taxa de mutação para adição de conexões
+REMOVE_CONNECTION_MUTATION_RATE = 0 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos 
 
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
@@ -48,25 +53,37 @@ possible_neurons = [
     # INPUT
     ("Input", "Temperature"),
     ("Input", "EnergyLevel"),
+    ("Input", "Health"),
     ("Input", "AngleToClosestFood"),
+    ("Input", "DistToClosestFood"),
+    ("Input", "NumOfFoodInView"),
+    ("Input", "AngleToClosestOrganism"),
+    ("Input", "DistToClosestOrganism"),
+    ("Input", "NumOfOrganismsInView"),
     ("Input", "Constant"),
+    ("Input", "Luminosity"),
+    ("Input", "Maturity"),
+    ("Input", "TimeAlive"),
 
-    # OCULTOS
+    # HIDDEN
     ("Hidden", "InvertSignal"),
     ("Hidden", "Absolute"),
     ("Hidden", "PiecewiseConstant"),
+    ("Hidden", "Sin"),
 
     # OUTPUT
     ("Output", "Accelerate"),
     ("Output", "Rotate"),
-    ("Output", "WantsToReproduce")
+    ("Output", "DesireToReproduce"),
+    ("Output", "DesireToEat")
 ]
 
 # Mapeando neurônios a funções para que cada neurônio da camada oculta saiba que função utilizar
 neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
     "PiecewiseConstant": PiecewiseConstant,
     "InvertSignal": invert_signal,
-    "Absolute": absolute
+    "Absolute": absolute,
+    "Sin": sin
 }
 
 # -------------------------------------------------------------------------------
@@ -77,6 +94,7 @@ class Neuron:
         self.id = id
         self.neuron_type = neuron_type # (Input/Hidden/Output)
         self.name = name # Deve estar na lista "possible_neurons"
+        self.activation_function = None
         self.output = None
 
     # Pega todos os inputs (já multiplicados pelos pesos) e calcula o output
@@ -445,9 +463,9 @@ class NeuralNetwork:
         print(f"Neurônios Output: {output_neurons}\n")
         print("Conexões:")
         for connection in self.connections:
-            from_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.from_neuron).name
-            to_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.to_neuron).name
-            print("{:>23}   ------>   {:<20}(W={})".format(from_neuron, to_neuron, connection.weight))
+            from_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.from_neuron)
+            to_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.to_neuron)
+            print("{:>25}({})     ------>   {:>18}({}) |  W={}".format(from_neuron.name, from_neuron.id, to_neuron.name, to_neuron.id, connection.weight))
 
 
 
@@ -482,12 +500,21 @@ basic_network.connections = [
 ]
 
 # Criando os valores de input manualmente. Na simulação, esses valores virão dos sentidos do organismo
-# "EnergyLevel" e "Temperature" não estão presentes nessa rede, mas caso a mutação introduza esses neurônios,
+# A maioria desses neurônios não está presente nessa rede, mas caso a mutação introduza esses neurônios,
 # deixaremos esses valores aqui para que a rede mutada possa computar os outputs 
-input_values = {
-    'AngleToClosestFood': -20, # A rede inicial só precisa desse valor, já que não possui os outros neurônios
+input_values = { # ESSES VALORES SÃO ARBITRÁRIOS AQUI
     'EnergyLevel': 25, 
     'Temperature': 16,
+    'Health': 85,
+    'AngleToClosestFood': -30, # A rede inicial só precisa desse valor, já que não possui os outros neurônios
+    'DistToClosestFood': 56,
+    'NumOfFoodInView': 3,
+    'AngleToClosestOrganism': -77,
+    'DistToClosestOrganism': 172,
+    'NumOfOrganismsInView': 0,
+    'Luminosity': 0.56,
+    'Maturity': 0.83,
+    'TimeAlive': 104
 }
 
 
@@ -503,7 +530,8 @@ print("Valores de output:", basic_network.feed_forward(input_values))
 print("\n------------------------- Rede Após mutação -------------------------")
 
 # Realizando a mutação
-basic_network.mutate()
+for i in range(1, 4):
+    basic_network.mutate()
 
 basic_network.print_network_info()
 
