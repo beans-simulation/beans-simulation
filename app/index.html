@@ -51,9 +51,9 @@
     </div> -->
 
     <canvas></canvas>
-    <div id="link">
+    <!-- <div id="link">
         <a id="linkGit"  target="__blank" href="https://github.com/e-llo/beans">GitHub: https://github.com/e-llo/beans </a>
-    </div>
+    </div> -->
     <div class="cronometro">
         <span id="hora">00</span>:<span id="minuto">00</span>:<span id="segundo">00</span>:<span id="milisegundo">00</span>
     </div>
@@ -69,7 +69,6 @@
     <div id="tabs">
         <div id="tabs-botoes" class="position-absolute d-flex" style="top:0; right:0;">
             <button type="button" class="btn btn-dark" onclick="$('#tab-simulacao').show();">Simulação</button>
-            <button type="button" class="btn btn-dark" onclick="$('#tab-organismos').show();">Organismos</button>
             <button type="button" class="btn btn-dark" onclick="$('#tab-dados').show();">Dados</button>
         </div>
 
@@ -109,11 +108,10 @@
                         <input type="range" min="0" max="100" value="5" class="slider-blue" id="inputMagMutacao" oninput="mudouInputMag()"
                             onchange="mudaMagMutacao(inputMagMutacao.value)">
 
-                        <div id="divTamanhoUniverso">
+                        <!-- <div id="divTamanhoUniverso">
                             <label id="tamanhoUniverso" name="tamanhoUniverso" for="inputTamanhoUniverso">Tamanho do universo: <label id="numTamanhoUniverso">2</label></label>
                             <input type="range" min="1" max="5" value="2" class="slider" id="inputTamanhoUniverso" oninput="reequilibraQuantidades()">
-                        </div>
-                        
+                        </div> -->
 
                         <div id="botoesIniciais" class ="row mt-3">
                             <div class="col-sm-3 d-grid gap-2">
@@ -167,53 +165,7 @@
             </div>
             <!--------------------- FIM TAB SIMULACAO ------------------>
 
-            <!--------------------- TAB ORGANISMOS ---------------------->
-            <div id="tab-organismos" class="tab-info w-300px" style="left:50%; top:50%;display:none;">
-                <div class="tab-title">
-                    Organismos
-                    <button type="button" class="btn close-btn" onclick=" $(this).closest('.tab-info').hide()">
-                        <i class="fal fa-minus"></i>
-                    </button>
-                </div>
-                <div class="tab-body">
-                    <div class="d-flex">
-                        <button type="button" id="btnCarn" class="d-flex justify-content-around align-items-center btn btn-sm btn-outline-danger w-100 addObjeto" onclick="addCarnivoro()"><span class="icone-carnivoro"></span>Adicionar Carnívoro</button>
-                        <button type="button" class="btn btn-gray" onclick="showEditPanel(1)"><i class="fas fa-edit p-0"></i></button>
-                    </div>
-                    <div class="d-flex">
-                        <button type="button" id="btnHerb" class="d-flex justify-content-around align-items-center btn btn-sm btn-outline-success w-100 addObjeto" onclick="addHerbivoro()"><span class="icone-herbivoro"></span>Adicionar Herbívoro</button>
-                        <button type="button" class="btn btn-gray" onclick="showEditPanel(2)"><i class="fas fa-edit p-0"></i></button>
-                    </div>
-                    <button type="button" id="btnAli"  class="d-flex justify-content-around align-items-center btn btn-sm btn-outline-warning w-100 addObjeto" onclick="addAlimento()"><span class="icone-vegetal"></span>Adicionar Vegetal</button>
-                    
-                    <hr class="mt-4">
-                    <div class="text-center " id="secaoExcluir">
-                        <i class="fas fa-exclamation-triangle" style="color:rgb(255, 208, 0)"></i> Excluir
-                    </div>
-                    <div class="text-center">
-                        <input id="inputMataHerb" name="inputMata" type="radio" onclick="matar('h')"/>
-                        <label for="inputMataHerb">Herbívoros</label>
 
-                        <input id="inputMataCarn" name="inputMata" type="radio" onclick="matar('c')"/>
-                        <label for="inputMataCarn">Carnívoros</label>
-                    </div>
-                    <div class="text-center">
-                        <input id="inputMataAli" name="inputMata" type="radio" onclick="matar('a')"/>
-                        <label for="inputMataAli">Vegetais</label>
-
-                        <input id="inputMataTodos" name="inputMata" type="radio" onclick="matar()"/>
-                        <label for="inputMataTodos">Todos</label>
-                    </div>
-                    <div id="btnDeletePopovers" class="mt-2" style="display: none;">
-                        <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="deletePopovers()">Fechar popovers</button>
-                    </div>
-                    <!-- PAINEL DE EDICAO PARA INSERIR NOVO ORGANISMO -->
-                    <div id="painelEditar" class="container-fluid edit-organism my-3 d-none">
-                        <!-- Gerado automaticamente pelos botoes de editar -->
-                    </div>
-                </div>
-            </div>
-            <!--------------------- FIM TAB ORGANISMOS ------------------>
 
             <!--------------------- TAB DADOS ---------------------->
             <div id="tab-dados" class="tab-info" style="left:5px; top:calc(50% - 319px);display:none;z-index: 1;">
@@ -249,7 +201,7 @@
     </div>
 
     <!-- TOAST -->
-    <div class="position-absolute" style="top: 40%; right: 350px;" >
+    <!-- <div class="position-absolute" style="top: 40%; right: 350px;" >
         <div role="alert" aria-live="assertive" aria-atomic="true" class="toast align-items-center text-white bg-secondary border-0" data-autohide="false" >
             <div class="d-flex">
                 <div class="toast-body">
@@ -259,7 +211,7 @@
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>    
-    </div>
+    </div> -->
     
     
   <script type="text/javascript">
@@ -335,7 +287,8 @@
 
 
         function iniciarSimulacao(){ // não ta funcionando se coloco só no click do botão
-            tamanhoUniverso = parseInt(document.getElementById("numTamanhoUniverso").textContent);
+            // tamanhoUniverso = parseInt(document.getElementById("numTamanhoUniverso").textContent);
+            tamanhoUniverso = 1; //julia: adicionei esse valor fixo ao invés do valor de input
             n_carnivoros = parseInt(document.getElementById("numCarn").textContent) * tamanhoUniverso;
             n_herbivoros = parseInt(document.getElementById("numHerb").textContent) * tamanhoUniverso;
             n_alimentos = parseInt(document.getElementById("numAli").textContent) * tamanhoUniverso;
@@ -367,12 +320,12 @@
             mudaProbMutacao(inputPMut.value);
             inputMMut = document.getElementById("inputMagMutacao");
             mudaMagMutacao(inputMMut.value);
-            document.getElementById("inputsIniciais").classList.add("d-none");
-            document.getElementById("divTamanhoUniverso").classList.add("d-none");
-            document.getElementById("painelSecundario").classList.remove("d-none");
-            document.getElementById("botoesIniciais").classList.add("d-none");
-            document.getElementById("botoesSecundarios").classList.remove("d-none");
-            document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
+            // document.getElementById("inputsIniciais").classList.add("d-none");
+            // document.getElementById("divTamanhoUniverso").classList.add("d-none");
+            // document.getElementById("painelSecundario").classList.remove("d-none");
+            // document.getElementById("botoesIniciais").classList.add("d-none");
+            // document.getElementById("botoesSecundarios").classList.remove("d-none");
+            // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
             if(!rodando && !pausado) { 
                 animate(); 
             }
@@ -392,8 +345,8 @@
             document.getElementById("numProbMutacao").textContent = 10;
             document.getElementById("numMagMutacao").textContent = 5;
 
-            document.getElementById("numTamanhoUniverso").textContent = 2;
-            document.getElementById("inputTamanhoUniverso").value = 2;
+            // document.getElementById("numTamanhoUniverso").textContent = 2;
+            // document.getElementById("inputTamanhoUniverso").value = 2;
 
             labelTaxa.textContent = 100;
             inputTalim.value = 100;
@@ -403,8 +356,9 @@
 
         // Função para mudar os valores inicias (populações, taxa de alimentos, etc.)
         function reequilibraQuantidades(){
-            numTamanhoUniverso.textContent=inputTamanhoUniverso.value
-            var tamUniverso = parseInt(inputTamanhoUniverso.value)
+            // numTamanhoUniverso.textContent=inputTamanhoUniverso.value
+            // var tamUniverso = parseInt(inputTamanhoUniverso.value)
+            var tamUniverso = 1; //julia:setando manualmente 
             var escala = Math.pow(tamUniverso, 1.3);
 
             document.getElementById("numCarn").textContent = Math.round(15 * escala * 0.8);

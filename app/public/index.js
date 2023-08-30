@@ -193,7 +193,7 @@ var energMedC;
 var taxaEnergMedC;
 
 // Variáveis para alterações nas mutações
-// var probabilidade_mutacao = labelProb; // chances de cada gene (atributo) sofrer mutação
+var probabilidade_mutacao = labelProb; // chances de cada gene (atributo) sofrer mutação
 var magnitude_mutacao = 0.1; // magnitude da mutação (o quanto vai variar)
 
 var lado_direito_vazio = true;
