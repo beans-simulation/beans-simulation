@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="shortcut icon" type="image/x-icon" href="Images/logoEscuroSemFundo.png"> -->
+    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <title>beans</title>
+    
+    <!-- A ordem de importar o script deve ser do que não depende de nada até os que dependem... (pra n bugar)-->
+    <script type="text/javascript" src="./src/models/Vetor.js"></script>
+    <script type="text/javascript" src="./src/models/Circulo.js"></script>
+    <script type="text/javascript" src="./src/models/Ponto.js"></script>
+    <script type="text/javascript" src="./src/models/Retangulo.js"></script>
+    <script type="text/javascript" src="./src/models/QuadTree.js"></script>
+    <script type="text/javascript" src="./src/models/DNA.js"></script>
+    <script type="text/javascript" src="./src/models/Alimento.js"></script>
+    <script type="text/javascript" src="./src/models/Organismo.js"></script>
+    <script type="text/javascript" src="./src/models/Herbivoro.js"></script>
+    <script type="text/javascript" src="./src/models/Carnivoro.js"></script>
+    <script type="text/javascript" src="./src/models/Infos.js"></script>
+    <script type="text/javascript" src="./src/models/Historico.js"></script>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+   <style>
+        body{
+            margin: 0
+        }
+    </style>
+    <script type="text/javascript">
+        var hora = minuto = segundo = milisegundo = 0;
+        var segundos_totais = 0;
+    </script>
+</head>
+
+<body style="background: #222">
+    <!-- <div class="splash" style="background: #333;">
+        <div class="d-flex flex-column justify-content-center" style="height: inherit;">
+            <div class="align-self-center">
+                <img id="img-splash" src="Images/capaFundoEscuro.png" alt=""/>
+            </div>
+        </div>
+    </div> -->
+
+    <canvas></canvas>
+    <!-- <div id="link">
+        <a id="linkGit"  target="__blank" href="https://github.com/e-llo/beans">GitHub: https://github.com/e-llo/beans </a>
+    </div> -->
+    <div class="cronometro">
+        <span id="hora">00</span>:<span id="minuto">00</span>:<span id="segundo">00</span>:<span id="milisegundo">00</span>
+    </div>
+
+    <!-- <div class="framerate">
+        <p>Frame rate: <span id="framerate"></span></p>
+    </div> -->
+
+    <!-- Hierarquia tabs
+        tab-info > tab-title ou tab-body
+    -->
+    
+    <div id="tabs">
+        <div id="tabs-botoes" class="position-absolute d-flex" style="top:0; right:0;">
+            <button type="button" class="btn btn-dark" onclick="$('#tab-simulacao').show();">Simulação</button>
+            <button type="button" class="btn btn-dark" onclick="$('#tab-dados').show();">Dados</button>
+        </div>
+
+        <div id="tabs-conteudos">
+            <!--------------------- TAB SIMULACAO ---------------------->
+            <div id="tab-simulacao" class="tab-info w-300px" style="right: 5px; top:calc(50% - 215px);">
+                <div class="tab-title">
+                    Simulação
+                    <button type="button" class="btn close-btn" onclick=" $(this).closest('.tab-info').hide()">
+                        <i class="fal fa-minus"></i>
+                    </button>
+                </div>
+                <div class="tab-body">
+
+                    <div id="painelInicial">
+                        <div id="inputsIniciais" class="p-0 m-0">
+                            <label id="carnivoro" name="carnivoro" for="inputCarnivoros">Carnívoros: <label id="numCarn">35</label></label>
+                            <input type="range" min="0" max="500" value="4" class="slider-red" step="1" id="inputCarnivoros" oninput="numCarn.textContent=inputCarnivoros.value">
+                            <label id="herbivoro" name="herbivoro" for="inputHerbivoros">Herbívoros: <label id="numHerb">300</label></label>
+                            <input type="range" min="0" max="800" value="10" class="slider" step="1" id="inputHerbivoros" oninput="numHerb.textContent=inputHerbivoros.value">
+                            <label id="alimento" name="alimento" for="inputAlimentos">Vegetais: <label id="numAli">800</label></label>
+                            <input type="range" min="0" max="3000" value="100" class="slider-yellow" step="5" id="inputAlimentos" oninput="numAli.textContent=inputAlimentos.value">    
+                        </div>
+                        <label id="taxaalimento" name="taxaalimento" for="inputTaxaAlimentos">Aparição de vegetais: <label id="numTaxaAli">100</label> por segundo</label>
+                        <input type="range" min="0" max="1000" value="10" class="slider-yellow" step="1" id="inputTaxaAlimentos" oninput="mudouInputTaxa()"
+                            onchange="mudaIntervaloAlimentos(inputTaxaAlimentos.value)">
+
+
+                        <label id="probMutacao" name="probMutacao" for="inputProbMutacao">Probabilidade de mutação: <label id="numProbMutacao">10</label>%</label>
+                        <input type="range" min="0" max="100" value="10" class="slider-blue" id="inputProbMutacao" oninput="mudouInputProb()"
+                            onchange="mudaProbMutacao(inputProbMutacao.value)">
+
+                    
+                        <label id="magMutacao" name="magMutacao" for="inputMagMutacao">Magnitude das mutações: <label id="numMagMutacao">5</label>%</label>
+                        <input type="range" min="0" max="100" value="5" class="slider-blue" id="inputMagMutacao" oninput="mudouInputMag()"
+                            onchange="mudaMagMutacao(inputMagMutacao.value)">
+
+
+                        <div id="botoesIniciais" class ="row mt-3">
+                            <div class="col-sm-3 d-grid gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" style="color: #ddd" onclick="restaurarPadroes()">Default</button>
+                            </div>
+                            <div class="col-sm-9 d-grid gap-2">
+                                <button type="button" class="btn btn-sm btn-success" onclick="iniciarSimulacao()">Play</button>
+                            </div>
+                        </div>
+                        <div id="botoesSecundarios" class="mt-3 text-center d-none">
+                            <button id="restartBtn" type="button" class="btn btn-sm btn-block btn-outline-secondary" style="color: #ddd" onclick="mostrarPainelInicial()">Restart</button>
+                            <div id="btnDesacelera" class="" onclick="desacelera()" style="cursor: pointer; display: inline; margin-left: 10px;">
+                                <i class="fas fa-arrow-alt-to-left"></i>
+                            </div>
+                            <div id="btnPausa" class="" onclick="pausa()" style="cursor: pointer; display: inline; margin-left: 10px;">
+                                <i class="fas fa-pause"></i>
+                            </div>
+                            <div id="btnDespausa" class="d-none" onclick="despausa()" style="cursor: pointer; display: inline; margin-left: 10px;">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div id="btnAcelera" class="" onclick="acelera()" style="cursor: pointer; display: inline; margin-left: 10px;">
+                                <i class="fas fa-angle-double-right"></i>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div id="painelSecundario" class="d-none">
+                        <div class="d-grid gap-2 mt-4">
+                            
+                            <div class="text-center">
+                                <input id="highlightFalse" name="highlight" type="radio" onclick="highlight()" checked/>
+                                <label for="highlightFalse">Todos</label>
+
+                                <input id="highlightCarn" name="highlight" type="radio" onclick="highlight('c')"/>
+                                <label for="highlightCarn">Carnívoros</label>
+
+                                <input id="highlightHerb" name="highlight" type="radio" onclick="highlight('h')"/>
+                                <label for="highlightHerb">Herbívoros</label>
+                            </div>
+                            <div>
+                                <!-- <button type="button" id="divisao" name="divisao" class="btn btn-sm btn-outline-secondary" onclick="desenhaDivisao()">Dividir populações</button> -->
+                                <label class ="form-check-label" for = "divisao">Dividir populações</label>
+                                <input class ="form-check-input" type="checkbox" id="divisao" name="divisao"
+                                    onclick="splitChart()">
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--------------------- FIM TAB SIMULACAO ------------------>
+
+
+
+            <!--------------------- TAB DADOS ---------------------->
+            <div id="tab-dados" class="tab-info" style="left:5px; top:calc(50% - 319px);display:none;z-index: 1;">
+                <div class="tab-title">
+                    Dados
+                    <button type="button" class="btn close-btn" onclick=" $(this).closest('.tab-info').hide()">
+                        <i class="fal fa-minus"></i>
+                    </button>
+                </div>
+                <div class="tab-body">
+                    <div id="btnsChart" class="d-flex justify-content-center flex-wrap d-none" style="width: 100%;">
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(1)">População</button>
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(2)">Velocidade</button>
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(3)">Agilidade</button>
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(4)">Raio</button>
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(5)">Detecção</button>
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(6)">Energia</button>
+                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(7)">Gasto</button>
+                        <!-- <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(8)">Ninhada</button> -->
+                    </div>
+
+                    <div id="chart"></div>
+                    <div id="chartSecundario"></div>
+
+                    <div id="baixar-dados" class="d-none">
+                        <button id="baixar-dados-btn" type="button" class="btn btn-sm btn-block btn-outline-secondary" style="color: #ddd; width: 40%; margin: 15px 0 5px 30%" onclick="exportarDados()">Baixar Dados</button>
+                    </div>
+                </div>
+            </div>
+            <!--------------------- FIM TAB DADOS ------------------>
+
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <!-- <div class="position-absolute" style="top: 40%; right: 350px;" >
+        <div role="alert" aria-live="assertive" aria-atomic="true" class="toast align-items-center text-white bg-secondary border-0" data-autohide="false" >
+            <div class="d-flex">
+                <div class="toast-body">
+                    Informe os parâmetros de entrada e clique em Play para iniciar a simulação. Clique em Default para restaurar as configurações padrão.<br/>
+                    <b>Você também pode dar zoom in/out com a roda do mouse, além de usá-la para se mover pela tela clicando e arrastando!</b>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>    
+    </div> -->
+    
+    
+  <script type="text/javascript">
+        var inputTalim = document.getElementById("inputTaxaAlimentos");
+        const labelTaxa = document.getElementById("numTaxaAli");
+
+        var inputPMut = document.getElementById("inputProbMutacao");
+        const labelProb = document.getElementById("numProbMutacao");
+
+        var inputMMut = document.getElementById("inputMagMutacao");
+        const labelMag = document.getElementById("numMagMutacao");
+
+        var n_carnivoros;
+        var n_herbivoros;
+        var n_alimentos;
+
+        var antesDoPlay = true;
+
+        var rodando = false;  
+        var insereDadosGrafico;      
+
+        // Variável para pausar e despausar o jogo
+        var pausado = false;
+
+        // Variáveis para auxiliar a atualizar os valores dos sliders
+        var sliderCarn = document.getElementById("inputCarnivoros");
+        var outputCarn = document.getElementById("numCarn");
+        outputCarn.innerHTML = sliderCarn.value;
+
+        var sliderHerb = document.getElementById("inputHerbivoros");
+        var outputHerb = document.getElementById("numHerb");
+        outputHerb.innerHTML = sliderHerb.value;
+
+        var sliderAli = document.getElementById("inputAlimentos");
+        var outputAli = document.getElementById("numAli");
+        outputAli.innerHTML = sliderAli.value;
+
+        // Variáveis para referenciar os botões de adicionar elementos na simulação
+        var btnAddHerb = document.getElementById("btnHerb");
+        var btnAddCarn = document.getElementById("btnCarn");
+        var btnAddAli = document.getElementById("btnAli");
+
+        // Variáveis para pausar e despausar a simulação
+        var btnPausa = document.getElementById("btnPausa");
+        var btnDespausa = document.getElementById("btnDespausa");
+
+        // Variável para escolher o gráfico que será mostrado
+        var chartType = 1;
+
+
+        // Update do valor do slider a cada vez que ele é modificado
+        sliderCarn.oninput = function(){
+            outputCarn.innerHTML = this.value;
+            n_carnivoros = outputCarn.innerHTML;
+        }
+        sliderHerb.oninput = function(){
+            outputHerb.innerHTML = this.value;
+            n_herbivoros = outputHerb.innerHTML;
+        }
+        sliderAli.oninput = function(){
+            outputAli.innerHTML = this.value;
+            n_alimentos = outputAli.innerHTML;
+        }
+
+        $(document).ready(function(){
+            // $('.toast').toast('show');
+            // $('.toast').css("data-autohide", "false");
+            // setTimeout(function(){
+            //     $(".splash").fadeOut(800)
+            // }, 1500)
+            document.querySelectorAll(".tab-info").forEach(elemento => dragElement(elemento))
+        });
+
+
+        function iniciarSimulacao(){ // não ta funcionando se coloco só no click do botão
+            // tamanhoUniverso = parseInt(document.getElementById("numTamanhoUniverso").textContent);
+            tamanhoUniverso = 1; //julia: adicionei esse valor fixo ao invés do valor de input
+            n_carnivoros = parseInt(document.getElementById("numCarn").textContent) * tamanhoUniverso;
+            n_herbivoros = parseInt(document.getElementById("numHerb").textContent) * tamanhoUniverso;
+            n_alimentos = parseInt(document.getElementById("numAli").textContent) * tamanhoUniverso;
+            
+
+            antesDoPlay = false;
+            destroiObjetos();
+            resetaCronometro();
+            historico.clear();
+            criaCronometro();
+            criaUniverso(tamanhoUniverso);
+            criaObjetos(n_carnivoros, n_herbivoros, n_alimentos);
+            
+            canvas.addEventListener("click", getOrg) // Habilita funcionalidade de pesquisar organismo
+
+            calculaDadosGrafico(); // Chama só 1x para não ficar valor 0 antes do primeiro segundo
+            
+            setInterval(calculaDadosGrafico, 1000);
+            
+            
+            resetChart();
+            buildChart(chartType);
+            mostrarBtnGraficos();
+            insereDadosGrafico = setInterval(insertNextDataChart, 1000);
+
+            setInterval(checaPopulacoesDivididas, 1000);
+            inputTalim = document.getElementById("inputTaxaAlimentos");
+            mudaIntervaloAlimentos(inputTalim.value, true);
+            inputPMut = document.getElementById("inputProbMutacao");
+            mudaProbMutacao(inputPMut.value);
+            inputMMut = document.getElementById("inputMagMutacao");
+            mudaMagMutacao(inputMMut.value);
+            // document.getElementById("inputsIniciais").classList.add("d-none");
+            // document.getElementById("divTamanhoUniverso").classList.add("d-none");
+            // document.getElementById("painelSecundario").classList.remove("d-none");
+            // document.getElementById("botoesIniciais").classList.add("d-none");
+            // document.getElementById("botoesSecundarios").classList.remove("d-none");
+            // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
+            if(!rodando && !pausado) { 
+                animate(); 
+            }
+            rodando = true;
+        }
+       
+        function restaurarPadroes(){// volta os parâmetros para o padrão inicial
+            document.getElementById("numCarn").textContent = 35;
+            document.getElementById("inputCarnivoros").value = 35;
+
+            document.getElementById("numHerb").textContent = 300;
+            document.getElementById("inputHerbivoros").value = 300;
+
+            document.getElementById("numAli").textContent = 800;
+            document.getElementById("inputAlimentos").value = 800;
+
+            document.getElementById("numProbMutacao").textContent = 10;
+            document.getElementById("numMagMutacao").textContent = 5;
+
+            // document.getElementById("numTamanhoUniverso").textContent = 2;
+            // document.getElementById("inputTamanhoUniverso").value = 2;
+
+            labelTaxa.textContent = 100;
+            inputTalim.value = 100;
+            inputPMut.value = 10;
+            inputMMut.value = 5;
+        }
+
+        // Função para mudar os valores inicias (populações, taxa de alimentos, etc.)
+        function reequilibraQuantidades(){
+            // numTamanhoUniverso.textContent=inputTamanhoUniverso.value
+            // var tamUniverso = parseInt(inputTamanhoUniverso.value)
+            var tamUniverso = 1; //julia:setando manualmente 
+            var escala = Math.pow(tamUniverso, 1.3);
+
+            document.getElementById("numCarn").textContent = Math.round(15 * escala * 0.8);
+            document.getElementById("inputCarnivoros").value = Math.round(15 * escala * 0.8);
+
+            document.getElementById("numHerb").textContent = Math.round(100 * escala * 0.8);
+            document.getElementById("inputHerbivoros").value = Math.round(100 * escala * 0.8);
+
+            document.getElementById("numAli").textContent = Math.round(300 * escala);
+            document.getElementById("inputAlimentos").value = Math.round(300 * escala);
+
+            labelTaxa.textContent = Math.round(30 * escala * 1.5);
+            inputTalim.value = Math.round(30 * escala * 1.5);
+        }
+
+        function mostrarPainelInicial() {
+            destroiObjetos();
+            resetaCronometro();
+            resetChart();
+            antesDoPlay = true;
+            clearInterval(insereDadosGrafico)
+            inputTalim = document.getElementById("inputTaxaAlimentos");
+            mudaIntervaloAlimentos(inputTalim.value);
+            inputPMut = document.getElementById("inputProbMutacao");
+            mudaProbMutacao(inputPMut.value);
+            inputMMut = document.getElementById("inputMagMutacao");
+            mudaMagMutacao(inputMMut.value);
+            document.getElementById("inputsIniciais").classList.remove("d-none");
+            document.getElementById("botoesIniciais").classList.remove("d-none");
+            document.getElementById("botoesSecundarios").classList.add("d-none");
+            document.getElementById("painelSecundario").classList.add("d-none");
+        }
+
+        function addCarnivoro(){ 
+            if(btnAddCarn.classList.contains("active")){
+                btnAddCarn.classList.remove("active");
+                document.removeEventListener('click', geradorC, true);
+                // habilitar getOrganismo soh se os outros botoes nao estiverem ativos
+                btnAddHerb.classList.contains("active") || btnAddAli.classList.contains("active") ?
+                    0 : canvas.addEventListener("click", getOrg);
+            }else{
+                btnAddCarn.classList.add("active");
+                canvas.removeEventListener("click", getOrg);
+                document.addEventListener('click', geradorC, true);
+            }
+        }
+
+        function geradorC(e){
+            cursorX = e.pageX;
+            cursorY = e.pageY;
+            if(cursorX<=canvas.width && cursorY<=canvas.height){
+                let carnivoro = geraCarnivoro(cursorX,cursorY);
+                carnivoro.display()
+            }
+        }
+
+        function addHerbivoro(){
+            if(btnAddHerb.classList.contains("active")){
+                btnAddHerb.classList.remove("active");
+                document.removeEventListener('click', geradorH, true);
+                // habilitar getOrganismo soh se os outros botoes nao estiverem ativos
+                btnAddCarn.classList.contains("active") || btnAddAli.classList.contains("active") ?
+                    0 : canvas.addEventListener("click", getOrg);
+            }else{
+                btnAddHerb.classList.add("active");
+                canvas.removeEventListener("click", getOrg);
+                document.addEventListener('click', geradorH, true); 
+            }
+        }
+
+        function geradorH(e){
+            cursorX = e.pageX;
+            cursorY= e.pageY;
+            if(cursorX<=canvas.width && cursorY<=canvas.height){
+                let herbivoro = geraHerbivoro(cursorX,cursorY);
+                herbivoro.display()
+            }
+            cursorX =null;
+            cursorY = null;
+        }
+
+        function addAlimento(){
+            if(btnAddAli.classList.contains("active")){
+                btnAddAli.classList.remove("active");
+                document.removeEventListener('click', geradorA, true);
+                // habilitar getOrganismo soh se os outros botoes nao estiverem ativos
+                btnAddCarn.classList.contains("active") || btnAddHerb.classList.contains("active") ?
+                    0 : canvas.addEventListener("click", getOrg);
+            }else{
+                btnAddAli.classList.add("active");
+                canvas.removeEventListener("click", getOrg);
+                document.addEventListener('click', geradorA, true); 
+            }
+        }
+
+        function getOrg(event) {
+            let cursorX = event.pageX
+            let cursorY = event.pageY
+
+            getOrganismo(cursorX, cursorY)
+            $("#btnDeletePopovers").show()
+        }
+
+        function mudouInputProb(){
+            labelProb.textContent = inputPMut.value;
+        }
+
+        function mudouInputMag(){
+            labelMag.textContent = inputMMut.value;
+        }
+
+        function mudouInputTaxa() {
+            if(inputTalim.value > 0) {
+                labelTaxa.textContent = inputTalim.value;
+            } else {
+                labelTaxa.textContent = "nenhum";
+            }
+        }
+        function geradorA(e){
+            cursorX = e.pageX;
+            cursorY= e.pageY;
+            if(cursorX<=canvas.width && cursorY<=canvas.height){
+                let alimento = geraAlimento(cursorX,cursorY);
+                alimento.display()
+            }
+        }
+
+        function mostrarBtnGraficos() {
+            $("#btnsChart").removeClass("d-none");
+        }
+
+        function deletePopovers() {
+            $(".popover-info").each((i, el) => {
+                // capturar id do popover
+                let popoverId = $(el).attr("id")
+                popoverId = popoverId.match(/\d{1,}/g)[0]
+                // pegar id do organismo
+                let organismoId = $(el).attr("data-organismoid")
+                // chamar funcao de deletePopover unitaria
+                deletePopover(popoverId, organismoId);
+            })
+            $("#btnDeletePopovers").hide();
+        }
+
+        function exportarDados(){
+            id_simulacao = makeId(4);
+            qtd_linhas = historico.segundos.length;
+
+            // Linha para nomear as colunas
+            dados_simulacao = [
+                ["idSimulacao","População Inicial H","População Inicial C","Alimentos por Segundo","Segundos",
+                 "População H","Velocidade H","Agilidade H","Raio H","Detecção H","Energia H","Gasto H", "Ninhada Média H",
+                 "População C","Velocidade C","Agilidade C","Raio C","Detecção C","Energia C","Gasto C", "Ninhada Média C"]
+            ]
+
+            for(let i=0; i < qtd_linhas; i++){
+                dados_simulacao.push(
+                    [
+                        id_simulacao, // ID da simulação para separá-las no banco de dados
+                        historico.herbivoros.populacao[0], // População Inicial de herbívoros
+                        historico.carnivoros.populacao[0], // População Inicial de carnívoros
+                        historico.taxa_alimentos[i], // Taxa de alimentos por segundo em cada momento
+                        historico.segundos[i], 
+                        historico.herbivoros.populacao[i], 
+                        historico.herbivoros.velocidade[i], 
+                        historico.herbivoros.agilidade[i], 
+                        historico.herbivoros.raio[i], 
+                        historico.herbivoros.deteccao[i], 
+                        historico.herbivoros.energia[i], 
+                        historico.herbivoros.gasto[i],
+                        historico.herbivoros.tamanho_medio_ninhada[i],
+                        historico.carnivoros.populacao[i], 
+                        historico.carnivoros.velocidade[i], 
+                        historico.carnivoros.agilidade[i], 
+                        historico.carnivoros.raio[i], 
+                        historico.carnivoros.deteccao[i], 
+                        historico.carnivoros.energia[i], 
+                        historico.carnivoros.gasto[i],
+                        historico.carnivoros.tamanho_medio_ninhada[i]
+                    ]
+                )
+            }
+            exportToCsv("dados-simulacao.csv", dados_simulacao)
+        }
+
+        function highlight(organismo = false) {
+            Carnivoro.highlight = false
+            Herbivoro.highlight = false
+
+            if(organismo == "c")
+                Carnivoro.highlight = true
+            else if(organismo == "h")
+                Herbivoro.highlight = true
+        }
+        function matar(organismo = false) { 
+
+            if(organismo == "c")
+                Carnivoro.carnivoros = []
+            else if(organismo == "h")
+                Herbivoro.herbivoros = []
+            else if(organismo == "a"){
+                Alimento.alimentos = []
+                inputTalim.value = 0;
+                labelTaxa.textContent = 0
+                mudaIntervaloAlimentos(0);
+            }
+            else{
+                Carnivoro.carnivoros = []
+                Herbivoro.herbivoros = []
+                Alimento.alimentos = []
+                inputTalim.value = 0;
+                labelTaxa.textContent = 0
+                mudaIntervaloAlimentos(0);
+            }
+
+        }
+
+        function dragElement(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            // se for uma tab
+            if (elmnt.classList.contains("tab-info")) {
+                // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)
+                elmnt.children[0].onmousedown = dragMouseDown;
+            } else {
+                // otherwise, move the DIV from anywhere inside the DIV:
+                elmnt.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    // get the mouse cursor position at startup:
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    document.onmouseup = closeDragElement;
+                    // call a function whenever the cursor moves:
+                    document.onmousemove = elementDrag;
+                }
+
+            function elementDrag(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    // calculate the new cursor position:
+                    pos1 = pos3 - e.clientX;
+                    pos2 = pos4 - e.clientY;
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    // set the element's new position:
+                    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+                }
+
+            function closeDragElement() {
+                    // stop moving when mouse button is released:
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                }
+            }
+
+    </script>
+    <script type="text/javascript" src="./src/index.js"></script>
+    <script type="text/javascript" src="./src/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+
+</body>
+</html>
