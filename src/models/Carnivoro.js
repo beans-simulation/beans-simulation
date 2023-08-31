@@ -128,15 +128,9 @@ class Carnivoro extends Organismo{
 
     display(){
         c.beginPath();
-        c.arc(this.posicao.x, this.posicao.y, this.raio, 0, Math.PI * 2);
-
-        if(Herbivoro.highlight) {
-            c.fillStyle = "rgba(" + this.cor2.substr(5).replace(")","") + ",0.15)";
-            c.strokeStyle = "rgba(" + this.cor.substr(4).replace(")","") + ",0.15)";
-        } else {
-            c.fillStyle = this.cor2;
-            c.strokeStyle = this.cor;
-        }
+        c.arc(this.posicao.x, this.posicao.y, this.raio, 0, Math.PI * 2);        
+        c.fillStyle = this.cor2;
+        c.strokeStyle = this.cor;
         c.lineWidth = 5;
         c.stroke();
         c.fill();
