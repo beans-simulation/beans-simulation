@@ -5,23 +5,23 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" type="image/x-icon" href="Images/logoEscuroSemFundo.png">
-    <link rel="stylesheet" href="./public/style.css">
+    <link rel="stylesheet" href="./src/style.css">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     <title>beans</title>
     
     <!-- A ordem de importar o script deve ser do que não depende de nada até os que dependem... (pra n bugar)-->
-    <script type="text/javascript" src="./public/Classes/Vetor.js"></script>
-    <script type="text/javascript" src="./public/Classes/Circulo.js"></script>
-    <script type="text/javascript" src="./public/Classes/Ponto.js"></script>
-    <script type="text/javascript" src="./public/Classes/Retangulo.js"></script>
-    <script type="text/javascript" src="./public/Classes/QuadTree.js"></script>
-    <script type="text/javascript" src="./public/Classes/DNA.js"></script>
-    <script type="text/javascript" src="./public/Classes/Alimento.js"></script>
-    <script type="text/javascript" src="./public/Classes/Organismo.js"></script>
-    <script type="text/javascript" src="./public/Classes/Herbivoro.js"></script>
-    <script type="text/javascript" src="./public/Classes/Carnivoro.js"></script>
-    <script type="text/javascript" src="./public/Classes/Infos.js"></script>
-    <script type="text/javascript" src="./public/Classes/Historico.js"></script>
+    <script type="text/javascript" src="./src/models/Vetor.js"></script>
+    <script type="text/javascript" src="./src/models/Circulo.js"></script>
+    <script type="text/javascript" src="./src/models/Ponto.js"></script>
+    <script type="text/javascript" src="./src/models/Retangulo.js"></script>
+    <script type="text/javascript" src="./src/models/QuadTree.js"></script>
+    <script type="text/javascript" src="./src/models/DNA.js"></script>
+    <script type="text/javascript" src="./src/models/Alimento.js"></script>
+    <script type="text/javascript" src="./src/models/Organismo.js"></script>
+    <script type="text/javascript" src="./src/models/Herbivoro.js"></script>
+    <script type="text/javascript" src="./src/models/Carnivoro.js"></script>
+    <script type="text/javascript" src="./src/models/Infos.js"></script>
+    <script type="text/javascript" src="./src/models/Historico.js"></script>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -86,32 +86,26 @@
                     <div id="painelInicial">
                         <div id="inputsIniciais" class="p-0 m-0">
                             <label id="carnivoro" name="carnivoro" for="inputCarnivoros">Carnívoros: <label id="numCarn">35</label></label>
-                            <input type="range" min="0" max="500" value="35" class="slider-red" step="1" id="inputCarnivoros" oninput="numCarn.textContent=inputCarnivoros.value">
+                            <input type="range" min="0" max="500" value="4" class="slider-red" step="1" id="inputCarnivoros" oninput="numCarn.textContent=inputCarnivoros.value">
                             <label id="herbivoro" name="herbivoro" for="inputHerbivoros">Herbívoros: <label id="numHerb">300</label></label>
-                            <input type="range" min="0" max="800" value="300" class="slider" step="1" id="inputHerbivoros" oninput="numHerb.textContent=inputHerbivoros.value">
+                            <input type="range" min="0" max="800" value="10" class="slider" step="1" id="inputHerbivoros" oninput="numHerb.textContent=inputHerbivoros.value">
                             <label id="alimento" name="alimento" for="inputAlimentos">Vegetais: <label id="numAli">800</label></label>
-                            <input type="range" min="0" max="3000" value="800" class="slider-yellow" step="5" id="inputAlimentos" oninput="numAli.textContent=inputAlimentos.value">    
+                            <input type="range" min="0" max="3000" value="100" class="slider-yellow" step="5" id="inputAlimentos" oninput="numAli.textContent=inputAlimentos.value">    
                         </div>
                         <label id="taxaalimento" name="taxaalimento" for="inputTaxaAlimentos">Aparição de vegetais: <label id="numTaxaAli">100</label> por segundo</label>
-                        <input type="range" min="0" max="1000" value="100" class="slider-yellow" step="1" id="inputTaxaAlimentos" oninput="mudouInputTaxa()"
+                        <input type="range" min="0" max="1000" value="10" class="slider-yellow" step="1" id="inputTaxaAlimentos" oninput="mudouInputTaxa()"
                             onchange="mudaIntervaloAlimentos(inputTaxaAlimentos.value)">
-                        
 
 
                         <label id="probMutacao" name="probMutacao" for="inputProbMutacao">Probabilidade de mutação: <label id="numProbMutacao">10</label>%</label>
                         <input type="range" min="0" max="100" value="10" class="slider-blue" id="inputProbMutacao" oninput="mudouInputProb()"
                             onchange="mudaProbMutacao(inputProbMutacao.value)">
 
-
                     
                         <label id="magMutacao" name="magMutacao" for="inputMagMutacao">Magnitude das mutações: <label id="numMagMutacao">5</label>%</label>
                         <input type="range" min="0" max="100" value="5" class="slider-blue" id="inputMagMutacao" oninput="mudouInputMag()"
                             onchange="mudaMagMutacao(inputMagMutacao.value)">
 
-                        <!-- <div id="divTamanhoUniverso">
-                            <label id="tamanhoUniverso" name="tamanhoUniverso" for="inputTamanhoUniverso">Tamanho do universo: <label id="numTamanhoUniverso">2</label></label>
-                            <input type="range" min="1" max="5" value="2" class="slider" id="inputTamanhoUniverso" oninput="reequilibraQuantidades()">
-                        </div> -->
 
                         <div id="botoesIniciais" class ="row mt-3">
                             <div class="col-sm-3 d-grid gap-2">
@@ -184,7 +178,7 @@
                         <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(5)">Detecção</button>
                         <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(6)">Energia</button>
                         <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(7)">Gasto</button>
-                        <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(8)">Ninhada</button>
+                        <!-- <button type="button" class="btn btn-sm btn-outline-info mx-1 my-1 flex-fill" onclick="changeChart(8)">Ninhada</button> -->
                     </div>
 
                     <div id="chart"></div>
@@ -621,8 +615,8 @@
             }
 
     </script>
-    <script type="text/javascript" src="./public/index.js"></script>
-    <script type="text/javascript" src="./public/chart.js"></script>
+    <script type="text/javascript" src="./src/index.js"></script>
+    <script type="text/javascript" src="./src/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
 
