@@ -3,7 +3,7 @@ class QuadTree{
         this.limite = limite; // Atributo do tipo Retângulo
         this.capacidade = capacidade; // A partir de quantos pontos (neste caso, seres vivos) o retângulo se subdivide
         this.pontos = [];
-        this.alimentos = [];
+        this.vegetables = [];
         this.organisms = [];
         this.dividida = false;
     }
@@ -58,30 +58,30 @@ class QuadTree{
         }
     }
 
-    inserirAlimento(alimento){
-        if(!this.limite.contemPonto(alimento)){ // Checa se o alimento está contido dentro dos limites (fronteiras) do retângulo raiz
+    inserirVegetable(vegetable){
+        if(!this.limite.contemPonto(vegetable)){ // Checa se o vegetable está contido dentro dos limites (fronteiras) do retângulo raiz
             return false;
         }
 
-        if(this.alimentos.length < this.capacidade){ // Se ainda couber alimentos dentro dela
-            this.alimentos.push(alimento); // Insere o alimento em sua lista
-            // console.log("alimentos ", this.alimentos);
+        if(this.vegetables.length < this.capacidade){ // Se ainda couber vegetables dentro dela
+            this.vegetables.push(vegetable); // Insere o vegetable em sua lista
+            // console.log("vegetables ", this.vegetables);
             return true;
         } else{ // Se a capacidade máxima de seres vivos tiver sido atingida            
             if(!this.dividida){ // A QuadTree não irá se subdividir caso já o tenha feito
-                // console.log("inserirAlimentos", this.alimentos);
+                // console.log("inserirVegetables", this.vegetables);
                 this.subdivide();
                 // console.log("SUBDIVIDIU - A", this.capacidade);
             }
 
-            // Não checamos a localização do alimento pois ela será checada no começo de cada chamada desses métodos
-            if(this.nordeste.inserirAlimento(alimento)){
+            // Não checamos a localização do vegetable pois ela será checada no começo de cada chamada desses métodos
+            if(this.nordeste.inserirVegetable(vegetable)){
                 return true;
-            } else if(this.noroeste.inserirAlimento(alimento)){
+            } else if(this.noroeste.inserirVegetable(vegetable)){
                 return true;
-            } else if(this.sudeste.inserirAlimento(alimento)){
+            } else if(this.sudeste.inserirVegetable(vegetable)){
                 return true;
-            } else if(this.sudoeste.inserirAlimento(alimento)){
+            } else if(this.sudoeste.inserirVegetable(vegetable)){
                 return true;
             };            
         }
@@ -142,24 +142,24 @@ class QuadTree{
         }
     }
 
-    procuraAlimentos(circulo, encontrados){
+    procuraVegetables(circulo, encontrados){
         if(!encontrados){
             encontrados = [];
         }
         if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
             return encontrados;
         } else{ // Se eles se interceptam
-            for(let a of this.alimentos){ // Para os alimentos dessa QuadTree
-                if(circulo.contemPonto(a)){ // Se o alimento pertencer ao círculo
+            for(let a of this.vegetables){ // Para os vegetables dessa QuadTree
+                if(circulo.contemPonto(a)){ // Se o vegetable pertencer ao círculo
                     encontrados.push(a);
                 }
             }
 
             if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-                this.noroeste.procuraAlimentos(circulo, encontrados); 
-                this.nordeste.procuraAlimentos(circulo, encontrados); 
-                this.sudoeste.procuraAlimentos(circulo, encontrados); 
-                this.sudeste.procuraAlimentos(circulo, encontrados);
+                this.noroeste.procuraVegetables(circulo, encontrados); 
+                this.nordeste.procuraVegetables(circulo, encontrados); 
+                this.sudoeste.procuraVegetables(circulo, encontrados); 
+                this.sudeste.procuraVegetables(circulo, encontrados);
             }
 
             return encontrados;

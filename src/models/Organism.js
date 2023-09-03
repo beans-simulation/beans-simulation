@@ -255,7 +255,7 @@ class Organism{
             
             if (d2 <= recorde){ // Caso a distância seja menor que a distância recorde,
                 recorde = d2; // recorde passa a ter o valor de d
-                i_mais_perto = i; // e o atual alimento passa a ser o i_mais_perto 
+                i_mais_perto = i; // e o atual vegetable passa a ser o i_mais_perto 
             }
             
         }

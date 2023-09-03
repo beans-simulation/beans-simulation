@@ -43,7 +43,7 @@ function insertNextDataChart() {
     historico.segundos.push(segundos_totais)
 
     // Outras infos para a análise de dados
-    historico.taxa_alimentos.push(inputTaxaAlimentos.value)
+    historico.taxa_vegetables.push(inputTaxaVegetables.value)
 
   // ------------------------------------------------------------------------------------------
   // Mesma variável de tempo para todos

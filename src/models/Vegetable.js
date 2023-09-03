@@ -1,17 +1,17 @@
-class Alimento{
-    static alimentos = [];
+class Vegetable{
+    static vegetables = [];
     static id = 0;
 
     constructor(x, y, raio){
         this.posicao = new Vetor(x, y);
         this.raio = raio;
-        // a energia do pedaço de alimento é proporcinal à sua área
-        this.energia_alimento = Math.floor(Math.PI * Math.pow(this.raio, 2)) * 15;
+        // a energia do pedaço de vegetable é proporcinal à sua área
+        this.energia_vegetable = Math.floor(Math.PI * Math.pow(this.raio, 2)) * 15;
 
-        Alimento.alimentos.push(this);
+        Vegetable.vegetables.push(this);
 
         // ID
-        this.id = Alimento.id++;
+        this.id = Vegetable.id++;
     }
 
     display(){

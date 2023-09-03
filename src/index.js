@@ -101,7 +101,7 @@ function verificaViesMutacoesNinhada(ninhada_min, ninhada_max, iteracoes){
 
 // Função para não haver a necessidade de dar despausa() e pausa() quando é preciso redesenhar os elementos sem dar play em animate()
 function desenhaTudo(){
-    Alimento.alimentos.forEach(a => {
+    Vegetable.vegetables.forEach(a => {
         a.display();
     })
     Organism.organisms.forEach(o => {
@@ -110,37 +110,37 @@ function desenhaTudo(){
 }
 
 
-function criaObjetos(n_organisms, n_alimentos){
+function criaObjetos(n_organisms, n_vegetables){
     for(var i = 0; i < n_organisms; i++){
         var x =(Math.random() * (universoWidth - 50) + 25);
         var y = (Math.random() * (universoHeight - 50) + 25);
         geraOrganism(x,y);
     }
 
-    for(var i = 0; i < n_alimentos; i++){
+    for(var i = 0; i < n_vegetables; i++){
         var x =(Math.random() * (universoWidth - 50) + 25);
         var y = (Math.random() * (universoHeight - 50) + 25);
-        geraAlimento(x,y);
+        geraVegetable(x,y);
     }
 }
 
 function destroiObjetos(){
     Organism.organisms.length = 0;
-    Alimento.alimentos.length = 0;
-    // mudaIntervaloAlimentos(1001);
+    Vegetable.vegetables.length = 0;
+    // mudaIntervaloVegetables(1001);
 }
 
 
-// cria mais alimentos ao longo do tempo
+// cria mais vegetables ao longo do tempo
 // a função setInterval() permite que ele chame o loop a cada x milisegundos
-var intervaloTaxaAlimentos;
+var intervaloTaxaVegetables;
 
 // variáveis de auxílio para a implementação da divisão de tela
 var limitador_de_loop = 0;
 
-function geraAlimento(x,y){
+function geraVegetable(x,y){
     var raio = geraNumeroPorIntervalo(1, 2);
-    return new Alimento(x, y, raio);
+    return new Vegetable(x, y, raio);
 }
 
 function geraOrganism(x,y){ // função para poder adicionar mais carnívoros manualmente 
@@ -328,27 +328,27 @@ function geraNumeroPorIntervalo(min, max) {
     return parseFloat((Math.random() * delta + min).toFixed(4)); // Math.random() * 2000 + 4000
 }
 
-function criaAlimentosGradativo(){
-    if(!pausado){ // Para de criar alimentos enquanto a simulação estiver pausada
+function criaVegetablesGradativo(){
+    if(!pausado){ // Para de criar vegetables enquanto a simulação estiver pausada
         var x = Math.random() * (universoWidth - 62) + 31;
         var y = Math.random() * (universoHeight - 62) + 31;
         var raio = Math.random() * 1.5 + 1;
 
-        if(Alimento.alimentos.length < 3000){ // Limitador para não sobrecarregar a simulação
-            new Alimento(x, y, raio);
+        if(Vegetable.vegetables.length < 3000){ // Limitador para não sobrecarregar a simulação
+            new Vegetable(x, y, raio);
         }
         
     }
 }
 
-function mudaIntervaloAlimentos(novoValor, criar=false) {
+function mudaIntervaloVegetables(novoValor, criar=false) {
     novoTempo = 1000 / novoValor
     if(!criar) {
-        clearInterval(intervaloTaxaAlimentos);
+        clearInterval(intervaloTaxaVegetables);
     }
     if(novoTempo > 1000) return;
     if(antesDoPlay) return;
-    intervaloTaxaAlimentos = setInterval(criaAlimentosGradativo, novoTempo)
+    intervaloTaxaVegetables = setInterval(criaVegetablesGradativo, novoTempo)
 }
 
 function mudaProbMutacao(novoValor){
@@ -451,9 +451,9 @@ function animate(){
 
     // limitador_de_loop = 0;
 
-    Alimento.alimentos.forEach(alimento => {
-        alimento.display();
-        qtree.inserirAlimento(alimento); // Insere o alimento na QuadTree
+    Vegetable.vegetables.forEach(vegetable => {
+        vegetable.display();
+        qtree.inserirVegetable(vegetable); // Insere o vegetable na QuadTree
 
     })
 

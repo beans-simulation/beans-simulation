@@ -16,7 +16,7 @@
     <script type="text/javascript" src="./src/models/Retangulo.js"></script>
     <script type="text/javascript" src="./src/models/QuadTree.js"></script>
     <script type="text/javascript" src="./src/models/DNA.js"></script>
-    <script type="text/javascript" src="./src/models/Alimento.js"></script>
+    <script type="text/javascript" src="./src/models/Vegetable.js"></script>
     <script type="text/javascript" src="./src/models/Organism.js"></script>
     <script type="text/javascript" src="./src/models/Infos.js"></script>
     <script type="text/javascript" src="./src/models/Historico.js"></script>
@@ -84,12 +84,12 @@
                         <div id="inputsIniciais" class="p-0 m-0">
                             <label id="organism" name="organism" for="inputOrganisms">Carnívoros: <label id="numCarn">35</label></label>
                             <input type="range" min="0" max="500" value="4" class="slider-red" step="1" id="inputOrganisms" oninput="numCarn.textContent=inputOrganisms.value">
-                            <label id="alimento" name="alimento" for="inputAlimentos">Vegetais: <label id="numAli">800</label></label>
-                            <input type="range" min="0" max="3000" value="100" class="slider-yellow" step="5" id="inputAlimentos" oninput="numAli.textContent=inputAlimentos.value">    
+                            <label id="vegetable" name="vegetable" for="inputVegetables">Vegetais: <label id="numAli">800</label></label>
+                            <input type="range" min="0" max="3000" value="100" class="slider-yellow" step="5" id="inputVegetables" oninput="numAli.textContent=inputVegetables.value">    
                         </div>
-                        <label id="taxaalimento" name="taxaalimento" for="inputTaxaAlimentos">Aparição de vegetais: <label id="numTaxaAli">100</label> por segundo</label>
-                        <input type="range" min="0" max="1000" value="10" class="slider-yellow" step="1" id="inputTaxaAlimentos" oninput="mudouInputTaxa()"
-                            onchange="mudaIntervaloAlimentos(inputTaxaAlimentos.value)">
+                        <label id="taxavegetable" name="taxavegetable" for="inputTaxaVegetables">Aparição de vegetais: <label id="numTaxaAli">100</label> por segundo</label>
+                        <input type="range" min="0" max="1000" value="10" class="slider-yellow" step="1" id="inputTaxaVegetables" oninput="mudouInputTaxa()"
+                            onchange="mudaIntervaloVegetables(inputTaxaVegetables.value)">
 
 
                         <label id="probMutacao" name="probMutacao" for="inputProbMutacao">Probabilidade de mutação: <label id="numProbMutacao">10</label>%</label>
@@ -149,7 +149,7 @@
     
     
   <script type="text/javascript">
-        var inputTalim = document.getElementById("inputTaxaAlimentos");
+        var inputTalim = document.getElementById("inputTaxaVegetables");
         const labelTaxa = document.getElementById("numTaxaAli");
 
         var inputPMut = document.getElementById("inputProbMutacao");
@@ -159,7 +159,7 @@
         const labelMag = document.getElementById("numMagMutacao");
 
         var n_organisms;
-        var n_alimentos;
+        var n_vegetables;
 
         var antesDoPlay = true;
 
@@ -173,7 +173,7 @@
         var outputCarn = document.getElementById("numCarn");
         outputCarn.innerHTML = sliderCarn.value;
 
-        var sliderAli = document.getElementById("inputAlimentos");
+        var sliderAli = document.getElementById("inputVegetables");
         var outputAli = document.getElementById("numAli");
         outputAli.innerHTML = sliderAli.value;
 
@@ -194,7 +194,7 @@
 
         sliderAli.oninput = function(){
             outputAli.innerHTML = this.value;
-            n_alimentos = outputAli.innerHTML;
+            n_vegetables = outputAli.innerHTML;
         }
 
         $(document).ready(function(){
@@ -211,7 +211,7 @@
             // tamanhoUniverso = parseInt(document.getElementById("numTamanhoUniverso").textContent);
             tamanhoUniverso = 1; //julia: adicionei esse valor fixo ao invés do valor de input
             n_organisms = parseInt(document.getElementById("numCarn").textContent) * tamanhoUniverso;
-            n_alimentos = parseInt(document.getElementById("numAli").textContent) * tamanhoUniverso;
+            n_vegetables = parseInt(document.getElementById("numAli").textContent) * tamanhoUniverso;
             
 
             antesDoPlay = false;
@@ -220,11 +220,11 @@
             historico.clear();
             criaCronometro();
             criaUniverso(tamanhoUniverso);
-            criaObjetos(n_organisms, n_alimentos);
+            criaObjetos(n_organisms, n_vegetables);
                         
 
-            inputTalim = document.getElementById("inputTaxaAlimentos");
-            mudaIntervaloAlimentos(inputTalim.value, true);
+            inputTalim = document.getElementById("inputTaxaVegetables");
+            mudaIntervaloVegetables(inputTalim.value, true);
             inputPMut = document.getElementById("inputProbMutacao");
             mudaProbMutacao(inputPMut.value);
             inputMMut = document.getElementById("inputMagMutacao");
@@ -247,7 +247,7 @@
 
 
             document.getElementById("numAli").textContent = 800;
-            document.getElementById("inputAlimentos").value = 800;
+            document.getElementById("inputVegetables").value = 800;
 
             document.getElementById("numProbMutacao").textContent = 10;
             document.getElementById("numMagMutacao").textContent = 5;
@@ -261,7 +261,7 @@
             inputMMut.value = 5;
         }
 
-        // Função para mudar os valores inicias (populações, taxa de alimentos, etc.)
+        // Função para mudar os valores inicias (populações, taxa de vegetables, etc.)
         function reequilibraQuantidades(){
             // numTamanhoUniverso.textContent=inputTamanhoUniverso.value
             // var tamUniverso = parseInt(inputTamanhoUniverso.value)
@@ -272,7 +272,7 @@
             document.getElementById("inputOrganisms").value = Math.round(15 * escala * 0.8);
 
             document.getElementById("numAli").textContent = Math.round(300 * escala);
-            document.getElementById("inputAlimentos").value = Math.round(300 * escala);
+            document.getElementById("inputVegetables").value = Math.round(300 * escala);
 
             labelTaxa.textContent = Math.round(30 * escala * 1.5);
             inputTalim.value = Math.round(30 * escala * 1.5);
@@ -282,8 +282,8 @@
             destroiObjetos();
             resetaCronometro();
             antesDoPlay = true;
-            inputTalim = document.getElementById("inputTaxaAlimentos");
-            mudaIntervaloAlimentos(inputTalim.value);
+            inputTalim = document.getElementById("inputTaxaVegetables");
+            mudaIntervaloVegetables(inputTalim.value);
             inputPMut = document.getElementById("inputProbMutacao");
             mudaProbMutacao(inputPMut.value);
             inputMMut = document.getElementById("inputMagMutacao");
@@ -337,8 +337,8 @@
             cursorX = e.pageX;
             cursorY= e.pageY;
             if(cursorX<=canvas.width && cursorY<=canvas.height){
-                let alimento = geraAlimento(cursorX,cursorY);
-                alimento.display()
+                let vegetable = geraVegetable(cursorX,cursorY);
+                vegetable.display()
             }
         }
 
@@ -360,17 +360,17 @@
             if(organism == "c")
                 Organism.organisms = []
             else if(organism == "a"){
-                Alimento.alimentos = []
+                Vegetable.vegetables = []
                 inputTalim.value = 0;
                 labelTaxa.textContent = 0
-                mudaIntervaloAlimentos(0);
+                mudaIntervaloVegetables(0);
             }
             else{
                 Organism.organisms = []
-                Alimento.alimentos = []
+                Vegetable.vegetables = []
                 inputTalim.value = 0;
                 labelTaxa.textContent = 0
-                mudaIntervaloAlimentos(0);
+                mudaIntervaloVegetables(0);
             }
 
         }

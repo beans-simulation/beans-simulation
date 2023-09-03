@@ -2,7 +2,7 @@ class Historico {
     constructor() {
         this.organisms = new Infos();
         this.segundos = [];
-        this.taxa_alimentos = []; // Alimentos por segundo
+        this.taxa_vegetables = []; // Vegetables por segundo
     }
 
     clear() {
