@@ -479,7 +479,7 @@ class NeuralNetwork:
 # ---------------------------------- TESTAGEM -----------------------------------
 # -------------------------------------------------------------------------------
 
-# Criando uma estrutura básica de rede neural para um organismo capaz de andar em direção a um vegetable
+# Criando uma estrutura básica de rede neural para um organismo capaz de andar em direção a um alimento
 basic_network = NeuralNetwork()
 
 # A estrutura básica é essa:
