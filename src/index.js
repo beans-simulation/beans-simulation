@@ -9,10 +9,10 @@ canvas.height = tela.height;
 
 const c = canvas.getContext('2d');
 
-var tamanhoUniverso = 1;
+var universe_size = 1;
 
-var universoWidth = canvas.width * tamanhoUniverso; 
-var universoHeight = canvas.height * tamanhoUniverso; 
+var universe_width = canvas.width * universe_size; 
+var universe_height = canvas.height * universe_size; 
 
 var percentual_energy_to_eat = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
 
@@ -21,21 +21,21 @@ var mudarGrafico = false;
 // Variáveis para o gráfico (carnívoro)
 var popC;
 var velMedC;
-var forcaMedC;
-var raioMedC;
-var raioDetMedC;
+var forceMedC;
+var radiusMedC;
+var radiusDetMedC;
 var energMedC;
 var taxaEnergMedC;
 
 // Variáveis para alterações nas mutações
-var probabilidade_mutacao = labelProb; // chances de cada gene (atributo) sofrer mutação
+var probabilidade_mutacao = label_mutation_probability; // chances de cada gene (atributo) sofrer mutação
 var magnitude_mutacao = 0.1; // magnitude da mutação (o quanto vai variar)
 
 var lado_direito_vazio = true;
 var lado_esquerdo_vazio = true;
 
 // QuadTree
-let retanguloCanvas = new Retangulo(universoWidth/2, universoHeight/2, universoWidth/2, universoHeight/2);
+let retanguloCanvas = new Rectangle(universe_width/2, universe_height/2, universe_width/2, universe_height/2);
 
 var popover_id = 1;
 
@@ -49,9 +49,9 @@ var conf_h;
 //                                  FUNÇÕES
 // ---------------------------------------------------------------------------------------
 
-function criaUniverso(tamanhoUniverso){
-    universoWidth = canvas.width * tamanhoUniverso; 
-    universoHeight = canvas.height * tamanhoUniverso;
+function create_universe(universe_size){
+    universe_width = canvas.width * universe_size; 
+    universe_height = canvas.height * universe_size;
 }
 
 function verificaViesMutacoes(valor, iteracoes){
@@ -60,7 +60,7 @@ function verificaViesMutacoes(valor, iteracoes){
     var igual = 0;
     var novoValor = 0;
     for(var i = 0; i < iteracoes; i++){
-        novoValor = newMutacao(valor)
+        novoValor = newMutation(valor)
         if(novoValor > valor){
             maior++;
         } else if(novoValor < valor){
@@ -110,24 +110,24 @@ function desenhaTudo(){
 }
 
 
-function criaObjetos(n_organisms, n_vegetables){
+function create_objects(n_organisms, n_vegetables){
     for(var i = 0; i < n_organisms; i++){
-        var x =(Math.random() * (universoWidth - 50) + 25);
-        var y = (Math.random() * (universoHeight - 50) + 25);
+        var x =(Math.random() * (universe_width - 50) + 25);
+        var y = (Math.random() * (universe_height - 50) + 25);
         geraOrganism(x,y);
     }
 
     for(var i = 0; i < n_vegetables; i++){
-        var x =(Math.random() * (universoWidth - 50) + 25);
-        var y = (Math.random() * (universoHeight - 50) + 25);
+        var x =(Math.random() * (universe_width - 50) + 25);
+        var y = (Math.random() * (universe_height - 50) + 25);
         geraVegetable(x,y);
     }
 }
 
-function destroiObjetos(){
+function destroy_objects(){
     Organism.organisms.length = 0;
     Vegetable.vegetables.length = 0;
-    // mudaIntervaloVegetables(1001);
+    // update_vegetables_apparition_interval(1001);
 }
 
 
@@ -139,44 +139,44 @@ var intervaloTaxaVegetables;
 var limitador_de_loop = 0;
 
 function geraVegetable(x,y){
-    var raio = geraNumeroPorIntervalo(1, 2);
-    return new Vegetable(x, y, raio);
+    var radius = generate_number_per_interval(1, 2);
+    return new Vegetable(x, y, radius);
 }
 
 function geraOrganism(x,y){ // função para poder adicionar mais carnívoros manualmente 
-    var raio_inicial = geraNumeroPorIntervalo(3, 8);
-    var vel_max = geraNumeroPorIntervalo(1, 2.2); 
-    var forca_max = geraNumeroPorIntervalo(0.01, 0.05);
-    var cor = geraCor();
-    var raio_deteccao_inicial = geraNumeroPorIntervalo(40, 120);
-    var ninhada_min = geraInteiro(1, 1);
-    var ninhada_max = ninhada_min + geraInteiro(1, 8);
-    var intervalo_ninhada = [ninhada_min, ninhada_max];
-    var sexo;
+    var initial_radius = generate_number_per_interval(3, 8);
+    var max_speed = generate_number_per_interval(1, 2.2); 
+    var max_strength = generate_number_per_interval(0.01, 0.05);
+    var color = geraCor();
+    var initial_detection_radius = generate_number_per_interval(40, 120);
+    var ninhada_min = generateInteger(1, 1);
+    var ninhada_max = ninhada_min + generateInteger(1, 8);
+    var litter_interval = [ninhada_min, ninhada_max];
+    var sex;
 
     if(Math.random() < 0.5){
-        sexo = 'XX'
+        sex = 'XX'
     } else{
-        sexo = 'XY'
+        sex = 'XY'
     }
 
     if(conf_c) {
-        raio_inicial = conf_c.raio_inicial;
-        vel_max = conf_c.vel_max;
-        forca_max = conf_c.forca_max;
-        cor = conf_c.cor;
-        intervalo_ninhada = conf_c.intervalo_ninhada
-        sexo = conf_c.sexo
+        initial_radius = conf_c.initial_radius;
+        max_speed = conf_c.max_speed;
+        max_strength = conf_c.max_strength;
+        color = conf_c.color;
+        litter_interval = conf_c.litter_interval
+        sex = conf_c.sex
     }
 
     var dna = new DNA(
-        raio_inicial,
-        vel_max,
-        forca_max,
-        cor,
-        raio_deteccao_inicial,
-        intervalo_ninhada,
-        sexo
+        initial_radius,
+        max_speed,
+        max_strength,
+        color,
+        initial_detection_radius,
+        litter_interval,
+        sex
     )
 
     return new Organism(
@@ -189,9 +189,9 @@ function geraCor(){
     var r = Math.floor(Math.random() * 256); 
     var g = Math.floor(Math.random() * 256);
     var b = Math.floor(Math.random() * 256);
-    var cor = "rgb(" + r + "," + g + "," + b + ")";
+    var color = "rgb(" + r + "," + g + "," + b + ")";
 
-    return cor;
+    return color;
 }
 
 function hexToRgb(hex) {
@@ -220,17 +220,17 @@ function corMutacao(estilo) {
     if(Math.random() < probabilidade_mutacao){ // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
         let cores = estilo.substring(4, estilo.length - 1) // remover os caracteres de texto. ex: "rgb(256,20,40)"
             .split(',') // retornar um array com os elementos separados por virgula. ex: 256,20,40
-            .map(function(cor) { //pegar cada elemento do array e fazer os cálculos a seguir
-                cor = parseInt(cor);
+            .map(function(color) { //pegar cada elemento do array e fazer os cálculos a seguir
+                color = parseInt(color);
                 let operacao = "";
                 let p = Math.random();
 
-                if(cor <= 10) { //para não gerar números negativos
+                if(color <= 10) { //para não gerar números negativos
                     operacao = "adicao"
-                } else if(cor >= 246) { //para não gerar valores maiores que 256
+                } else if(color >= 246) { //para não gerar valores maiores que 256
                     operacao = "subtracao"
 
-                } else { //randomiza se vai ser add ou subtraido valores caso a cor estiver entre 10 e 246
+                } else { //randomiza se vai ser add ou subtraido valores caso a color estiver entre 10 e 246
                     if(Math.random() < 0.5) {
                         operacao = "adicao"
                     } else {
@@ -240,25 +240,25 @@ function corMutacao(estilo) {
 
                 if(operacao == "adicao") {
                     if(p < 0.002){ // Há 0.2% de chance de a mutação ser grande
-                        return Math.ceil(cor + cor * (Math.random() * magnitude_mutacao * 10));
+                        return Math.ceil(color + color * (Math.random() * magnitude_mutacao * 10));
                     } else if(p < 0.008){ // Há 0.6% de chance (0.8% - o 0.2% do if anterior) de a mutação ser razoavelmente grande
-                        return Math.ceil(cor + cor * (Math.random() * magnitude_mutacao * 4));
+                        return Math.ceil(color + color * (Math.random() * magnitude_mutacao * 4));
                     } else if(p < 0.028){ // Há 2% de chance (2.8% - o 0.8% do if anterior) de a mutação ser razoável
-                        return Math.ceil(cor + cor * (Math.random() * magnitude_mutacao * 2));
+                        return Math.ceil(color + color * (Math.random() * magnitude_mutacao * 2));
                     } else{
-                        // return cor + Math.ceil(Math.random() * 10)
-                        return Math.ceil(cor + cor * (Math.random() * magnitude_mutacao));
+                        // return color + Math.ceil(Math.random() * 10)
+                        return Math.ceil(color + color * (Math.random() * magnitude_mutacao));
                     }
                     
                 } else { //subtração
                     if(p < 0.002){ // Há 0.2% de chance de a mutação ser grande
-                        return Math.ceil(cor - cor * (Math.random() * magnitude_mutacao * 10));
+                        return Math.ceil(color - color * (Math.random() * magnitude_mutacao * 10));
                     } else if(p < 0.008){ // Há 0.6% de chance (0.8% - o 0.2% do if anterior) de a mutação ser razoavelmente grande
-                        return Math.ceil(cor - cor * (Math.random() * magnitude_mutacao * 4));
+                        return Math.ceil(color - color * (Math.random() * magnitude_mutacao * 4));
                     } else if(p < 0.028){ // Há 2% de chance (2.8% - o 0.8% do if anterior) de a mutação ser razoável
-                        return Math.ceil(cor - cor * (Math.random() * magnitude_mutacao * 2));
+                        return Math.ceil(color - color * (Math.random() * magnitude_mutacao * 2));
                     } else{
-                        return Math.ceil(cor - cor * (Math.random() * magnitude_mutacao));
+                        return Math.ceil(color - color * (Math.random() * magnitude_mutacao));
                     }
                 }
             });
@@ -270,7 +270,7 @@ function corMutacao(estilo) {
     }
 }
 
-function newMutacao(valor) {// exemplo: valor = 20;  magnitude_mutacao = 0.05 || 5%
+function newMutation(valor) {// exemplo: valor = 20;  magnitude_mutacao = 0.05 || 5%
     if(Math.random() < probabilidade_mutacao){ // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
         let p = Math.random();
         let variacao = valor * magnitude_mutacao; //  variacao = 20 * 0.05 = 1, ou seja, poderá variar de +1 a -1 no resultado
@@ -285,7 +285,7 @@ function newMutacao(valor) {// exemplo: valor = 20;  magnitude_mutacao = 0.05 ||
         }
         
         let minimo = valor - variacao;  //  minimo = 20 - 1 = 19. Para que não precise sub-dividir o return em adição ou subtração
-        variacao *= 2                   //  puxo o ponto de referência para o menor valor possível. Logo, o resultado variará de
+        variacao *= 2                   //  puxo o point de referência para o menor valor possível. Logo, o resultado variará de
                                         //  0 a +2, afinal a distância de 1 até -1 é 2.
         if(minimo <= 0) {
             minimo = valor * 0.01; // Se a mutação diminuir o valor para menos que 0, ela será simplesmente muito pequena
@@ -299,8 +299,8 @@ function newMutacao(valor) {// exemplo: valor = 20;  magnitude_mutacao = 0.05 ||
 
 function mutacaoNinhada(ninhada_min, ninhada_max) {
     if(Math.random() < probabilidade_mutacao){ // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
-        let variacao_ninhada_min = geraInteiro(0, 2 + Math.floor(magnitude_mutacao * 10));
-        let variacao_ninhada_max = geraInteiro(0, 2 + Math.floor(magnitude_mutacao * 10));
+        let variacao_ninhada_min = generateInteger(0, 2 + Math.floor(magnitude_mutacao * 10));
+        let variacao_ninhada_max = generateInteger(0, 2 + Math.floor(magnitude_mutacao * 10));
  
         if(Math.random() >= 0.5) { // Soma
             ninhada_min += variacao_ninhada_min;
@@ -323,54 +323,54 @@ function mutacaoNinhada(ninhada_min, ninhada_max) {
 
 
 
-function geraNumeroPorIntervalo(min, max) {
+function generate_number_per_interval(min, max) {
     let delta = max - min; // exemplo: 4000 e 6000. 6000 - 4000 = 2000
     return parseFloat((Math.random() * delta + min).toFixed(4)); // Math.random() * 2000 + 4000
 }
 
 function criaVegetablesGradativo(){
-    if(!pausado){ // Para de criar vegetables enquanto a simulação estiver pausada
-        var x = Math.random() * (universoWidth - 62) + 31;
-        var y = Math.random() * (universoHeight - 62) + 31;
-        var raio = Math.random() * 1.5 + 1;
+    if(!is_paused){ // Para de criar vegetables enquanto a simulação estiver pausada
+        var x = Math.random() * (universe_width - 62) + 31;
+        var y = Math.random() * (universe_height - 62) + 31;
+        var radius = Math.random() * 1.5 + 1;
 
         if(Vegetable.vegetables.length < 3000){ // Limitador para não sobrecarregar a simulação
-            new Vegetable(x, y, raio);
+            new Vegetable(x, y, radius);
         }
         
     }
 }
 
-function mudaIntervaloVegetables(novoValor, criar=false) {
+function update_vegetables_apparition_interval(novoValor, criar=false) {
     novoTempo = 1000 / novoValor
     if(!criar) {
         clearInterval(intervaloTaxaVegetables);
     }
     if(novoTempo > 1000) return;
-    if(antesDoPlay) return;
+    if(is_before_play) return;
     intervaloTaxaVegetables = setInterval(criaVegetablesGradativo, novoTempo)
 }
 
-function mudaProbMutacao(novoValor){
+function update_mutation_probability(novoValor){
     probabilidade_mutacao = novoValor / 100;
 }
 
-function mudaMagMutacao(novoValor){
+function update_mutation_magnitude(novoValor){
     magnitude_mutacao = novoValor / 100;
 }
 
 
-function desenhaQuadTree(qtree){
-    qtree.desenha();
+function displayQuadTree(qtree){
+    qtree.display();
 
-    let alcance = new Retangulo(Math.random() * universoWidth, Math.random() * universoHeight, 170, 123);
-    c.rect(alcance.x - alcance.w, alcance.y - alcance.h, alcance.w*2, alcance.h*2);
+    let scope = new Rectangle(Math.random() * universe_width, Math.random() * universe_height, 170, 123);
+    c.rect(scope.x - scope.w, scope.y - scope.h, scope.w*2, scope.h*2);
     c.strokeStyle = "green";
     c.lineWidth = 3;
     c.stroke();
 
-    let pontos = qtree.procura(alcance);
-    for(let p of pontos){
+    let points = qtree.procura(scope);
+    for(let p of points){
         c.beginPath();
         c.arc(p.x, p.y, 1, 0, 2 * Math.PI);
         c.strokeStyle = "red";
@@ -378,24 +378,24 @@ function desenhaQuadTree(qtree){
     }
 }
 
-function criaPontos(){
-    let congregacao = new Ponto(Math.random() * universoWidth, Math.random() * universoHeight);
+function criaPoints(){
+    let congregacao = new Point(Math.random() * universe_width, Math.random() * universe_height);
     
     for(var i = 0; i < 500; i++){
-        let p = new Ponto(Math.random() * universoWidth, Math.random() * universoHeight);
-        qtree.inserirPonto(p);
+        let p = new Point(Math.random() * universe_width, Math.random() * universe_height);
+        qtree.insert_point(p);
     }
     for(var i = 0; i < 300; i++){
-        let p = new Ponto(congregacao.x + (Math.random() - 0.5) * 300, congregacao.y + (Math.random() - 0.5) * 300);
-        qtree.inserirPonto(p);
+        let p = new Point(congregacao.x + (Math.random() - 0.5) * 300, congregacao.y + (Math.random() - 0.5) * 300);
+        qtree.insert_point(p);
     }
     for(var i = 0; i < 400; i++){
-        let p = new Ponto(congregacao.x + (Math.random() - 0.5) * 600, congregacao.y + (Math.random() - 0.5) * 600);
-        qtree.inserirPonto(p);
+        let p = new Point(congregacao.x + (Math.random() - 0.5) * 600, congregacao.y + (Math.random() - 0.5) * 600);
+        qtree.insert_point(p);
     }
     for(var i = 0; i < 400; i++){
-        let p = new Ponto(congregacao.x + (Math.random() - 0.5) * 800, congregacao.y + (Math.random() - 0.5) * 800);
-        qtree.inserirPonto(p);
+        let p = new Point(congregacao.x + (Math.random() - 0.5) * 800, congregacao.y + (Math.random() - 0.5) * 800);
+        qtree.insert_point(p);
     }
 }
 
@@ -403,18 +403,18 @@ function criaPontos(){
 var idAnimate;
 
 function pausa(){
-    pausado = true;
+    is_paused = true;
 
-    btnPausa.classList.add("d-none");
-    btnDespausa.classList.remove("d-none");
+    button_pause_simulation.classList.add("d-none");
+    button_resume_simulation.classList.remove("d-none");
 
 }
 
 function despausa(){
-    pausado = false;
+    is_paused = false;
 
-    btnDespausa.classList.add("d-none");
-    btnPausa.classList.remove("d-none");
+    button_resume_simulation.classList.add("d-none");
+    button_pause_simulation.classList.remove("d-none");
 
     animate();
 }
@@ -431,16 +431,16 @@ function desacelera(){
 }
 
 function animate(){
-    if(pausado == false){
+    if(is_paused == false){
         idAnimate = requestAnimationFrame(animate);
     }
     
-    c.clearRect(0, 0, universoWidth, universoHeight);
+    c.clearRect(0, 0, universe_width, universe_height);
     c.beginPath();
     c.moveTo(-3, -4);
-    c.lineTo(universoWidth + 3, -3);
-    c.lineTo(universoWidth + 3, universoHeight + 3);
-    c.lineTo(-3, universoHeight + 3);
+    c.lineTo(universe_width + 3, -3);
+    c.lineTo(universe_width + 3, universe_height + 3);
+    c.lineTo(-3, universe_height + 3);
     c.lineTo(-3, -3);
     c.strokeStyle = "white";
     c.stroke();
@@ -453,35 +453,35 @@ function animate(){
 
     Vegetable.vegetables.forEach(vegetable => {
         vegetable.display();
-        qtree.inserirVegetable(vegetable); // Insere o vegetable na QuadTree
+        qtree.insert_vegetable(vegetable); // Insere o vegetable na QuadTree
 
     })
 
     Organism.organisms.forEach((organism) => {
-        organism.criaBordas(false); // telaDividida: false
+        organism.create_space_delimitation(false); // telaDividida: false
     })
 
     Organism.organisms.forEach(organism => {
-        qtree.insertOrganism(organism); // Insere o organism na QuadTree
+        qtree.insert_organism(organism); // Insere o organism na QuadTree
     });
     
 
     Organism.organisms.forEach(organism => {
         organism.update();
-        organism.vagueia();
+        organism.roam();
 
-        // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
-        let visaoC = new Circulo(organism.posicao.x, organism.posicao.y, organism.raio_deteccao);
+        // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
+        let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
 
-        // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a reproduzir infinitamente
-        // if(organism.energia <= organism.energia_max * percentual_energy_to_eat){ // FOME
-        //     organism.findPrey(qtree, visaoC);
+        // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a procreate infinitamente
+        // if(organism.energy <= organism.max_energy * percentual_energy_to_eat){ // FOME
+        //     organism.find_prey(qtree, vision);
         // }
     })
 }
 
 
-function geraInteiro(min, max) {
+function generateInteger(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
@@ -492,16 +492,16 @@ function geraInteiro(min, max) {
 // ----------------------------------------------------------------------------------------------
 var cronometro;
 
-function criaCronometro(){
+function create_timer(){
     cronometro = setInterval(() => { timer(); }, 10);
 }
 
 function timer() {
-    if(!pausado){ // Só atualiza se a simulação não estiver pausada
+    if(!is_paused){ // Só atualiza se a simulação não estiver pausada
         if ((milisegundo += 10) == 1000) {
         milisegundo = 0;
         segundo++;
-        segundos_totais++;
+        total_of_seconds++;
         }
         if (segundo == 60) {
         segundo = 0;
@@ -522,8 +522,8 @@ function returnData(input) {
     return input > 10 ? input : `0${input}`
 }
 
-function resetaCronometro(){
-    hora = minuto = segundo = milisegundo = segundos_totais = 0;
+function reset_timer(){
+    hora = minuto = segundo = milisegundo = total_of_seconds = 0;
 
     //limpar o cronometro se ele existe.
     try {

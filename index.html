@@ -10,16 +10,16 @@
     <title>beans</title>
     
     <!-- A ordem de importar o script deve ser do que não depende de nada até os que dependem... (pra n bugar)-->
-    <script type="text/javascript" src="./src/models/Vetor.js"></script>
-    <script type="text/javascript" src="./src/models/Circulo.js"></script>
-    <script type="text/javascript" src="./src/models/Ponto.js"></script>
-    <script type="text/javascript" src="./src/models/Retangulo.js"></script>
+    <script type="text/javascript" src="./src/models/Vector.js"></script>
+    <script type="text/javascript" src="./src/models/Circle.js"></script>
+    <script type="text/javascript" src="./src/models/Point.js"></script>
+    <script type="text/javascript" src="./src/models/Rectangle.js"></script>
     <script type="text/javascript" src="./src/models/QuadTree.js"></script>
     <script type="text/javascript" src="./src/models/DNA.js"></script>
     <script type="text/javascript" src="./src/models/Vegetable.js"></script>
     <script type="text/javascript" src="./src/models/Organism.js"></script>
-    <script type="text/javascript" src="./src/models/Infos.js"></script>
-    <script type="text/javascript" src="./src/models/Historico.js"></script>
+    <script type="text/javascript" src="./src/models/Info.js"></script>
+    <script type="text/javascript" src="./src/models/History.js"></script>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -81,44 +81,44 @@
                 <div class="tab-body">
 
                     <div id="painelInicial">
-                        <div id="inputsIniciais" class="p-0 m-0">
-                            <label id="organism" name="organism" for="inputOrganisms">Carnívoros: <label id="numCarn">35</label></label>
-                            <input type="range" min="0" max="500" value="4" class="slider-red" step="1" id="inputOrganisms" oninput="numCarn.textContent=inputOrganisms.value">
-                            <label id="vegetable" name="vegetable" for="inputVegetables">Vegetais: <label id="numAli">800</label></label>
-                            <input type="range" min="0" max="3000" value="100" class="slider-yellow" step="5" id="inputVegetables" oninput="numAli.textContent=inputVegetables.value">    
+                        <div id="initial_inputs" class="p-0 m-0">
+                            <label id="organism" name="organism" for="slider_input_organisms">Carnívoros: <label id="output_organisms">35</label></label>
+                            <input type="range" min="0" max="500" value="4" class="slider-red" step="1" id="slider_input_organisms" oninput="output_organisms.textContent=slider_input_organisms.value">
+                            <label id="vegetable" name="vegetable" for="slider_input_vegetables">Vegetais: <label id="output_vegetables">800</label></label>
+                            <input type="range" min="0" max="3000" value="100" class="slider-yellow" step="5" id="slider_input_vegetables" oninput="output_vegetables.textContent=slider_input_vegetables.value">    
                         </div>
-                        <label id="taxavegetable" name="taxavegetable" for="inputTaxaVegetables">Aparição de vegetais: <label id="numTaxaAli">100</label> por segundo</label>
-                        <input type="range" min="0" max="1000" value="10" class="slider-yellow" step="1" id="inputTaxaVegetables" oninput="mudouInputTaxa()"
-                            onchange="mudaIntervaloVegetables(inputTaxaVegetables.value)">
+                        <label id="taxavegetable" name="taxavegetable" for="input_vegetable_rate">Aparição de vegetais: <label id="num_vegetable_rate">100</label> por segundo</label>
+                        <input type="range" min="0" max="1000" value="10" class="slider-yellow" step="1" id="input_vegetable_rate" oninput="change_vegetable_rate()"
+                            onchange="update_vegetables_apparition_interval(input_vegetable_rate.value)">
 
 
-                        <label id="probMutacao" name="probMutacao" for="inputProbMutacao">Probabilidade de mutação: <label id="numProbMutacao">10</label>%</label>
-                        <input type="range" min="0" max="100" value="10" class="slider-blue" id="inputProbMutacao" oninput="mudouInputProb()"
-                            onchange="mudaProbMutacao(inputProbMutacao.value)">
+                        <label id="probMutacao" name="probMutacao" for="input_mutation_probability">Probabilidade de mutação: <label id="num_mutation_probability">10</label>%</label>
+                        <input type="range" min="0" max="100" value="10" class="slider-blue" id="input_mutation_probability" oninput="change_mutation_probability()"
+                            onchange="update_mutation_probability(input_mutation_probability.value)">
 
                     
-                        <label id="magMutacao" name="magMutacao" for="inputMagMutacao">Magnitude das mutações: <label id="numMagMutacao">5</label>%</label>
-                        <input type="range" min="0" max="100" value="5" class="slider-blue" id="inputMagMutacao" oninput="mudouInputMag()"
-                            onchange="mudaMagMutacao(inputMagMutacao.value)">
+                        <label id="magMutacao" name="magMutacao" for="input_mutation_magnitude">Magnitude das mutações: <label id="num_mutation_magnitude">5</label>%</label>
+                        <input type="range" min="0" max="100" value="5" class="slider-blue" id="input_mutation_magnitude" oninput="change_mutation_magnitude()"
+                            onchange="update_mutation_magnitude(input_mutation_magnitude.value)">
 
 
-                        <div id="botoesIniciais" class ="row mt-3">
+                        <div id="initial_buttons" class ="row mt-3">
                             <div class="col-sm-3 d-grid gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" style="color: #ddd" onclick="restaurarPadroes()">Default</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" style="color: #ddd" onclick="set_default_config()">Default</button>
                             </div>
                             <div class="col-sm-9 d-grid gap-2">
-                                <button type="button" class="btn btn-sm btn-success" onclick="iniciarSimulacao()">Play</button>
+                                <button type="button" class="btn btn-sm btn-success" onclick="startSimulation()">Play</button>
                             </div>
                         </div>
-                        <div id="botoesSecundarios" class="mt-3 text-center d-none">
-                            <button id="restartBtn" type="button" class="btn btn-sm btn-block btn-outline-secondary" style="color: #ddd" onclick="mostrarPainelInicial()">Restart</button>
+                        <div id="extra_buttons" class="mt-3 text-center d-none">
+                            <button id="restartBtn" type="button" class="btn btn-sm btn-block btn-outline-secondary" style="color: #ddd" onclick="show_initial_panel()">Restart</button>
                             <div id="btnDesacelera" class="" onclick="desacelera()" style="cursor: pointer; display: inline; margin-left: 10px;">
                                 <i class="fas fa-arrow-alt-to-left"></i>
                             </div>
-                            <div id="btnPausa" class="" onclick="pausa()" style="cursor: pointer; display: inline; margin-left: 10px;">
+                            <div id="button_pause_simulation" class="" onclick="pausa()" style="cursor: pointer; display: inline; margin-left: 10px;">
                                 <i class="fas fa-pause"></i>
                             </div>
-                            <div id="btnDespausa" class="d-none" onclick="despausa()" style="cursor: pointer; display: inline; margin-left: 10px;">
+                            <div id="button_resume_simulation" class="d-none" onclick="despausa()" style="cursor: pointer; display: inline; margin-left: 10px;">
                                 <i class="fas fa-play"></i>
                             </div>
                             <div id="btnAcelera" class="" onclick="acelera()" style="cursor: pointer; display: inline; margin-left: 10px;">
@@ -149,256 +149,163 @@
     
     
   <script type="text/javascript">
-        var inputTalim = document.getElementById("inputTaxaVegetables");
-        const labelTaxa = document.getElementById("numTaxaAli");
+        var input_vegetable_rate = document.getElementById("input_vegetable_rate");
+        const label_vegetable_rate = document.getElementById("num_vegetable_rate");
 
-        var inputPMut = document.getElementById("inputProbMutacao");
-        const labelProb = document.getElementById("numProbMutacao");
+        var input_mutation_probability = document.getElementById("input_mutation_probability");
+        const label_mutation_probability = document.getElementById("num_mutation_probability");
 
-        var inputMMut = document.getElementById("inputMagMutacao");
-        const labelMag = document.getElementById("numMagMutacao");
+        var input_mutation_magnitude = document.getElementById("input_mutation_magnitude");
+        const label_mutation_magnitude = document.getElementById("num_mutation_magnitude");
 
         var n_organisms;
         var n_vegetables;
 
-        var antesDoPlay = true;
+        var is_before_play = true;
 
-        var rodando = false;  
+        var is_running = false;  
 
         // Variável para pausar e despausar o jogo
-        var pausado = false;
+        var is_paused = false;
 
         // Variáveis para auxiliar a atualizar os valores dos sliders
-        var sliderCarn = document.getElementById("inputOrganisms");
-        var outputCarn = document.getElementById("numCarn");
-        outputCarn.innerHTML = sliderCarn.value;
+        var slider_input_organisms = document.getElementById("slider_input_organisms");
+        var output_organisms = document.getElementById("output_organisms");
+        output_organisms.innerHTML = slider_input_organisms.value;
 
-        var sliderAli = document.getElementById("inputVegetables");
-        var outputAli = document.getElementById("numAli");
-        outputAli.innerHTML = sliderAli.value;
-
-        // Variáveis para referenciar os botões de adicionar elementos na simulação
-        var btnAddCarn = document.getElementById("btnCarn");
-        var btnAddAli = document.getElementById("btnAli");
+        var slider_input_vegetables = document.getElementById("slider_input_vegetables");
+        var output_vegetables = document.getElementById("output_vegetables");
+        output_vegetables.innerHTML = slider_input_vegetables.value;
 
         // Variáveis para pausar e despausar a simulação
-        var btnPausa = document.getElementById("btnPausa");
-        var btnDespausa = document.getElementById("btnDespausa");
+        var button_pause_simulation = document.getElementById("button_pause_simulation");
+        var button_resume_simulation = document.getElementById("button_resume_simulation");
 
 
         // Update do valor do slider a cada vez que ele é modificado
-        sliderCarn.oninput = function(){
-            outputCarn.innerHTML = this.value;
-            n_organisms = outputCarn.innerHTML;
+        slider_input_organisms.oninput = function(){
+            output_organisms.innerHTML = this.value;
+            n_organisms = output_organisms.innerHTML;
         }
 
-        sliderAli.oninput = function(){
-            outputAli.innerHTML = this.value;
-            n_vegetables = outputAli.innerHTML;
+        slider_input_vegetables.oninput = function(){
+            output_vegetables.innerHTML = this.value;
+            n_vegetables = output_vegetables.innerHTML;
         }
 
         $(document).ready(function(){
-            // $('.toast').toast('show');
-            // $('.toast').css("data-autohide", "false");
-            // setTimeout(function(){
-            //     $(".splash").fadeOut(800)
-            // }, 1500)
-            document.querySelectorAll(".tab-info").forEach(elemento => dragElement(elemento))
+            document.querySelectorAll(".tab-info").forEach(element => drag_screen_element(element))
         });
 
 
-        function iniciarSimulacao(){ // não ta funcionando se coloco só no click do botão
-            // tamanhoUniverso = parseInt(document.getElementById("numTamanhoUniverso").textContent);
-            tamanhoUniverso = 1; //julia: adicionei esse valor fixo ao invés do valor de input
-            n_organisms = parseInt(document.getElementById("numCarn").textContent) * tamanhoUniverso;
-            n_vegetables = parseInt(document.getElementById("numAli").textContent) * tamanhoUniverso;
+        function startSimulation(){ 
+            universe_size = 1; 
+            n_organisms = parseInt(document.getElementById("output_organisms").textContent) * universe_size;
+            n_vegetables = parseInt(document.getElementById("output_vegetables").textContent) * universe_size;
             
 
-            antesDoPlay = false;
-            destroiObjetos();
-            resetaCronometro();
-            historico.clear();
-            criaCronometro();
-            criaUniverso(tamanhoUniverso);
-            criaObjetos(n_organisms, n_vegetables);
+            is_before_play = false;
+            destroy_objects();
+            reset_timer();
+            history.clear(); //julia:checar se está sendo utilizado
+            create_timer();
+            create_universe(universe_size);
+            create_objects(n_organisms, n_vegetables);
                         
 
-            inputTalim = document.getElementById("inputTaxaVegetables");
-            mudaIntervaloVegetables(inputTalim.value, true);
-            inputPMut = document.getElementById("inputProbMutacao");
-            mudaProbMutacao(inputPMut.value);
-            inputMMut = document.getElementById("inputMagMutacao");
-            mudaMagMutacao(inputMMut.value);
-            // document.getElementById("inputsIniciais").classList.add("d-none");
+            input_vegetable_rate = document.getElementById("input_vegetable_rate");
+            update_vegetables_apparition_interval(input_vegetable_rate.value, true);
+            input_mutation_probability = document.getElementById("input_mutation_probability");
+            update_mutation_probability(input_mutation_probability.value);
+            input_mutation_magnitude = document.getElementById("input_mutation_magnitude");
+            update_mutation_magnitude(input_mutation_magnitude.value);
+            // document.getElementById("initial_inputs").classList.add("d-none");
             // document.getElementById("divTamanhoUniverso").classList.add("d-none");
-            // document.getElementById("painelSecundario").classList.remove("d-none");
-            // document.getElementById("botoesIniciais").classList.add("d-none");
-            // document.getElementById("botoesSecundarios").classList.remove("d-none");
+            // document.getElementById("extra_panel").classList.remove("d-none");
+            // document.getElementById("initial_buttons").classList.add("d-none");
+            // document.getElementById("extra_buttons").classList.remove("d-none");
             // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
-            if(!rodando && !pausado) { 
+            if(!is_running && !is_paused) { 
                 animate(); 
             }
-            rodando = true;
+            is_running = true;
         }
        
-        function restaurarPadroes(){// volta os parâmetros para o padrão inicial
-            document.getElementById("numCarn").textContent = 35;
-            document.getElementById("inputOrganisms").value = 35;
+        function set_default_config(){// volta os parâmetros para o padrão inicial
+            document.getElementById("output_organisms").textContent = 35;
+            document.getElementById("slider_input_organisms").value = 35;
 
 
-            document.getElementById("numAli").textContent = 800;
-            document.getElementById("inputVegetables").value = 800;
+            document.getElementById("output_vegetables").textContent = 800;
+            document.getElementById("slider_input_vegetables").value = 800;
 
-            document.getElementById("numProbMutacao").textContent = 10;
-            document.getElementById("numMagMutacao").textContent = 5;
+            document.getElementById("num_mutation_probability").textContent = 10;
+            document.getElementById("num_mutation_magnitude").textContent = 5;
 
-            // document.getElementById("numTamanhoUniverso").textContent = 2;
-            // document.getElementById("inputTamanhoUniverso").value = 2;
+            label_vegetable_rate.textContent = 100;
+            input_vegetable_rate.value = 100;
+            input_mutation_probability.value = 10;
+            input_mutation_magnitude.value = 5;
+        }
+        
 
-            labelTaxa.textContent = 100;
-            inputTalim.value = 100;
-            inputPMut.value = 10;
-            inputMMut.value = 5;
+        function show_initial_panel() {
+            destroy_objects();
+            reset_timer();
+            is_before_play = true;
+            input_vegetable_rate = document.getElementById("input_vegetable_rate");
+            update_vegetables_apparition_interval(input_vegetable_rate.value);
+            input_mutation_probability = document.getElementById("input_mutation_probability");
+            update_mutation_probability(input_mutation_probability.value);
+            input_mutation_magnitude = document.getElementById("input_mutation_magnitude");
+            update_mutation_magnitude(input_mutation_magnitude.value);
+            document.getElementById("initial_inputs").classList.remove("d-none");
+            document.getElementById("initial_buttons").classList.remove("d-none");
+            document.getElementById("extra_buttons").classList.add("d-none");
+            document.getElementById("extra_panel").classList.add("d-none");
         }
 
-        // Função para mudar os valores inicias (populações, taxa de vegetables, etc.)
-        function reequilibraQuantidades(){
-            // numTamanhoUniverso.textContent=inputTamanhoUniverso.value
-            // var tamUniverso = parseInt(inputTamanhoUniverso.value)
-            var tamUniverso = 1; //julia:setando manualmente 
-            var escala = Math.pow(tamUniverso, 1.3);
 
-            document.getElementById("numCarn").textContent = Math.round(15 * escala * 0.8);
-            document.getElementById("inputOrganisms").value = Math.round(15 * escala * 0.8);
-
-            document.getElementById("numAli").textContent = Math.round(300 * escala);
-            document.getElementById("inputVegetables").value = Math.round(300 * escala);
-
-            labelTaxa.textContent = Math.round(30 * escala * 1.5);
-            inputTalim.value = Math.round(30 * escala * 1.5);
+        function change_mutation_probability(){
+            label_mutation_probability.textContent = input_mutation_probability.value;
         }
 
-        function mostrarPainelInicial() {
-            destroiObjetos();
-            resetaCronometro();
-            antesDoPlay = true;
-            inputTalim = document.getElementById("inputTaxaVegetables");
-            mudaIntervaloVegetables(inputTalim.value);
-            inputPMut = document.getElementById("inputProbMutacao");
-            mudaProbMutacao(inputPMut.value);
-            inputMMut = document.getElementById("inputMagMutacao");
-            mudaMagMutacao(inputMMut.value);
-            document.getElementById("inputsIniciais").classList.remove("d-none");
-            document.getElementById("botoesIniciais").classList.remove("d-none");
-            document.getElementById("botoesSecundarios").classList.add("d-none");
-            document.getElementById("painelSecundario").classList.add("d-none");
+        function change_mutation_magnitude(){
+            label_mutation_magnitude.textContent = input_mutation_magnitude.value;
         }
 
-        // function addOrganism(){ 
-        //     if(btnAddCarn.classList.contains("active")){
-        //         btnAddCarn.classList.remove("active");
-        //         document.removeEventListener('click', geradorC, true);
-        //         // habilitar getOrganism soh se os outros botoes nao estiverem ativos
-        //         btnAddAli.classList.contains("active") ?
-        //             0 : canvas.addEventListener("click", getOrg);
-        //     }else{
-        //         btnAddCarn.classList.add("active");
-        //         canvas.removeEventListener("click", getOrg);
-        //         document.addEventListener('click', geradorC, true);
-        //     }
-        // }
-
-        // function geradorC(e){
-        //     cursorX = e.pageX;
-        //     cursorY = e.pageY;
-        //     if(cursorX<=canvas.width && cursorY<=canvas.height){
-        //         let organism = geraOrganism(cursorX,cursorY);
-        //         organism.display()
-        //     }
-        // }
-
-
-        function mudouInputProb(){
-            labelProb.textContent = inputPMut.value;
-        }
-
-        function mudouInputMag(){
-            labelMag.textContent = inputMMut.value;
-        }
-
-        function mudouInputTaxa() {
-            if(inputTalim.value > 0) {
-                labelTaxa.textContent = inputTalim.value;
+        function change_vegetable_rate() {
+            if(input_vegetable_rate.value > 0) {
+                label_vegetable_rate.textContent = input_vegetable_rate.value;
             } else {
-                labelTaxa.textContent = "nenhum";
-            }
-        }
-        function geradorA(e){
-            cursorX = e.pageX;
-            cursorY= e.pageY;
-            if(cursorX<=canvas.width && cursorY<=canvas.height){
-                let vegetable = geraVegetable(cursorX,cursorY);
-                vegetable.display()
+                label_vegetable_rate.textContent = "nenhum";
             }
         }
 
-        function deletePopovers() {
-            $(".popover-info").each((i, el) => {
-                // capturar id do popover
-                let popoverId = $(el).attr("id")
-                popoverId = popoverId.match(/\d{1,}/g)[0]
-                // pegar id do organism
-                let organismId = $(el).attr("data-organismid")
-                // chamar funcao de deletePopover unitaria
-                deletePopover(popoverId, organismId);
-            })
-            $("#btnDeletePopovers").hide();
-        }
-
-        function matar(organism = false) { 
-
-            if(organism == "c")
-                Organism.organisms = []
-            else if(organism == "a"){
-                Vegetable.vegetables = []
-                inputTalim.value = 0;
-                labelTaxa.textContent = 0
-                mudaIntervaloVegetables(0);
-            }
-            else{
-                Organism.organisms = []
-                Vegetable.vegetables = []
-                inputTalim.value = 0;
-                labelTaxa.textContent = 0
-                mudaIntervaloVegetables(0);
-            }
-
-        }
-
-        function dragElement(elmnt) {
+        function drag_screen_element(element) {
             let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
             // se for uma tab
-            if (elmnt.classList.contains("tab-info")) {
+            if (element.classList.contains("tab-info")) {
                 // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)
-                elmnt.children[0].onmousedown = dragMouseDown;
+                element.children[0].onmousedown = drag_mouse_down;
             } else {
                 // otherwise, move the DIV from anywhere inside the DIV:
-                elmnt.onmousedown = dragMouseDown;
+                element.onmousedown = drag_mouse_down;
             }
 
-            function dragMouseDown(e) {
+            function drag_mouse_down(e) {
                     e = e || window.event;
                     e.preventDefault();
                     // get the mouse cursor position at startup:
                     pos3 = e.clientX;
                     pos4 = e.clientY;
-                    document.onmouseup = closeDragElement;
+                    document.onmouseup = close_drag_element;
                     // call a function whenever the cursor moves:
-                    document.onmousemove = elementDrag;
+                    document.onmousemove = element_drag;
                 }
 
-            function elementDrag(e) {
+            function element_drag(e) {
                     e = e || window.event;
                     e.preventDefault();
                     // calculate the new cursor position:
@@ -407,11 +314,11 @@
                     pos3 = e.clientX;
                     pos4 = e.clientY;
                     // set the element's new position:
-                    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-                    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+                    element.style.top = (element.offsetTop - pos2) + "px";
+                    element.style.left = (element.offsetLeft - pos1) + "px";
                 }
 
-            function closeDragElement() {
+            function close_drag_element() {
                     // stop moving when mouse button is released:
                     document.onmouseup = null;
                     document.onmousemove = null;

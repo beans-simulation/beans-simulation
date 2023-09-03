@@ -2,11 +2,11 @@ class Vegetable{
     static vegetables = [];
     static id = 0;
 
-    constructor(x, y, raio){
-        this.posicao = new Vetor(x, y);
-        this.raio = raio;
+    constructor(x, y, radius){
+        this.position = new Vector(x, y);
+        this.radius = radius;
         // a energia do pedaço de vegetable é proporcinal à sua área
-        this.energia_vegetable = Math.floor(Math.PI * Math.pow(this.raio, 2)) * 15;
+        this.vegetable_energy = Math.floor(Math.PI * Math.pow(this.radius, 2)) * 15;
 
         Vegetable.vegetables.push(this);
 
@@ -16,7 +16,7 @@ class Vegetable{
 
     display(){
         c.beginPath();
-        c.arc(this.posicao.x, this.posicao.y, this.raio, 0, Math.PI * 2);
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
         c.fillStyle = "rgb(115, 158, 115)";
         c.fill();
     }
