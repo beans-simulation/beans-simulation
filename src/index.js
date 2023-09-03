@@ -473,7 +473,7 @@ function animate(){
         // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
         let visaoC = new Circulo(organism.posicao.x, organism.posicao.y, organism.raio_deteccao);
 
-        // julia: essa chamada de função não está funcionando, vale checar se a função está correta
+        // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a reproduzir infinitamente
         // if(organism.energia <= organism.energia_max * percentual_energy_to_eat){ // FOME
         //     organism.findPrey(qtree, visaoC);
         // }

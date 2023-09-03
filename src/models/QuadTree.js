@@ -4,9 +4,7 @@ class QuadTree{
         this.capacidade = capacidade; // A partir de quantos pontos (neste caso, seres vivos) o retângulo se subdivide
         this.pontos = [];
         this.alimentos = [];
-        this.herbivoros = [];
         this.organisms = [];
-        // this.seresVivos = this.alimentos.concat(this.herbivoros, this.organisms); // Array contendo todos os alimentos, herbívoros e carnívoros dentro de sua raiz
         this.dividida = false;
     }
     
@@ -89,31 +87,6 @@ class QuadTree{
         }
     }
 
-    inserirHerbivoro(herbivoro){
-        if(!this.limite.contemPonto(herbivoro)){ // Checa se o herbivoro está contido dentro dos limites (fronteiras) do retângulo raiz
-            return false;
-        }
-
-        if(this.herbivoros.length < this.capacidade){ // Se ainda couber herbivoros dentro dela
-            this.herbivoros.push(herbivoro); // Insere o herbivoro em sua lista
-            return true;
-        } else{ // Se a capacidade máxima de seres vivos tiver sido atingida
-            if(!this.dividida){ // A QuadTree não irá se subdividir caso já o tenha feito
-                this.subdivide();
-            }
-
-            // Não checamos a localização do herbivoro pois ela será checada no começo de cada chamada desses métodos
-            if(this.nordeste.inserirHerbivoro(herbivoro)){
-                return true;
-            } else if(this.noroeste.inserirHerbivoro(herbivoro)){
-                return true;
-            } else if(this.sudeste.inserirHerbivoro(herbivoro)){
-                return true;
-            } else if(this.sudoeste.inserirHerbivoro(herbivoro)){
-                return true;
-            };            
-        }
-    }
 
     insertOrganism(organism){
         if(!this.limite.contemPonto(organism)){ // Checa se o organism está contido dentro dos limites (fronteiras) do retângulo raiz
@@ -200,9 +173,9 @@ class QuadTree{
         if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
             return encontrados;
         } else{ // Se eles se interceptam
-            for(let h of this.herbivoros){ // Para os herbivoros dessa QuadTree
-                if(circulo.contemPonto(h)){ // Se o herbivoro pertencer ao círculo
-                    encontrados.push(h);
+            for(let o of this.organisms){ // Para os organismos dessa QuadTree
+                if(circulo.contemPonto(o)){ // Se o organismo pertencer ao círculo
+                    encontrados.push(o);
                 }
             }
 
@@ -255,21 +228,7 @@ class QuadTree{
             this.sudeste.desenha();
             this.sudoeste.desenha();
         }
-        // for(let a of this.alimentos){
-        //     c.beginPath();
-        //     c.arc(a.posicao.x, a.posicao.y, 1, 0, 2 * Math.PI);
-        //     c.stroke();
-        // }
-        // for(let h of this.herbivoros){
-        //     c.beginPath();
-        //     c.arc(h.posicao.x, h.posicao.y, 1, 0, 2 * Math.PI);
-        //     c.stroke();
-        // }
-        // for(let ca of this.organisms){
-        //     c.beginPath();
-        //     c.arc(ca.posicao.x, ca.posicao.y, 1, 0, 2 * Math.PI);
-        //     c.stroke();
-        // }
+    
     }
 
     
