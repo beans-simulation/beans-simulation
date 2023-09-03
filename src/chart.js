@@ -8,9 +8,9 @@ var segundoRepetido = -1;
 const chart = document.getElementById("chart")
 const chartSecundario = document.getElementById("chartSecundario")
 
-let historico = new Historico();
-let historicoE = new Historico();
-let historicoD = new Historico();
+let history = new History();
+let historicoE = new History();
+let historicoD = new History();
 
 
 function resetChart() {
@@ -24,58 +24,58 @@ function removeChartTitle() {
 
 function insertNextDataChart() {
   // Não deixa inserir dados para segundos repetidos
-  if(segundos_totais == segundoRepetido) {
+  if(total_of_seconds == segundoRepetido) {
     return;
   }
-  segundoRepetido = segundos_totais;
-  // Salva os valores atuais no(s) historico(s) ---------------------------------------------
+  segundoRepetido = total_of_seconds;
+  // Salva os valores atuais no(s) history(s) ---------------------------------------------
     //  Carnivoros
-    historico.carnivoros.populacao.push(popC.sem_div)
-    historico.carnivoros.velocidade.push(velMedC.sem_div)
-    historico.carnivoros.agilidade.push(forcaMedC.sem_div)
-    historico.carnivoros.raio.push(raioMedC.sem_div)
-    historico.carnivoros.deteccao.push(raioDetMedC.sem_div)
-    historico.carnivoros.energia.push(energMedC.sem_div)
-    historico.carnivoros.gasto.push(taxaEnergMedC.sem_div)
-    historico.carnivoros.tamanho_medio_ninhada.push(ninhadaMediaC.sem_div)
+    history.carnivoros.population.push(popC.sem_div)
+    history.carnivoros.speed.push(velMedC.sem_div)
+    history.carnivoros.agility.push(forceMedC.sem_div)
+    history.carnivoros.radius.push(radiusMedC.sem_div)
+    history.carnivoros.detection.push(radiusDetMedC.sem_div)
+    history.carnivoros.energy.push(energMedC.sem_div)
+    history.carnivoros.energy_expenditure.push(taxaEnergMedC.sem_div)
+    history.carnivoros.avg_litter_size.push(ninhadaMediaC.sem_div)
 
     //  Segundos
-    historico.segundos.push(segundos_totais)
+    history.seconds.push(total_of_seconds)
 
     // Outras infos para a análise de dados
-    historico.taxa_alimentos.push(inputTaxaAlimentos.value)
+    history.vegetables_per_seconds.push(input_vegetable_rate.value)
 
   // ------------------------------------------------------------------------------------------
   // Mesma variável de tempo para todos
-  let arraySeconds = [segundos_totais];
+  let arraySeconds = [total_of_seconds];
 
   // Identificar qual o gráfico atual
   let valores;
 
   switch(chartType) {
     case 1:
-      valores = [historico.carnivoros.populacao.last()];
+      valores = [history.carnivoros.population.last()];
       break;
     case 2:
-      valores = [historico.carnivoros.velocidade.last()];
+      valores = [history.carnivoros.speed.last()];
       break;
     case 3:
-      valores = [historico.carnivoros.agilidade.last()];
+      valores = [history.carnivoros.agility.last()];
       break;
     case 4:
-      valores = [historico.carnivoros.raio.last()];
+      valores = [history.carnivoros.radius.last()];
       break;
     case 5:
-      valores = [historico.carnivoros.deteccao.last()];
+      valores = [history.carnivoros.detection.last()];
       break;
     case 6:
-      valores = [historico.carnivoros.energia.last()];
+      valores = [history.carnivoros.energy.last()];
       break;
     case 7:
-      valores = [historico.carnivoros.gasto.last()];
+      valores = [history.carnivoros.energy_expenditure.last()];
       break;
     case 8:
-      valores = [historico.carnivoros.tamanho_medio_ninhada.last()];
+      valores = [history.carnivoros.avg_litter_size.last()];
   }
 
   Plotly.extendTraces(chart,{y: valores, x: arraySeconds}, [0,1]);
@@ -113,55 +113,55 @@ function buildChart(type) {
     case 1: // População
       title = "População";
       yTitle = "Carnívoros";
-      data = [historico.carnivoros.populacao];
+      data = [history.carnivoros.population];
       break;
     case 2: // Velocidade
       //indice = 3;
       title = "Velocidade";
       yTitle = "Velocidade média";
-      data = [historico.carnivoros.velocidade];
+      data = [history.carnivoros.speed];
       break;
     case 3: // Força
       //indice = 5;
       title = "Agilidade";
       yTitle = "Agilidade Média";
-      data = [historico.carnivoros.agilidade];
+      data = [history.carnivoros.agility];
       break;
     case 4: // Raio
       //indice = 7;
       title = "Raio";
       yTitle = "Raio médio";
-      data = [historico.carnivoros.raio];
+      data = [history.carnivoros.radius];
       break;
-    case 5: // Raio deteccao
+    case 5: // Raio detection
       //indice = 9;
       title = "Alcance de detecção";
       yTitle = "Raio de detecção médio";
-      data = [historico.carnivoros.deteccao];
+      data = [history.carnivoros.detection];
       break;
     case 6: // Energia
       //indice = 11;
       title = "Energia";
-      yTitle = "Nível de energia médio";
-      data = [historico.carnivoros.energia];
+      yTitle = "Nível de energy médio";
+      data = [history.carnivoros.energy];
       break;
-    case 7: // Taxa de energia
+    case 7: // Taxa de energy
       //indice = 13;
-      title = "Gasto de energia";
-      yTitle = "Taxa de energia média";
-      data = [historico.carnivoros.gasto];
+      title = "Gasto de energy";
+      yTitle = "Taxa de energy média";
+      data = [history.carnivoros.energy_expenditure];
       break;
     case 8: // Tamanho médio da ninhada
       //indice = 15;
       title = "Ninhada média";
       yTitle = "Tamanho médio da ninhada";
-      data = [historico.carnivoros.tamanho_medio_ninhada];
+      data = [history.carnivoros.avg_litter_size];
   }
   // -----------------------------------------------------------------------------------------------
 
   // INSERE TODO O HISTÓRICO DE DADOS NO GRÁFICO
   let carnivoros = {
-    x: historico.segundos,
+    x: history.seconds,
     y: data[0],
     type: 'scatter',
     mode: 'lines',

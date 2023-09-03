@@ -1,232 +1,231 @@
 class QuadTree{
-    constructor(limite, capacidade){
-        this.limite = limite; // Atributo do tipo Retângulo
-        this.capacidade = capacidade; // A partir de quantos pontos (neste caso, seres vivos) o retângulo se subdivide
-        this.pontos = [];
-        this.alimentos = [];
+    constructor(rectangle, supported_amout_of_point){
+        this.rectangle = rectangle; // Atributo do tipo Retângulo
+        this.supported_amout_of_point = supported_amout_of_point; // A partir de quantos points (neste caso, seres vivos) o retângulo se subdivide
+        this.points = [];
+        this.vegetables = [];
         this.organisms = [];
-        this.dividida = false;
+        this.is_divided = false;
     }
     
-    // Subdivide a QuadTree em 4 retângulos filhos
+    // Subdivide a QuadTree em 4 retângulos children
     subdivide(){
-        let x = this.limite.x;
-        let y = this.limite.y;
-        let w = this.limite.w;
-        let h = this.limite.h;
+        let x = this.rectangle.x;
+        let y = this.rectangle.y;
+        let w = this.rectangle.w;
+        let h = this.rectangle.h;
 
-        let ne = new Retangulo(x + w/2, y - h/2, w/2, h/2);
-        this.nordeste = new QuadTree(ne, this.capacidade);
+        let ne = new Rectangle(x + w/2, y - h/2, w/2, h/2);
+        this.northeast = new QuadTree(ne, this.supported_amout_of_point); //nordeste
 
-        let no = new Retangulo(x - w/2, y - h/2, w/2, h/2);
-        this.noroeste = new QuadTree(no, this.capacidade);
+        let nw = new Rectangle(x - w/2, y - h/2, w/2, h/2);
+        this.northwest = new QuadTree(nw, this.supported_amout_of_point); //noroeste
 
-        let se = new Retangulo(x + w/2, y + h/2, w/2, h/2);
-        this.sudeste = new QuadTree(se, this.capacidade);
+        let se = new Rectangle(x + w/2, y + h/2, w/2, h/2);
+        this.southeast = new QuadTree(se, this.supported_amout_of_point); //sudeste
 
-        let so = new Retangulo(x - w/2, y + h/2, w/2, h/2);
-        this.sudoeste = new QuadTree(so, this.capacidade);
+        let sw = new Rectangle(x - w/2, y + h/2, w/2, h/2);
+        this.southwest = new QuadTree(sw, this.supported_amout_of_point); //sudoeste
 
-        this.dividida = true;
+        this.is_divided = true;
 
     }
 
-    inserirPonto(ponto){
-
-        if(!this.limite.contemPonto(ponto)){ // Checa se o ponto está contido dentro dos limites (fronteiras) do retângulo raiz
+    insert_point(point){
+        if(!this.rectangle.contains_point(point)){ // Checa se o point está contido dentro dos limites (fronteiras) do retângulo raiz
             return false;
         }
 
-        if(this.pontos.length < this.capacidade){
-            this.pontos.push(ponto);
+        if(this.points.length < this.supported_amout_of_point){
+            this.points.push(point);
             return true;
-        } else{ // Se a capacidade máxima tiver sido atingida
-            if(!this.dividida){ // A QuadTree não irá se subdividir caso já o tenha feito
+        } else{ // Se a supported_amout_of_point máxima tiver sido atingida
+            if(!this.is_divided){ // A QuadTree não irá se subdividir caso já o tenha feito
                 this.subdivide();
             }
 
-            // Não checamos a localização do ponto pois ele será checado no começo de cada chamada desses métodos
-            if(this.nordeste.inserirPonto(ponto)){
+            // Não checamos a localização do point pois ele será checado nw começo de cada chamada desses métodos
+            if(this.northeast.insert_point(point)){
                 return true;
-            } else if(this.noroeste.inserirPonto(ponto)){
+            } else if(this.northwest.insert_point(point)){
                 return true;
-            } else if(this.sudeste.inserirPonto(ponto)){
+            } else if(this.southeast.insert_point(point)){
                 return true;
-            } else if(this.sudoeste.inserirPonto(ponto)){
+            } else if(this.southwest.insert_point(point)){
                 return true;
             };            
         }
     }
 
-    inserirAlimento(alimento){
-        if(!this.limite.contemPonto(alimento)){ // Checa se o alimento está contido dentro dos limites (fronteiras) do retângulo raiz
+    insert_vegetable(vegetable){
+        if(!this.rectangle.contains_point(vegetable)){ // Checa se o vegetable está contido dentro dos limites (fronteiras) do retângulo raiz
             return false;
         }
 
-        if(this.alimentos.length < this.capacidade){ // Se ainda couber alimentos dentro dela
-            this.alimentos.push(alimento); // Insere o alimento em sua lista
-            // console.log("alimentos ", this.alimentos);
+        if(this.vegetables.length < this.supported_amout_of_point){ // Se ainda couber vegetables dentro dela
+            this.vegetables.push(vegetable); // Insere o vegetable em sua lista
+            // console.log("vegetables ", this.vegetables);
             return true;
-        } else{ // Se a capacidade máxima de seres vivos tiver sido atingida            
-            if(!this.dividida){ // A QuadTree não irá se subdividir caso já o tenha feito
-                // console.log("inserirAlimentos", this.alimentos);
+        } else{ // Se a supported_amout_of_point máxima de seres vivos tiver sido atingida            
+            if(!this.is_divided){ // A QuadTree não irá se subdividir caso já o tenha feito
+                // console.log("inserirVegetables", this.vegetables);
                 this.subdivide();
-                // console.log("SUBDIVIDIU - A", this.capacidade);
+                // console.log("SUBDIVIDIU - A", this.supported_amout_of_point);
             }
 
-            // Não checamos a localização do alimento pois ela será checada no começo de cada chamada desses métodos
-            if(this.nordeste.inserirAlimento(alimento)){
+            // Não checamos a localização do vegetable pois ela será checada nw começo de cada chamada desses métodos
+            if(this.northeast.insert_vegetable(vegetable)){
                 return true;
-            } else if(this.noroeste.inserirAlimento(alimento)){
+            } else if(this.northwest.insert_vegetable(vegetable)){
                 return true;
-            } else if(this.sudeste.inserirAlimento(alimento)){
+            } else if(this.southeast.insert_vegetable(vegetable)){
                 return true;
-            } else if(this.sudoeste.inserirAlimento(alimento)){
+            } else if(this.southwest.insert_vegetable(vegetable)){
                 return true;
             };            
         }
     }
 
 
-    insertOrganism(organism){
-        if(!this.limite.contemPonto(organism)){ // Checa se o organism está contido dentro dos limites (fronteiras) do retângulo raiz
+    insert_organism(organism){
+        if(!this.rectangle.contains_point(organism)){ // Checa se o organism está contido dentro dos limites (fronteiras) do retângulo raiz
             return false;
         }
         
-        if(this.organisms.length < this.capacidade){ // Se ainda couber organisms dentro dela
+        if(this.organisms.length < this.supported_amout_of_point){ // Se ainda couber organisms dentro dela
             // console.log("DANDO PUSH");
             this.organisms.push(organism); // Insere o organism em sua lista
             // console.log("organisms ", this.organisms);
             return true;
-        } else{ // Se a capacidade máxima de seres vivos tiver sido atingida    
-            if(!this.dividida){ // A QuadTree não irá se subdividir caso já o tenha feito
+        } else{ // Se a supported_amout_of_point máxima de seres vivos tiver sido atingida    
+            if(!this.is_divided){ // A QuadTree não irá se subdividir caso já o tenha feito
                 // console.log("insertOrganisms", this.organisms);
                 this.subdivide();
-                // console.log("SUBDIVIDIU - C", this.capacidade);
+                // console.log("SUBDIVIDIU - C", this.supported_amout_of_point);
             }
             
             // Não checamos a localização do organism pois ela será checada no começo de cada chamada desses métodos
-            if(this.nordeste.insertOrganism(organism)){
+            if(this.northeast.insert_organism(organism)){
                 return true;
-            } else if(this.noroeste.insertOrganism(organism)){
+            } else if(this.northwest.insert_organism(organism)){
                 return true;
-            } else if(this.sudeste.insertOrganism(organism)){
+            } else if(this.southeast.insert_organism(organism)){
                 return true;
-            } else if(this.sudoeste.insertOrganism(organism)){
+            } else if(this.southwest.insert_organism(organism)){
                 return true;
             };            
         }
     }
 
-    procuraPontos(alcance, encontrados){ // alcance é do tipo Retangulo
-        if(!encontrados){
-            encontrados = [];
+    search_points(scope, located){ // scope é do tipo Rectangle
+        if(!located){
+            located = [];
         }
-        if(!this.limite.intersepta(alcance)){ // Se NÃO se interceptam, não executa o código
+        if(!this.rectangle.intersept(scope)){ // Se NÃO se interceptam, não executa o código
             return;
         } else{ // Se eles se interceptam
-            for(let p of this.pontos){ // Para os pontos dessa QuadTree
-                if(alcance.contemPonto(p)){ // Se o ponto pertencer ao retângulo "alcance"
-                    encontrados.push(p);
+            for(let p of this.points){ // Para os points dessa QuadTree
+                if(scope.contains_point(p)){ // Se o point pertencer ao retângulo "scope"
+                    located.push(p);
                 }
             }
 
-            if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-                this.noroeste.procuraPontos(alcance, encontrados); 
-                this.nordeste.procuraPontos(alcance, encontrados); 
-                this.sudoeste.procuraPontos(alcance, encontrados); 
-                this.sudeste.procuraPontos(alcance, encontrados);
+            if(this.is_divided){ // Se a QuadTree tiver QuadTrees filhas
+                this.northwest.search_points(scope, located); 
+                this.northeast.search_points(scope, located); 
+                this.southwest.search_points(scope, located); 
+                this.southeast.search_points(scope, located);
             }
 
-            return encontrados;
+            return located;
         }
     }
 
-    procuraAlimentos(circulo, encontrados){
-        if(!encontrados){
-            encontrados = [];
+    search_vegetables(circle, located){
+        if(!located){
+            located = [];
         }
-        if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
-            return encontrados;
+        if(!this.rectangle.does_intercept_circle(circle)){ // Se NÃO se interceptam, não executa o código
+            return located;
         } else{ // Se eles se interceptam
-            for(let a of this.alimentos){ // Para os alimentos dessa QuadTree
-                if(circulo.contemPonto(a)){ // Se o alimento pertencer ao círculo
-                    encontrados.push(a);
+            for(let a of this.vegetables){ // Para os vegetables dessa QuadTree
+                if(circle.contains_point(a)){ // Se o vegetable pertencer ao círculo
+                    located.push(a);
                 }
             }
 
-            if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-                this.noroeste.procuraAlimentos(circulo, encontrados); 
-                this.nordeste.procuraAlimentos(circulo, encontrados); 
-                this.sudoeste.procuraAlimentos(circulo, encontrados); 
-                this.sudeste.procuraAlimentos(circulo, encontrados);
+            if(this.is_divided){ // Se a QuadTree tiver QuadTrees filhas
+                this.northwest.search_vegetables(circle, located); 
+                this.northeast.search_vegetables(circle, located); 
+                this.southwest.search_vegetables(circle, located); 
+                this.southeast.search_vegetables(circle, located);
             }
 
-            return encontrados;
+            return located;
         }
     }
 
-    findPreyOrganisms(circulo, encontrados){
-        if(!encontrados){
-            encontrados = [];
+    find_prey_element(circle, located){
+        if(!located){
+            located = [];
         }
-        if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
-            return encontrados;
+        if(!this.rectangle.does_intercept_circle(circle)){ // Se NÃO se interceptam, não executa o código
+            return located;
         } else{ // Se eles se interceptam
             for(let o of this.organisms){ // Para os organismos dessa QuadTree
-                if(circulo.contemPonto(o)){ // Se o organismo pertencer ao círculo
-                    encontrados.push(o);
+                if(circle.contains_point(o)){ // Se o organismo pertencer ao círculo
+                    located.push(o);
                 }
             }
 
-            if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-                this.noroeste.findPreyOrganisms(circulo, encontrados); 
-                this.nordeste.findPreyOrganisms(circulo, encontrados); 
-                this.sudoeste.findPreyOrganisms(circulo, encontrados); 
-                this.sudeste.findPreyOrganisms(circulo, encontrados);
+            if(this.is_divided){ // Se a QuadTree tiver QuadTrees filhas
+                this.northwest.find_prey_element(circle, located); 
+                this.northeast.find_prey_element(circle, located); 
+                this.southwest.find_prey_element(circle, located); 
+                this.southeast.find_prey_element(circle, located);
             }
 
-            return encontrados;
+            return located;
         }
     }
 
 
-    // procura predador
-    // procuraCarnivoros(circulo, encontrados){
-    //     if(!encontrados){
-    //         encontrados = [];
-    //     }
-    //     if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
-    //         return encontrados;
-    //     } else{ // Se eles se interceptam
-    //         // console.log("procuraCarnivoros", this.organisms);
-    //         for(let c of this.organisms){ // Para os organisms dessa QuadTree 
-    //             if(circulo.contemPonto(c)){ // Se o organism pertencer ao círculo
-    //                 encontrados.push(c);
-    //             }
-    //         }
+    // função para a procura de predador
+    find_predator_element(circle, located){
+        if(!located){
+            located = [];
+        }
+        if(!this.rectangle.does_intercept_circle(circle)){ // Se NÃO se interceptam, não executa o código
+            return located;
+        } else{ // Se eles se interceptam
+            // console.log("find_predator_element", this.organisms);
+            for(let c of this.organisms){ // Para os organisms dessa QuadTree 
+                if(circle.contains_point(c)){ // Se o organism pertencer ao círculo
+                    located.push(c);
+                }
+            }
 
-    //         if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-    //             this.noroeste.procuraCarnivoros(circulo, encontrados); 
-    //             this.nordeste.procuraCarnivoros(circulo, encontrados); 
-    //             this.sudoeste.procuraCarnivoros(circulo, encontrados); 
-    //             this.sudeste.procuraCarnivoros(circulo, encontrados);
-    //         }
+            if(this.is_divided){ // Se a QuadTree tiver QuadTrees filhas
+                this.northwest.find_predator_element(circle, located); 
+                this.northeast.find_predator_element(circle, located); 
+                this.southwest.find_predator_element(circle, located); 
+                this.southeast.find_predator_element(circle, located);
+            }
 
-    //         return encontrados;
-    //     }
-    // }
+            return located;
+        }
+    }
 
-    desenha(){
+    display(){
         // c.lineWidth = 1;
         c.beginPath();
-        c.rect(this.limite.x - this.limite.w, this.limite.y - this.limite.h, this.limite.w*2, this.limite.h*2);
+        c.rect(this.rectangle.x - this.rectangle.w, this.rectangle.y - this.rectangle.h, this.rectangle.w*2, this.rectangle.h*2);
         c.stroke();
-        if(this.dividida){
-            this.nordeste.desenha();
-            this.noroeste.desenha();
-            this.sudeste.desenha();
-            this.sudoeste.desenha();
+        if(this.is_divided){
+            this.northeast.display();
+            this.northwest.display();
+            this.southeast.display();
+            this.southwest.display();
         }
     
     }
