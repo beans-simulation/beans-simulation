@@ -14,19 +14,9 @@ var tamanhoUniverso = 1;
 var universoWidth = canvas.width * tamanhoUniverso; 
 var universoHeight = canvas.height * tamanhoUniverso; 
 
-var fome_c = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
-var fome_h = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
+var percentual_energy_to_eat = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
 
 var mudarGrafico = false;
-
-// Variáveis para o gráfico (herbívoro)
-var popH;
-var velMedH;
-var forcaMedH;
-var raioMedH;
-var raioDetMedH;
-var energMedH;
-var taxaEnergMedH;
 
 // Variáveis para o gráfico (carnívoro)
 var popC;
@@ -49,7 +39,7 @@ let retanguloCanvas = new Retangulo(universoWidth/2, universoHeight/2, universoW
 
 var popover_id = 1;
 
-// Configuracoes dos organismos editados
+// Configuracoes dos organisms editados
 var conf_c;
 var conf_h;
 
@@ -114,65 +104,19 @@ function desenhaTudo(){
     Alimento.alimentos.forEach(a => {
         a.display();
     })
-    Organismo.organismos.forEach(o => {
+    Organism.organisms.forEach(o => {
         o.display();
     })
 }
 
-function exportToCsv(filename, rows) {
-    var processRow = function (row) {
-        var finalVal = '';
-        for (var j = 0; j < row.length; j++) {
-            var innerValue = row[j] === null ? '' : row[j].toString();
-            if (row[j] instanceof Date) {
-                innerValue = row[j].toLocaleString();
-            };
-            var result = innerValue.replace(/""/g, '""""');
-            result = result.replace(".", ",")
-            if (result.search(/("|,|\n)/g) >= 0)
-                result = '"' + result + '"';
-            if (j > 0)
-                finalVal += ';';
-            finalVal += result;
-        }
-        return finalVal + '\n';
-    };
 
-    var csvFile = '';
-    for (var i = 0; i < rows.length; i++) {
-        csvFile += processRow(rows[i]);
-    }
-
-    var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
-    if (navigator.msSaveBlob) { // IE 10+
-        navigator.msSaveBlob(blob, filename);
-    } else {
-        var link = document.createElement("a");
-        if (link.download !== undefined) { // feature detection
-            // Browsers that support HTML5 download attribute
-            var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    }
-}
-
-
-function criaObjetos(n_carnivoros, n_herbivoros, n_alimentos){
-    for(var i = 0; i < n_carnivoros; i++){
+function criaObjetos(n_organisms, n_alimentos){
+    for(var i = 0; i < n_organisms; i++){
         var x =(Math.random() * (universoWidth - 50) + 25);
         var y = (Math.random() * (universoHeight - 50) + 25);
-        geraCarnivoro(x,y);
+        geraOrganism(x,y);
     }
-    for(var i = 0; i < n_herbivoros; i++){
-        var x =(Math.random() * (universoWidth - 50) + 25);
-        var y = (Math.random() * (universoHeight - 50) + 25);
-        geraHerbivoro(x,y);    
-    }
+
     for(var i = 0; i < n_alimentos; i++){
         var x =(Math.random() * (universoWidth - 50) + 25);
         var y = (Math.random() * (universoHeight - 50) + 25);
@@ -181,8 +125,7 @@ function criaObjetos(n_carnivoros, n_herbivoros, n_alimentos){
 }
 
 function destroiObjetos(){
-    Carnivoro.carnivoros.length = 0;
-    Herbivoro.herbivoros.length = 0;
+    Organism.organisms.length = 0;
     Alimento.alimentos.length = 0;
     // mudaIntervaloAlimentos(1001);
 }
@@ -193,8 +136,6 @@ function destroiObjetos(){
 var intervaloTaxaAlimentos;
 
 // variáveis de auxílio para a implementação da divisão de tela
-var checkbox_divisao = document.getElementById('divisao');
-var telaDividida;
 var limitador_de_loop = 0;
 
 function geraAlimento(x,y){
@@ -202,7 +143,7 @@ function geraAlimento(x,y){
     return new Alimento(x, y, raio);
 }
 
-function geraCarnivoro(x,y){ // função para poder adicionar mais carnívoros manualmente 
+function geraOrganism(x,y){ // função para poder adicionar mais carnívoros manualmente 
     var raio_inicial = geraNumeroPorIntervalo(3, 8);
     var vel_max = geraNumeroPorIntervalo(1, 2.2); 
     var forca_max = geraNumeroPorIntervalo(0.01, 0.05);
@@ -238,53 +179,10 @@ function geraCarnivoro(x,y){ // função para poder adicionar mais carnívoros m
         sexo
     )
 
-    return new Carnivoro(
+    return new Organism(
         x, y, dna
     );
 }
-
-
-function geraHerbivoro(x,y){ // função para poder adicionar mais herbivoros manualmente    
-    var raio_inicial = geraNumeroPorIntervalo(3, 8);
-    var vel_max = geraNumeroPorIntervalo(1, 2.2); 
-    var forca_max = geraNumeroPorIntervalo(0.01, 0.05);
-    var cor = geraCor();
-    var raio_deteccao_inicial = geraNumeroPorIntervalo(40, 120);
-    var ninhada_min = geraInteiro(1, 1);
-    var ninhada_max = ninhada_min + geraInteiro(1, 8);
-    var intervalo_ninhada = [ninhada_min, ninhada_max];
-    var sexo;
-
-    if(Math.random() < 0.5){
-        sexo = 'XX'
-    } else{
-        sexo = 'XY'
-    }
-
-    if(conf_h) {
-        raio_inicial = conf_h.raio_inicial;
-        vel_max = conf_h.vel_max;
-        forca_max = conf_h.forca_max;
-        cor = conf_h.cor;
-        intervalo_ninhada = conf_h.intervalo_ninhada;
-        sexo = conf_h.sexo;
-    }
-
-    var dna = new DNA(
-        raio_inicial,
-        vel_max,
-        forca_max,
-        cor,
-        raio_deteccao_inicial,
-        intervalo_ninhada,
-        sexo
-    )
-
-    return new Herbivoro(
-        x, y, dna
-    );
-}
-
 
 function geraCor(){
     // variáveis para a geração de cores
@@ -432,43 +330,14 @@ function geraNumeroPorIntervalo(min, max) {
 
 function criaAlimentosGradativo(){
     if(!pausado){ // Para de criar alimentos enquanto a simulação estiver pausada
-        if(telaDividida){
-            if(lado_esquerdo_vazio){ // Se não houver população no lado esquerdo, não gerará alimentos lá
-                var x = geraNumeroPorIntervalo(universoWidth/2 + 31, universoWidth - 31);
-                var y = Math.random() * (universoHeight - 62) + 31;
-                var raio = Math.random() * 1.5 + 1;
-    
-                if(Alimento.alimentos.length < 3000){ // Limitador para não sobrecarregar a simulação
-                    new Alimento(x, y, raio);
-                }
-            }
-            if(lado_direito_vazio){ // Se não houver população no lado direito, não gerará alimentos lá
-                var x = geraNumeroPorIntervalo(31, universoWidth/2 - 31);
-                var y = Math.random() * (universoHeight - 62) + 31;
-                var raio = Math.random() * 1.5 + 1;
-    
-                if(Alimento.alimentos.length < 3000){ // Limitador para não sobrecarregar a simulação
-                    new Alimento(x, y, raio);
-                }
-            }
-            if(!lado_direito_vazio && !lado_esquerdo_vazio){
-                var x = Math.random() * (universoWidth - 62) + 31;
-                var y = Math.random() * (universoHeight - 62) + 31;
-                var raio = Math.random() * 1.5 + 1;
+        var x = Math.random() * (universoWidth - 62) + 31;
+        var y = Math.random() * (universoHeight - 62) + 31;
+        var raio = Math.random() * 1.5 + 1;
 
-                if(Alimento.alimentos.length < 3000){ // Limitador para não sobrecarregar a simulação
-                    new Alimento(x, y, raio);
-                }
-            }
-        } else{
-            var x = Math.random() * (universoWidth - 62) + 31;
-            var y = Math.random() * (universoHeight - 62) + 31;
-            var raio = Math.random() * 1.5 + 1;
-
-            if(Alimento.alimentos.length < 3000){ // Limitador para não sobrecarregar a simulação
-                new Alimento(x, y, raio);
-            }
+        if(Alimento.alimentos.length < 3000){ // Limitador para não sobrecarregar a simulação
+            new Alimento(x, y, raio);
         }
+        
     }
 }
 
@@ -490,13 +359,6 @@ function mudaMagMutacao(novoValor){
     magnitude_mutacao = novoValor / 100;
 }
 
-function desenhaDivisao(){
-    c.beginPath();
-    c.moveTo(universoWidth / 2, 0);
-    c.lineTo(universoWidth / 2, universoHeight);
-    c.strokeStyle = "white";
-    c.stroke();
-}
 
 function desenhaQuadTree(qtree){
     qtree.desenha();
@@ -537,166 +399,6 @@ function criaPontos(){
     }
 }
 
-function calculaDadosGrafico(){
-    // Liberar espaço de memória das variáveis anteriores
-    popH = velMedH = forcaMedH = raioMedH = raioDetMedH = energMedH = taxaEnergMedH = ninhadaMediaH = null;
-    popC = velMedC = forcaMedC = raioMedC = raioDetMedC = energMedC = taxaEnergMedC = ninhadaMediaC = null;
-
-    // Resetando as variáveis para os herbívoros
-    popH = {sem_div: 0, esq: 0, dir: 0}
-    velMedH = {sem_div: 0, esq: 0, dir: 0};
-    forcaMedH = {sem_div: 0, esq: 0, dir: 0};
-    raioMedH = {sem_div: 0, esq: 0, dir: 0};
-    raioDetMedH = {sem_div: 0, esq: 0, dir: 0};
-    energMedH = {sem_div: 0, esq: 0, dir: 0};
-    taxaEnergMedH = {sem_div: 0, esq: 0, dir: 0};
-    ninhadaMediaH = {sem_div: 0, esq: 0, dir: 0};
-
-    // Resetando as variáveis para os carnívoros
-    popC = {sem_div: 0, esq: 0, dir: 0}
-    velMedC = {sem_div: 0, esq: 0, dir: 0};
-    forcaMedC = {sem_div: 0, esq: 0, dir: 0};
-    raioMedC = {sem_div: 0, esq: 0, dir: 0};
-    raioDetMedC = {sem_div: 0, esq: 0, dir: 0};
-    energMedC = {sem_div: 0, esq: 0, dir: 0};
-    taxaEnergMedC = {sem_div: 0, esq: 0, dir: 0};
-    ninhadaMediaC = {sem_div: 0, esq: 0, dir: 0};
-
-
-    Herbivoro.herbivoros.forEach(herbivoro => {
-        // Soma o valor das variáveis pra todos os herbívoros
-        popH["sem_div"]++
-        velMedH["sem_div"] += herbivoro.vel_max;
-        forcaMedH["sem_div"] += herbivoro.forca_max;
-        raioMedH["sem_div"] += herbivoro.raio_inicial * 1.5; // o raio máximo é (1.5 * raio_inicial)
-        raioDetMedH["sem_div"] += herbivoro.raio_deteccao_inicial * 1.3; // 1.3 e não 1.5 pois o raio de detecção aumenta menos que o raio
-        energMedH["sem_div"] += herbivoro.energia_max_fixa;
-        taxaEnergMedH["sem_div"] += herbivoro.taxa_gasto_energia_max;
-        ninhadaMediaH["sem_div"] += (herbivoro.intervalo_ninhada[0] + herbivoro.intervalo_ninhada[1]) / 2;
-
-        if(telaDividida){
-            // Checa se está a direita ou a esquerda
-            let lado;
-            if(herbivoro.posicao.x < universoWidth / 2) {
-                lado = "esq"
-            } else {
-                lado = "dir"
-            }
-            // Soma o valor das variáveis pra todos os herbívoros
-            popH[lado]++
-            velMedH[lado] += herbivoro.vel_max;
-            forcaMedH[lado] += herbivoro.forca_max;
-            raioMedH[lado] += herbivoro.raio_inicial * 1.5; // o raio máximo é (1.5 * raio_inicialimo)
-            raioDetMedH[lado] += herbivoro.raio_deteccao_inicial * 1.3; // 1.3 e não 1.5 pois o raio de detecção aumenta menos que o raio
-            energMedH[lado] += herbivoro.energia_max_fixa;
-            taxaEnergMedH[lado] += herbivoro.taxa_gasto_energia_max;
-            ninhadaMediaH[lado] += (herbivoro.intervalo_ninhada[0] + herbivoro.intervalo_ninhada[1]) / 2;
-        }
-    });
-
-    Carnivoro.carnivoros.forEach(carnivoro => {
-        // Soma o valor das variáveis pra todos os carnívoros
-        popC["sem_div"]++
-        velMedC["sem_div"] += carnivoro.vel_max;
-        forcaMedC["sem_div"] += carnivoro.forca_max;
-        raioMedC["sem_div"] += carnivoro.raio_inicial * 1.5; // o raio máximo é (1.5 * raio_inicial)
-        raioDetMedC["sem_div"] += carnivoro.raio_deteccao_inicial * 1.3; // 1.3 e não 1.5 pois o raio de detecção aumenta menos que o raio
-        energMedC["sem_div"] += carnivoro.energia_max_fixa;
-        taxaEnergMedC["sem_div"] += carnivoro.taxa_gasto_energia_max;
-        ninhadaMediaC["sem_div"] += (carnivoro.intervalo_ninhada[0] + carnivoro.intervalo_ninhada[1]) / 2;
-
-        if(telaDividida){
-            // Checa se está a direita ou a esquerda
-            let lado;
-            if(carnivoro.posicao.x < universoWidth / 2) {
-                lado = "esq"
-            } else {
-                lado = "dir"
-            }
-            // Soma o valor das variáveis pra todos os carnívoros
-            popC[lado]++
-            velMedC[lado] += carnivoro.vel_max;
-            forcaMedC[lado] += carnivoro.forca_max;
-            raioMedC[lado] += carnivoro.raio_inicial * 1.5; // o raio máximo é (1.5 * raio_inicialimo)
-            raioDetMedC[lado] += carnivoro.raio_deteccao_inicial * 1.3; // 1.3 e não 1.5 pois o raio de detecção aumenta menos que o raio
-            energMedC[lado] += carnivoro.energia_max_fixa;
-            taxaEnergMedC[lado] += carnivoro.taxa_gasto_energia_max;
-            ninhadaMediaC[lado] += (carnivoro.intervalo_ninhada[0] + carnivoro.intervalo_ninhada[1]) / 2;
-        }        
-    });
-
-
-    // Divide o valor (a soma total) pelo número de herbívoros para obter a média
-    // Sem divisão
-    velMedH.sem_div /= popH.sem_div;
-    forcaMedH.sem_div /= popH.sem_div;
-    raioMedH.sem_div /= popH.sem_div;
-    raioDetMedH.sem_div /= popH.sem_div;
-    energMedH.sem_div /= popH.sem_div;
-    taxaEnergMedH.sem_div /= popH.sem_div;
-    ninhadaMediaH.sem_div /= popH.sem_div;
-    // Lado esquerdo
-    velMedH.esq /= popH.esq;
-    forcaMedH.esq /= popH.esq;
-    raioMedH.esq /= popH.esq;
-    raioDetMedH.esq /= popH.esq;
-    energMedH.esq /= popH.esq;
-    taxaEnergMedH.esq /= popH.esq;
-    ninhadaMediaH.esq /= popH.esq;
-    // Lado direito
-    velMedH.dir /= popH.dir;
-    forcaMedH.dir /= popH.dir;
-    raioMedH.dir /= popH.dir;
-    raioDetMedH.dir /= popH.dir;
-    energMedH.dir /= popH.dir;
-    taxaEnergMedH.dir /= popH.dir;
-    ninhadaMediaH.dir /= popH.dir;
-
-    // Divide o valor (a soma total) pelo número de carnívoros para obter a média
-    // Sem divisão
-    velMedC.sem_div /= popC.sem_div;
-    forcaMedC.sem_div /= popC.sem_div;
-    raioMedC.sem_div /= popC.sem_div;
-    raioDetMedC.sem_div /= popC.sem_div;
-    energMedC.sem_div /= popC.sem_div;
-    taxaEnergMedC.sem_div /= popC.sem_div;
-    ninhadaMediaC.sem_div /= popC.sem_div;
-    // Lado esquerdo
-    velMedC.esq /= popC.esq;
-    forcaMedC.esq /= popC.esq;
-    raioMedC.esq /= popC.esq;
-    raioDetMedC.esq /= popC.esq;
-    energMedC.esq /= popC.esq;
-    taxaEnergMedC.esq /= popC.esq;
-    ninhadaMediaC.esq /= popC.esq;
-    // Lado direito
-    velMedC.dir /= popC.dir;
-    forcaMedC.dir /= popC.dir;
-    raioMedC.dir /= popC.dir;
-    raioDetMedC.dir /= popC.dir;
-    energMedC.dir /= popC.dir;
-    taxaEnergMedC.dir /= popC.dir;
-    ninhadaMediaC.dir /= popC.dir;
-}
-
-function checaPopulacoesDivididas(){
-    if(telaDividida){
-        lado_direito_vazio = true;
-        lado_esquerdo_vazio = true;
-            
-        Herbivoro.herbivoros.forEach(herbivoro => {
-            // Checa lado esquerdo
-            if(herbivoro.posicao.x < universoWidth / 2 - 31){
-                lado_esquerdo_vazio = false;
-            }
-
-            // Checa lado direito
-            if(herbivoro.posicao.x > universoWidth / 2 + 31){
-                lado_direito_vazio = false;
-            }
-        })
-    }
-}
 
 var idAnimate;
 
@@ -746,360 +448,44 @@ function animate(){
     // Criando a Quadtree
     let qtree = new QuadTree(retanguloCanvas, 10);
 
-    // Divisão de tela
-    if(checkbox_divisao.checked){
-        telaDividida = true;
-    } else{
-        telaDividida = false;
-    }
 
-    if(telaDividida){
-        desenhaDivisao();
+    // limitador_de_loop = 0;
 
-        Alimento.alimentos.forEach((alimento, i) => {
-            alimento.display();
-            // remove alimentos próximos da divisão para evitar que organismos se atraiam para perto dela
-            if(alimento.posicao.x - universoWidth / 2 < 30 && alimento.posicao.x - universoWidth / 2 > -30){ 
-                Alimento.alimentos.splice(i, 1);
-            }
+    Alimento.alimentos.forEach(alimento => {
+        alimento.display();
+        qtree.inserirAlimento(alimento); // Insere o alimento na QuadTree
 
-            qtree.inserirAlimento(alimento); // Insere o alimento na QuadTree
+    })
 
-        })
+    Organism.organisms.forEach((organism) => {
+        organism.criaBordas(false); // telaDividida: false
+    })
 
-        if(limitador_de_loop < 10){
-            limitador_de_loop++;
-        }
-        
-        Organismo.organismos.forEach((organismo) => {
-            if(organismo.posicao.x <= universoWidth/2){ // se o organismo estiver na parte esquerda
-                if(limitador_de_loop == 1 && universoWidth/2 - organismo.posicao.x < 10){ // empurra os organismos pertos da borda para o lado
-                    organismo.posicao.x -= 10;
-                }
-                organismo.criaBordas(true); // telaDividida: true
-            } else{ // se o organismo estiver na parte direita
-                if(limitador_de_loop == 1 && organismo.posicao.x - universoWidth/2 < 10){ // empurra os organismos pertos da borda para o lado
-                    organismo.posicao.x += 10;
-                }
-                organismo.criaBordas(true); // telaDividida: true
-            }
-        })
+    Organism.organisms.forEach(organism => {
+        qtree.insertOrganism(organism); // Insere o organism na QuadTree
+    });
+    
 
-        // Inserindo os organismos na QuadTree antes de chamar os métodos de cada um
-        Herbivoro.herbivoros.forEach(herbivoro => {
-            qtree.inserirHerbivoro(herbivoro); // Insere o herbivoro na QuadTree
-        });
-        Carnivoro.carnivoros.forEach(carnivoro => {
-            qtree.inserirCarnivoro(carnivoro); // Insere o carnivoro na QuadTree
-        });
+    Organism.organisms.forEach(organism => {
+        organism.update();
+        organism.vagueia();
 
-        // Chamando os métodos dos organismos
-        Herbivoro.herbivoros.forEach(herbivoro => {
-            herbivoro.update();
-            herbivoro.vagueia();
+        // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
+        let visaoC = new Circulo(organism.posicao.x, organism.posicao.y, organism.raio_deteccao);
 
-            // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
-            let visaoH = new Circulo(herbivoro.posicao.x, herbivoro.posicao.y, herbivoro.raio_deteccao);
-                
-            // herbivoro.buscarAlimento(qtree, visaoH);
-            if(herbivoro.energia <= herbivoro.energia_max * fome_h){ // FOME
-                herbivoro.buscarAlimento(qtree, visaoH);
-            }
-            herbivoro.detectaPredador(qtree, visaoH);
-        })
-
-        Carnivoro.carnivoros.forEach(carnivoro => {
-            carnivoro.update();
-            carnivoro.vagueia();
-
-            // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
-            let visaoC = new Circulo(carnivoro.posicao.x, carnivoro.posicao.y, carnivoro.raio_deteccao);
-
-            // carnivoro.buscarHerbivoro(qtree, visaoC);
-            if(carnivoro.energia <= carnivoro.energia_max * fome_c){ // FOME
-                carnivoro.buscarHerbivoro(qtree, visaoC);
-            }
-        })
-    } else{ // se a tela NÃO estiver dividida
-        limitador_de_loop = 0;
-
-        Alimento.alimentos.forEach(alimento => {
-            alimento.display();
-            qtree.inserirAlimento(alimento); // Insere o alimento na QuadTree
-
-        })
-
-        Organismo.organismos.forEach((organismo) => {
-            organismo.criaBordas(false); // telaDividida: false
-        })
-
-        // Inserindo os organismos na QuadTree antes de chamar os métodos de cada um
-        Herbivoro.herbivoros.forEach(herbivoro => {
-            qtree.inserirHerbivoro(herbivoro); // Insere o herbivoro na QuadTree
-        });
-        Carnivoro.carnivoros.forEach(carnivoro => {
-            qtree.inserirCarnivoro(carnivoro); // Insere o carnivoro na QuadTree
-        });
-        
-        // Chamando os métodos dos organismos
-        Herbivoro.herbivoros.forEach(herbivoro => {
-            herbivoro.update();
-            herbivoro.vagueia();
-            
-            // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
-            let visaoH = new Circulo(herbivoro.posicao.x, herbivoro.posicao.y, herbivoro.raio_deteccao);
-
-            // herbivoro.buscarAlimento(qtree, visaoH);
-            if(herbivoro.energia <= herbivoro.energia_max * fome_h){ // FOME
-                herbivoro.buscarAlimento(qtree, visaoH);
-            }
-            
-            herbivoro.detectaPredador(qtree, visaoH);
-        })
-
-        Carnivoro.carnivoros.forEach(carnivoro => {
-            carnivoro.update();
-            carnivoro.vagueia();
-
-            // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
-            let visaoC = new Circulo(carnivoro.posicao.x, carnivoro.posicao.y, carnivoro.raio_deteccao);
-
-            // carnivoro.buscarHerbivoro(qtree, visaoC);
-            if(carnivoro.energia <= carnivoro.energia_max * fome_c){ // FOME
-                carnivoro.buscarHerbivoro(qtree, visaoC);
-            }
-        })
-    }
+        // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a reproduzir infinitamente
+        // if(organism.energia <= organism.energia_max * percentual_energy_to_eat){ // FOME
+        //     organism.findPrey(qtree, visaoC);
+        // }
+    })
 }
+
 
 function geraInteiro(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
   }
-// ----------------------------------------------------------------------------------------------
-//                                   Paineis dinamicos e Popovers
-// ----------------------------------------------------------------------------------------------
-// Função atrelada ao evento click para encontrar o organismo na lista e retornar suas propriedades
-function getOrganismo(x, y) {
-    let organismo = Organismo.organismos.find(o => Math.abs(o.posicao.x - x) <= 10 && Math.abs(o.posicao.y - y) <= 10)
-    if(organismo == undefined) {
-        return; //console.log("não encontrou")
-    }
-
-    // Verificar se ja existe um popover referente ao organismo clicado
-    let popoverJaExiste = document.querySelectorAll(`.popover-info[data-organismoid="${organismo.id}"]`).length > 0 ? 1:0
-    if (popoverJaExiste) {
-        return;
-    }
-    
-    let popover = `
-        <div id="popover-${popover_id}" class="popover-info" data-organismoid="${organismo.id}" style="top:${parseInt(organismo.posicao.y - 20)}px; left:${parseInt(organismo.posicao.x + 15)}px">
-            <div class="popover-title">
-                ${(organismo instanceof Carnivoro) ? "Carnívoro":"Herbívoro"} <div style="color: grey; display: inline; font-size: medium">#${organismo.id}</div>
-            </div>
-            <div class="popover-content">
-                <b>Sexo:</b> <div id="pop-sexo-${popover_id}" style="display: inline">${organismo.sexo}</div><br/>
-                <b>Raio:</b> <div id="pop-raio-${popover_id}" style="display: inline">${organismo.raio.toFixed(2)}</div>/${(organismo.raio_inicial * 1.5).toFixed(2)}<br/>
-                <b>Velocidade:</b> <div id="pop-vel-${popover_id}" style="display: inline">${organismo.vel.mag().toFixed(2)}</div>/${organismo.vel_max.toFixed(2)}<br/>
-                <b>Raio de detecção:</b> <div id="pop-deteccao-${popover_id}" style="display: inline">${organismo.raio_deteccao.toFixed(2)}</div><br/>
-                <b>Energia:</b> <div id="pop-energia-${popover_id}" style="display: inline">${organismo.energia.toFixed(2)}</div>/<div id="pop-energia-max-${popover_id}" style="display: inline">${organismo.energia_max.toFixed(2)}</div><br/>
-                <b>Gasto energético:</b> <div id="pop-gasto-${popover_id}" style="display: inline">${(organismo.taxa_gasto_energia + organismo.gasto_minimo).toFixed(3)}</div><br/>
-                <b>Cor:</b> <svg width="20" height="20"><rect width="18" height="18" style="fill:${organismo.cor}"/></svg> ${organismo.cor}<br/>
-                <!-- <b>Fome:</b> <div id="pop-fome-${popover_id}" style="display: inline">${organismo.energia <= organismo.energia_max * 0.8 ? "Com fome":"Satisfeito"}</div><br/> -->
-                <b>Status:</b> <div id="pop-status-${popover_id}" style="display: inline">${organismo.status}</div><br/>
-                <b>Idade:</b> <div id="pop-vida-${popover_id}" style="display: inline">${organismo.tempo_vivido}</div>/${organismo.tempo_vida}<br/>
-                <b>Ninhada: </b> de <div id="pop-ninhada-min-${popover_id}" style="display: inline">${organismo.intervalo_ninhada[0]}</div> a <div id="pop-ninhada-max-${popover_id}" style="display: inline">${organismo.intervalo_ninhada[1]}</div><br/>
-                <b>Filhos:</b> <div id="pop-vezes-reproduzidas-${popover_id}" style="display: inline">${organismo.filhos.length}</div><br/>
-                <button type="button" class="btn btn-danger btn-sm" onclick="excluirOrganismoPopover(${popover_id}, ${organismo.id})" style="margin-top: 10px">Excluir ${(organismo instanceof Carnivoro) ? "Carnívoro":"Herbívoro"}</button>
-            </div>
-            <button type="button" class="btn close" aria-label="Close"
-                onclick="deletePopover(${popover_id}, ${organismo.id})">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    `
-    $("body").append($(popover));
-
-    let pop_id = popover_id
-    // CRIAR MONITORADOR PARA A VARIÁVEL POSICAO
-    organismo.proxy = new Proxy(organismo["posicao"], {
-        set: function(target_org, key_position, value) {
-            target_org[key_position] = value;
-
-            //console.log("vetor mudou: "+key_position+" = "+value)
-
-            let cssProperty = key_position == "x" ? 
-
-                {left: parseInt((value + 15 - c.transformedPoint(0, 0).x))} : 
-                {top: parseInt(value - 20 - c.transformedPoint(0, 0).y)}
-            // Popover acompanhar a posicao do organismo
-            $(`#popover-${pop_id}`).css(cssProperty);
-            document.getElementById(`pop-raio-${pop_id}`).textContent = organismo.raio.toFixed(1);
-            document.getElementById(`pop-vel-${pop_id}`).textContent = organismo.vel.mag().toFixed(2);
-            document.getElementById(`pop-deteccao-${pop_id}`).textContent = organismo.raio_deteccao.toFixed(2);
-            document.getElementById(`pop-energia-${pop_id}`).textContent = organismo.energia.toFixed(1);
-            document.getElementById(`pop-energia-max-${pop_id}`).textContent = organismo.energia_max.toFixed(1);
-            document.getElementById(`pop-gasto-${pop_id}`).textContent = (organismo.taxa_gasto_energia + organismo.gasto_minimo).toFixed(3);
-            document.getElementById(`pop-status-${pop_id}`).textContent = organismo.status;
-            document.getElementById(`pop-vezes-reproduzidas-${pop_id}`).textContent = organismo.vezes_reproduzidas;
-            // organismo.energia <= organismo.energia_max * 0.8 ? document.getElementById(`pop-fome-${pop_id}`).textContent = "Com fome": document.getElementById(`pop-fome-${pop_id}`).textContent = "Satisfeito"
-            document.getElementById(`pop-vida-${pop_id}`).textContent = organismo.tempo_vivido;
-            return true;
-        }
-    })
-
-    // SALVAR O ID DO POPOVER NO ORGANISMO
-    organismo.popover_id = pop_id
-
-    popover_id++
-}
-
-function deletePopover(popoverId, organismoId) {
-    // Capturar organismo
-    const organismo = Organismo.organismos.find(o => o.id == organismoId) || 0;
-    if(organismo) {
-        delete organismo.proxy
-        delete organismo.popover_id
-    }
-    $(`#popover-${popoverId}`).remove()
-
-    // Esconder botao de fechar todos os popovers se nao existem mais popover abertos
-    if($(".popover-info").length == 0) {
-        $("#btnDeletePopovers").hide();
-    }
-}
-
-function excluirOrganismoPopover(popoverId, organismoId){
-    // Capturar organismo
-    const organismo = Organismo.organismos.find(o => o.id == organismoId) || 0;
-    if(organismo) {
-        organismo.morre();
-        if(pausado){
-            despausa(); // Se não fizer isso, o organismo continua aparecendo enquanto estiver pausado 
-            pausa();
-        }
-    }
-    $(`#popover-${popoverId}`).remove()
-}
-
-// GERAR PAINEL DE ESCOLHA DAS PROPRIEDADES DOS ORGANISMOS ADICIONADOS NA TELA
-function showEditPanel(type) {
-    // Restaurar configuracoes salvas
-    let config;
-    if(type == 1) {
-        config = conf_c;
-    } else {
-        config = conf_h;
-    }
-
-    let panel = `
-    
-        <div class="row mb-3">
-            <div id="edit-title" class="col-8">${type == 1? "Carnívoro":"Herbívoro"}</div>
-            <!-- Se o aleatorio estiver ligado, desabilitar todos os inputs -->
-            <button id="edit-random" class="btn col-2 btn-gray" onclick="randomConfig(${type})"><i class="fas fa-dice"></i></button>
-            <button class="btn close col-2" onclick="$(this).closest('.edit-organism').addClass('d-none').html('')">
-                <span class="text-white" aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    
-
-        <form id="formConfig" class="container-fluid">
-            <div class="row mb-3">
-                <div style="display: inline; width: 50%">
-                    <!-- desenho do organismo com atualizacao em tempo real -->
-                    <b><label for="input-cor">Cor</label></b>
-                    <input id="input-cor" name="cor" type="color" value="${config? rgbToHex(config.cor):"#ff0000"}">
-                </div>
-            </div>
-            <div class="row p-0">
-                <div style="display: inline; width: 50%">
-                    <b><label for="input-raio">Raio</label></b>
-                    <input id="input-raio" name="raio_inicial" type="number" value="${config? config.raio_inicial:(raio_inicial||geraNumeroPorIntervalo(3, 7).toFixed(2))}" class="form-control p-0">
-                </div>  
-                <div style="display: inline; width: 50%">                 
-                    <b><label for="input-velocidade">Velocidade</label></b>
-                    <input id="input-velocidade" name="vel_max" type="number" value="${config? config.vel_max.toFixed(2):geraNumeroPorIntervalo(1, 2.2).toFixed(2)}" class="form-control p-0">
-                </div>
-                <div style="display: inline; width: 50%">
-                    <b><label for="input-forca">Agilidade</label></b>
-                    <input id="input-forca" name="forca_max" type="number" value="${config? config.forca_max.toFixed(2):geraNumeroPorIntervalo(0.001, 0.05).toFixed(2)}" class="form-control p-0">
-                </div>
-                <div style="display: inline; width: 50%">
-                    <b><label for="input-deteccao">Visão</label></b>
-                    <input id="input-deteccao" name="raio_deteccao_inicial" type="number" value="${config? config.raio_deteccao_inicial.toFixed(2):geraNumeroPorIntervalo(15, 60).toFixed(2)}" class="form-control p-0">
-                </div>
-                <div style="display: inline; width: 50%">
-                    <b><label for="input-ninhada">Tamanho da ninhada</label></b>
-                    <input id="input-ninhada-min" name="intervalo_ninhada_min" type="number" value="${config? config.intervalo_ninhada[0]:geraNumeroPorIntervalo(1, 5)}" class="form-control p-0">
-                    <input id="input-ninhada-max" name="intervalo_ninhada_max" type="number" value="${config? config.intervalo_ninhada[1]:geraNumeroPorIntervalo(1, 5)}" class="form-control p-0">
-                    </div>
-            </div>
-        </form>
-        <div class="row mt-2">
-            <button type="button" onclick="serializarFormConfig(${type})" class="btn btn-sm btn-outline-secondary btn-block">Salvar</button>
-        </div>
-    
-    
-    `
-    $("#painelEditar").html(panel).removeClass("d-none")
-    // Iniciar como aleatorio se não existe configuracao previa salva
-    if(!config) {
-        randomConfig(type);
-    }
-}
-
-function serializarFormConfig(type) {
-    let obj = $("#formConfig").serializeArray().reduce(function(obj, value, i) {
-        obj[value.name] = value.value;
-        return obj;
-    }, {});
-    // Converter cor
-    obj.cor = hexToRgb(obj["cor"])
-    
-    // Converter numeros
-    obj.raio_inicial = parseFloat(obj.raio_inicial);
-    obj.vel_max = parseFloat(obj.vel_max);
-    obj.forca_max = parseFloat(obj.forca_max);
-    obj.raio_deteccao_inicial = parseFloat(obj.raio_deteccao_inicial);
-    obj.intervalo_ninhada = obj.intervalo_ninhada;
-
-    if(type == 1) {
-        conf_c = obj;
-    } else {
-        conf_h = obj;
-    }
-}
-
-function randomConfig(type) {
-    if($("#edit-random").hasClass("active")) {
-        $("#edit-random").removeClass("active");
-
-        // Retirar disable dos inputs
-        $("#formConfig input").prop("disabled", false)
-    } else {
-        // apagar configuracao
-        if(type==1 && conf_c) {
-            // TODO: aviso para confirmar se quer aleatorizar mesmo.
-            let resultado = confirm("Ao aleatorizar os valores, você perderá as configurações salvas para os Carnívoros. Deseja continuar?")
-            if(resultado == true)
-                conf_c = undefined;
-            else
-                return;
-        } else if(type==2 && conf_h) {
-            // TODO: aviso para confirmar se quer aleatorizar mesmo.
-            let resultado = confirm("Ao aleatorizar os valores, você perderá as configurações salvas para os Herbívoros. Deseja continuar?")
-            if(resultado == true)
-                conf_h = undefined;
-            else
-                return;
-        }
-        $("#edit-random").addClass("active");
-        // dar disable nos inputs de configuracao
-        $("#formConfig input").prop("disabled", true)
-    }
-}
 
 // ----------------------------------------------------------------------------------------------
 //                                         Cronômetro
