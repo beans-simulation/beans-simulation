@@ -5,8 +5,8 @@ class QuadTree{
         this.pontos = [];
         this.alimentos = [];
         this.herbivoros = [];
-        this.carnivoros = [];
-        // this.seresVivos = this.alimentos.concat(this.herbivoros, this.carnivoros); // Array contendo todos os alimentos, herbívoros e carnívoros dentro de sua raiz
+        this.organisms = [];
+        // this.seresVivos = this.alimentos.concat(this.herbivoros, this.organisms); // Array contendo todos os alimentos, herbívoros e carnívoros dentro de sua raiz
         this.dividida = false;
     }
     
@@ -115,31 +115,31 @@ class QuadTree{
         }
     }
 
-    inserirCarnivoro(carnivoro){
-        if(!this.limite.contemPonto(carnivoro)){ // Checa se o carnivoro está contido dentro dos limites (fronteiras) do retângulo raiz
+    insertOrganism(organism){
+        if(!this.limite.contemPonto(organism)){ // Checa se o organism está contido dentro dos limites (fronteiras) do retângulo raiz
             return false;
         }
         
-        if(this.carnivoros.length < this.capacidade){ // Se ainda couber carnivoros dentro dela
+        if(this.organisms.length < this.capacidade){ // Se ainda couber organisms dentro dela
             // console.log("DANDO PUSH");
-            this.carnivoros.push(carnivoro); // Insere o carnivoro em sua lista
-            // console.log("carnivoros ", this.carnivoros);
+            this.organisms.push(organism); // Insere o organism em sua lista
+            // console.log("organisms ", this.organisms);
             return true;
         } else{ // Se a capacidade máxima de seres vivos tiver sido atingida    
             if(!this.dividida){ // A QuadTree não irá se subdividir caso já o tenha feito
-                // console.log("inserirCarnivoros", this.carnivoros);
+                // console.log("insertOrganisms", this.organisms);
                 this.subdivide();
                 // console.log("SUBDIVIDIU - C", this.capacidade);
             }
             
-            // Não checamos a localização do carnivoro pois ela será checada no começo de cada chamada desses métodos
-            if(this.nordeste.inserirCarnivoro(carnivoro)){
+            // Não checamos a localização do organism pois ela será checada no começo de cada chamada desses métodos
+            if(this.nordeste.insertOrganism(organism)){
                 return true;
-            } else if(this.noroeste.inserirCarnivoro(carnivoro)){
+            } else if(this.noroeste.insertOrganism(organism)){
                 return true;
-            } else if(this.sudeste.inserirCarnivoro(carnivoro)){
+            } else if(this.sudeste.insertOrganism(organism)){
                 return true;
-            } else if(this.sudoeste.inserirCarnivoro(carnivoro)){
+            } else if(this.sudoeste.insertOrganism(organism)){
                 return true;
             };            
         }
@@ -224,9 +224,9 @@ class QuadTree{
         if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
             return encontrados;
         } else{ // Se eles se interceptam
-            // console.log("procuraCarnivoros", this.carnivoros);
-            for(let c of this.carnivoros){ // Para os carnivoros dessa QuadTree 
-                if(circulo.contemPonto(c)){ // Se o carnivoro pertencer ao círculo
+            // console.log("procuraCarnivoros", this.organisms);
+            for(let c of this.organisms){ // Para os organisms dessa QuadTree 
+                if(circulo.contemPonto(c)){ // Se o organism pertencer ao círculo
                     encontrados.push(c);
                 }
             }
@@ -263,7 +263,7 @@ class QuadTree{
         //     c.arc(h.posicao.x, h.posicao.y, 1, 0, 2 * Math.PI);
         //     c.stroke();
         // }
-        // for(let ca of this.carnivoros){
+        // for(let ca of this.organisms){
         //     c.beginPath();
         //     c.arc(ca.posicao.x, ca.posicao.y, 1, 0, 2 * Math.PI);
         //     c.stroke();

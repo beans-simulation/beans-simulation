@@ -40,7 +40,7 @@ let retanguloCanvas = new Retangulo(universoWidth/2, universoHeight/2, universoW
 
 var popover_id = 1;
 
-// Configuracoes dos organismos editados
+// Configuracoes dos organisms editados
 var conf_c;
 var conf_h;
 
@@ -105,17 +105,17 @@ function desenhaTudo(){
     Alimento.alimentos.forEach(a => {
         a.display();
     })
-    Organismo.organismos.forEach(o => {
+    Organism.organisms.forEach(o => {
         o.display();
     })
 }
 
 
-function criaObjetos(n_carnivoros, n_alimentos){
-    for(var i = 0; i < n_carnivoros; i++){
+function criaObjetos(n_organisms, n_alimentos){
+    for(var i = 0; i < n_organisms; i++){
         var x =(Math.random() * (universoWidth - 50) + 25);
         var y = (Math.random() * (universoHeight - 50) + 25);
-        geraCarnivoro(x,y);
+        geraOrganism(x,y);
     }
 
     for(var i = 0; i < n_alimentos; i++){
@@ -126,7 +126,7 @@ function criaObjetos(n_carnivoros, n_alimentos){
 }
 
 function destroiObjetos(){
-    Carnivoro.carnivoros.length = 0;
+    Organism.organisms.length = 0;
     Alimento.alimentos.length = 0;
     // mudaIntervaloAlimentos(1001);
 }
@@ -144,7 +144,7 @@ function geraAlimento(x,y){
     return new Alimento(x, y, raio);
 }
 
-function geraCarnivoro(x,y){ // função para poder adicionar mais carnívoros manualmente 
+function geraOrganism(x,y){ // função para poder adicionar mais carnívoros manualmente 
     var raio_inicial = geraNumeroPorIntervalo(3, 8);
     var vel_max = geraNumeroPorIntervalo(1, 2.2); 
     var forca_max = geraNumeroPorIntervalo(0.01, 0.05);
@@ -180,7 +180,7 @@ function geraCarnivoro(x,y){ // função para poder adicionar mais carnívoros m
         sexo
     )
 
-    return new Carnivoro(
+    return new Organism(
         x, y, dna
     );
 }
@@ -400,79 +400,6 @@ function criaPontos(){
     }
 }
 
-// function calculaDadosGrafico(){
-//     // Liberar espaço de memória das variáveis anteriores
-//     popC = velMedC = forcaMedC = raioMedC = raioDetMedC = energMedC = taxaEnergMedC = ninhadaMediaC = null;
-
-//     // Resetando as variáveis para os carnívoros
-//     popC = {sem_div: 0, esq: 0, dir: 0}
-//     velMedC = {sem_div: 0, esq: 0, dir: 0};
-//     forcaMedC = {sem_div: 0, esq: 0, dir: 0};
-//     raioMedC = {sem_div: 0, esq: 0, dir: 0};
-//     raioDetMedC = {sem_div: 0, esq: 0, dir: 0};
-//     energMedC = {sem_div: 0, esq: 0, dir: 0};
-//     taxaEnergMedC = {sem_div: 0, esq: 0, dir: 0};
-//     ninhadaMediaC = {sem_div: 0, esq: 0, dir: 0};
-
-//     Carnivoro.carnivoros.forEach(carnivoro => {
-//         // Soma o valor das variáveis pra todos os carnívoros
-//         popC["sem_div"]++
-//         velMedC["sem_div"] += carnivoro.vel_max;
-//         forcaMedC["sem_div"] += carnivoro.forca_max;
-//         raioMedC["sem_div"] += carnivoro.raio_inicial * 1.5; // o raio máximo é (1.5 * raio_inicial)
-//         raioDetMedC["sem_div"] += carnivoro.raio_deteccao_inicial * 1.3; // 1.3 e não 1.5 pois o raio de detecção aumenta menos que o raio
-//         energMedC["sem_div"] += carnivoro.energia_max_fixa;
-//         taxaEnergMedC["sem_div"] += carnivoro.taxa_gasto_energia_max;
-//         ninhadaMediaC["sem_div"] += (carnivoro.intervalo_ninhada[0] + carnivoro.intervalo_ninhada[1]) / 2;
-
-//         if(telaDividida){
-//             // Checa se está a direita ou a esquerda
-//             let lado;
-//             if(carnivoro.posicao.x < universoWidth / 2) {
-//                 lado = "esq"
-//             } else {
-//                 lado = "dir"
-//             }
-//             // Soma o valor das variáveis pra todos os carnívoros
-//             popC[lado]++
-//             velMedC[lado] += carnivoro.vel_max;
-//             forcaMedC[lado] += carnivoro.forca_max;
-//             raioMedC[lado] += carnivoro.raio_inicial * 1.5; // o raio máximo é (1.5 * raio_inicialimo)
-//             raioDetMedC[lado] += carnivoro.raio_deteccao_inicial * 1.3; // 1.3 e não 1.5 pois o raio de detecção aumenta menos que o raio
-//             energMedC[lado] += carnivoro.energia_max_fixa;
-//             taxaEnergMedC[lado] += carnivoro.taxa_gasto_energia_max;
-//             ninhadaMediaC[lado] += (carnivoro.intervalo_ninhada[0] + carnivoro.intervalo_ninhada[1]) / 2;
-//         }        
-//     });
-
-
-//     // Divide o valor (a soma total) pelo número de carnívoros para obter a média
-//     // Sem divisão
-//     velMedC.sem_div /= popC.sem_div;
-//     forcaMedC.sem_div /= popC.sem_div;
-//     raioMedC.sem_div /= popC.sem_div;
-//     raioDetMedC.sem_div /= popC.sem_div;
-//     energMedC.sem_div /= popC.sem_div;
-//     taxaEnergMedC.sem_div /= popC.sem_div;
-//     ninhadaMediaC.sem_div /= popC.sem_div;
-//     // Lado esquerdo
-//     velMedC.esq /= popC.esq;
-//     forcaMedC.esq /= popC.esq;
-//     raioMedC.esq /= popC.esq;
-//     raioDetMedC.esq /= popC.esq;
-//     energMedC.esq /= popC.esq;
-//     taxaEnergMedC.esq /= popC.esq;
-//     ninhadaMediaC.esq /= popC.esq;
-//     // Lado direito
-//     velMedC.dir /= popC.dir;
-//     forcaMedC.dir /= popC.dir;
-//     raioMedC.dir /= popC.dir;
-//     raioDetMedC.dir /= popC.dir;
-//     energMedC.dir /= popC.dir;
-//     taxaEnergMedC.dir /= popC.dir;
-//     ninhadaMediaC.dir /= popC.dir;
-// }
-
 
 var idAnimate;
 
@@ -531,26 +458,26 @@ function animate(){
 
     })
 
-    Organismo.organismos.forEach((organismo) => {
-        organismo.criaBordas(false); // telaDividida: false
+    Organism.organisms.forEach((organism) => {
+        organism.criaBordas(false); // telaDividida: false
     })
 
-    Carnivoro.carnivoros.forEach(carnivoro => {
-        qtree.inserirCarnivoro(carnivoro); // Insere o carnivoro na QuadTree
+    Organism.organisms.forEach(organism => {
+        qtree.insertOrganism(organism); // Insere o organism na QuadTree
     });
     
 
-    Carnivoro.carnivoros.forEach(carnivoro => {
-        carnivoro.update();
-        carnivoro.vagueia();
+    Organism.organisms.forEach(organism => {
+        organism.update();
+        organism.vagueia();
 
         // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
-        let visaoC = new Circulo(carnivoro.posicao.x, carnivoro.posicao.y, carnivoro.raio_deteccao);
+        let visaoC = new Circulo(organism.posicao.x, organism.posicao.y, organism.raio_deteccao);
 
-        // carnivoro.buscarHerbivoro(qtree, visaoC);
+        // organism.buscarHerbivoro(qtree, visaoC);
         //julia: comentado momentaneamente enquanto nao existe comida
-        // if(carnivoro.energia <= carnivoro.energia_max * fome_c){ // FOME
-        //     carnivoro.buscarHerbivoro(qtree, visaoC);
+        // if(organism.energia <= organism.energia_max * fome_c){ // FOME
+        //     organism.buscarHerbivoro(qtree, visaoC);
         // }
     })
 }
