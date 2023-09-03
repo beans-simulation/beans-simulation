@@ -193,7 +193,7 @@ class QuadTree{
         }
     }
 
-    procuraHerbivoros(circulo, encontrados){
+    findPreyOrganisms(circulo, encontrados){
         if(!encontrados){
             encontrados = [];
         }
@@ -207,40 +207,42 @@ class QuadTree{
             }
 
             if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-                this.noroeste.procuraHerbivoros(circulo, encontrados); 
-                this.nordeste.procuraHerbivoros(circulo, encontrados); 
-                this.sudoeste.procuraHerbivoros(circulo, encontrados); 
-                this.sudeste.procuraHerbivoros(circulo, encontrados);
+                this.noroeste.findPreyOrganisms(circulo, encontrados); 
+                this.nordeste.findPreyOrganisms(circulo, encontrados); 
+                this.sudoeste.findPreyOrganisms(circulo, encontrados); 
+                this.sudeste.findPreyOrganisms(circulo, encontrados);
             }
 
             return encontrados;
         }
     }
 
-    procuraCarnivoros(circulo, encontrados){
-        if(!encontrados){
-            encontrados = [];
-        }
-        if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
-            return encontrados;
-        } else{ // Se eles se interceptam
-            // console.log("procuraCarnivoros", this.organisms);
-            for(let c of this.organisms){ // Para os organisms dessa QuadTree 
-                if(circulo.contemPonto(c)){ // Se o organism pertencer ao círculo
-                    encontrados.push(c);
-                }
-            }
 
-            if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
-                this.noroeste.procuraCarnivoros(circulo, encontrados); 
-                this.nordeste.procuraCarnivoros(circulo, encontrados); 
-                this.sudoeste.procuraCarnivoros(circulo, encontrados); 
-                this.sudeste.procuraCarnivoros(circulo, encontrados);
-            }
+    // procura predador
+    // procuraCarnivoros(circulo, encontrados){
+    //     if(!encontrados){
+    //         encontrados = [];
+    //     }
+    //     if(!this.limite.interseptaC(circulo)){ // Se NÃO se interceptam, não executa o código
+    //         return encontrados;
+    //     } else{ // Se eles se interceptam
+    //         // console.log("procuraCarnivoros", this.organisms);
+    //         for(let c of this.organisms){ // Para os organisms dessa QuadTree 
+    //             if(circulo.contemPonto(c)){ // Se o organism pertencer ao círculo
+    //                 encontrados.push(c);
+    //             }
+    //         }
 
-            return encontrados;
-        }
-    }
+    //         if(this.dividida){ // Se a QuadTree tiver QuadTrees filhas
+    //             this.noroeste.procuraCarnivoros(circulo, encontrados); 
+    //             this.nordeste.procuraCarnivoros(circulo, encontrados); 
+    //             this.sudoeste.procuraCarnivoros(circulo, encontrados); 
+    //             this.sudeste.procuraCarnivoros(circulo, encontrados);
+    //         }
+
+    //         return encontrados;
+    //     }
+    // }
 
     desenha(){
         // c.lineWidth = 1;

@@ -14,8 +14,7 @@ var tamanhoUniverso = 1;
 var universoWidth = canvas.width * tamanhoUniverso; 
 var universoHeight = canvas.height * tamanhoUniverso; 
 
-var fome_c = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
-var fome_h = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
+var percentual_energy_to_eat = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
 
 var mudarGrafico = false;
 
@@ -474,10 +473,9 @@ function animate(){
         // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
         let visaoC = new Circulo(organism.posicao.x, organism.posicao.y, organism.raio_deteccao);
 
-        // organism.buscarHerbivoro(qtree, visaoC);
-        //julia: comentado momentaneamente enquanto nao existe comida
-        // if(organism.energia <= organism.energia_max * fome_c){ // FOME
-        //     organism.buscarHerbivoro(qtree, visaoC);
+        // julia: essa chamada de função não está funcionando, vale checar se a função está correta
+        // if(organism.energia <= organism.energia_max * percentual_energy_to_eat){ // FOME
+        //     organism.findPrey(qtree, visaoC);
         // }
     })
 }

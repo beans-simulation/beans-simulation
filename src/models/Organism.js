@@ -233,6 +233,69 @@ class Organism{
         this.acel.add(forca);
     }
 
+    // findPrey(qtree, visaoC){
+    //     this.status = "procurando presas"
+    //     this.comendo = false;
+    //     // Var recorde: qual a menor distância (a recorde) de um organism até agora
+    //     var recorde = Infinity; // Inicialmente, setaremos essa distância como sendo infinita
+    //     var i_mais_perto = -1; // Qual o índice na lista de organisms do organism mais perto até agora
+
+    //     // Insere em near_organisms uma lista de organisms que estão na sua QuadTree 
+    //     let near_organisms = qtree.findPreyOrganisms(visaoC); // findPreyOrganisms() retorna uma lista de organisms
+        
+    //     if(near_organisms>0){
+    //         console.log("organisms próximos", near_organisms);
+    //     }
+    //     // Loop que analisa cada organism na lista de organisms
+    //     for(var i = near_organisms.length - 1; i >= 0; i--){
+    //         // Distância d entre este organismo e o atual organism sendo analisado na lista (lista_organisms[i])
+    //         // var d = this.posicao.dist(lista_organisms[i].posicao);
+
+    //         var d2 = Math.pow(this.posicao.x - near_organisms[i].posicao.x, 2) + Math.pow(this.posicao.y - near_organisms[i].posicao.y, 2);
+            
+    //         if (d2 <= recorde){ // Caso a distância seja menor que a distância recorde,
+    //             recorde = d2; // recorde passa a ter o valor de d
+    //             i_mais_perto = i; // e o atual alimento passa a ser o i_mais_perto 
+    //         }
+            
+    //     }
+    //     // Momento em que ele vai comer!
+    //     if(recorde <= Math.pow(this.raio_deteccao, 2)){
+    //         this.comendo = true;
+    //         this.vagueando = false;
+    //         this.status = "caçando"
+
+    //         near_organisms[i_mais_perto].fugindo = true;
+    //         near_organisms[i_mais_perto].comendo = false;
+    //         near_organisms[i_mais_perto].vagueando = false;
+    //         near_organisms[i_mais_perto].status = "fugindo";
+
+    //         if(recorde <= 25){ // como recorde é a distância ao quadrado, elevamos 5 ao quadrado (5^2 = 25) para comparar
+    //             this.eatOrganism(near_organisms[i_mais_perto]);
+                
+    //         } else if(near_organisms.length != 0){
+    //             this.persegue(near_organisms[i_mais_perto]);
+    //         }
+    //     }
+    // }
+    
+    // eatOrganism(organism){
+    //     this.qdade_comida++;
+    //     // Absorção de energia ao comer o herbívoro
+    //     // Se a energia que ele adquirá do herbívoro (10% da energia total do herbívoro)
+    //     // for menor que o quanto falta para encher a barra de energia, ela será somada integralmente (os 10%)
+    //     if(this.energia_max - this.energia >= organism.energia_max * 0.1){
+    //         this.energia += organism.energia_max * 0.1; // O carnívoro, ao comer o herbívoro, ganha 10% da energia deste
+    //     } else{
+    //         this.energia = this.energia_max; // Limitanto a energia para não ultrapassar sua energia máxima
+    //     }
+    //     if(this.energia > this.energia_max){
+    //         this.energia = this.energia_max;
+    //     }
+    //     organism.morre() // O herbívoro comido morre (é retirado da lista de herbívoros)
+    //     this.aumentaTamanho();
+    // }
+
 
     // Método que fará o organism vaguear por aí quando não está fugindo ou perseguindo
     vagueia(){
