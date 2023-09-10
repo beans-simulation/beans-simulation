@@ -18,17 +18,7 @@ class Organism{
         this.initial_detection_radius = dna.initial_detection_radius;
         this.litter_interval = dna.litter_interval; //ninhada
         this.sex = dna.sex;
-        this.energy_consumption_rate;
-        this.minimal_consumption = 0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
-        this.max_energy_consumption_rate = this.minimal_consumption + (Math.pow(this.initial_radius * 1.5, 2) * Math.pow(this.max_speed, 2)) * 0.00012;;
-        this.procreation_probability = 0.5;
-        this.status;
-        this.food_eaten = 0;
-        this.procreation_count = 0;
-        this.birth_moment_in_seconds = total_of_seconds; // "segundo" é a variável global
-        this.lifetime = parseInt(generate_number_per_interval(200, 300)); // tempo de vida do organism
-        this.lived_time_in_secord = 0;
-        this.litter_size;
+        
 
 
         // DNA -> Objeto para separar apenas os atributos passados para os descendentes
@@ -53,14 +43,22 @@ class Organism{
         this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
 
 
-        // NINHADAS
-
-        // this.energy = this.max_energy * 0.75
         if(parent){
             this.energy = (this.max_energy * (0.75 + Math.random() / 4)) / (parent.litter_size) * 0.6; // Começa com uma parcela da energy máxima
         } else{
             this.energy = this.max_energy * 0.75
         }
+        this.energy_consumption_rate;
+        this.minimal_consumption = 0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
+        this.max_energy_consumption_rate = this.minimal_consumption + (Math.pow(this.initial_radius * 1.5, 2) * Math.pow(this.max_speed, 2)) * 0.00012;;
+        this.procreation_probability = 0.5;
+        this.status;
+        this.food_eaten = 0;
+        this.procreation_count = 0;
+        this.birth_moment_in_seconds = total_of_seconds; // "segundo" é a variável global
+        this.lifetime = parseInt(generate_number_per_interval(200, 300)); // tempo de vida do organism
+        this.lived_time_in_secord = 0;
+        this.litter_size;
 
 
         // Variáveis de status
@@ -117,9 +115,7 @@ class Organism{
 
             if(Math.random() < (0.0005 * this.food_eaten)/10){ // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
                 if(Math.random() <= this.procreation_probability){
-                    // this.procreate();
                     // NINHADA
-
                     this.litter_size = generateInteger(this.litter_interval[0], this.litter_interval[1] + 1);
                     for(var i = 0; i < this.litter_size; i++){
                         if(Math.random() < 0.2){ // Para espaçar os nascimentos
@@ -229,18 +225,15 @@ class Organism{
     }
 
     find_prey(qtree, vision){
-        this.status = "procurando presas"
+        this.status = "looking_for_prey"
         this.is_eating = false;
         // Var min_distance: qual a menor distância (a recorde) de um organism até agora
         var min_distance = Infinity; // Inicialmente, setaremos essa distância como sendo infinita
         var closer_index = -1; // Qual o índice na lista de organisms do organism mais perto até agora
 
         // Insere em close_organisms uma lista de organisms que estão na sua QuadTree 
-        let close_organisms = qtree.find_prey_element(vision); // find_prey_element() retorna uma lista de organisms
-        
-        // if(close_organisms>0){
-        //     console.log("organisms próximos", close_organisms);
-        // }
+        let close_organisms = qtree.find_prey_element(vision,this.id); // find_prey_element() retorna uma lista de organisms
+
         // Loop que analisa cada organism na lista de organisms
         for(var i = close_organisms.length - 1; i >= 0; i--){
             // Distância d entre este organismo e o atual organism sendo analisado na lista (lista_organisms[i])
@@ -250,7 +243,7 @@ class Organism{
             
             if (d2 <= min_distance){ // Caso a distância seja menor que a distância min_distance,
                 min_distance = d2; // min_distance passa a ter o valor de d
-                closer_index = i; // e o atual vegetable passa a ser o closer_index 
+                closer_index = i; // e o atual indivíduo passa a ser o closer_index 
             }
             
         }
@@ -260,10 +253,10 @@ class Organism{
             this.is_roaming = false;
             this.status = "hunting"
 
-            close_organisms[closer_index].is_running_away = true;
-            close_organisms[closer_index].is_eating = false;
-            close_organisms[closer_index].is_roaming = false;
-            close_organisms[closer_index].status = "is_running_away";
+            // close_organisms[closer_index].is_running_away = true;
+            // close_organisms[closer_index].is_eating = false;
+            // close_organisms[closer_index].is_roaming = false;
+            // close_organisms[closer_index].status = "is_running_away";
 
             if(min_distance <= 25){ // como min_distance é a distância ao quadrado, elevamos 5 ao quadrado (5^2 = 25) para comparar
                 this.eat_organism(close_organisms[closer_index]);
@@ -275,7 +268,6 @@ class Organism{
     }
     
     eat_organism(organism){
-        this.food_eaten++;
         // Absorção de energy ao comer o herbívoro
         // Se a energy que ele adquirá do herbívoro (10% da energy total do herbívoro)
         // for menor que o quanto falta para encher a barra de energy, ela será somada integralmente (os 10%)
@@ -287,8 +279,9 @@ class Organism{
         if(this.energy > this.max_energy){
             this.energy = this.max_energy;
         }
-        organism.kill() // O herbívoro comido morre (é retirado da lista de herbívoros)
+        organism.kill() // O organismo comido morre (é retirado da lista de organismos)
         this.increase_size();
+        this.food_eaten++;
     }
 
 
@@ -337,12 +330,12 @@ class Organism{
     persue(alvo){
         alvo.is_running_away = true;
         // O vector da velocidade desejada é o vector de posição do alvo menos o da própria posição
-        var desired_speed = alvo.position.sub_new(this.position); // Um vector apontando da localização dele para o alvo
+        var desired_speed = alvo.position.subtract_new(this.position); // Um vector apontando da localização dele para o alvo
         // Amplia a velocidade desejada para a velocidade máxima
         desired_speed.set_magnitude(this.max_speed);
 
         // Redirecionamento = velocidade desejada - velocidade
-        var redirection = desired_speed.sub_new(this.speed);
+        var redirection = desired_speed.subtract_new(this.speed);
         redirection.limit(this.max_strength); // Limita o redirection para a força máxima
 
         // Soma a força de redirecionamento à aceleração
@@ -422,18 +415,18 @@ class Organism{
         return this.energy <= 0;
     }
     
-    remove(lista) {
+    remove(list) {
         var what, a = arguments, L = a.length, indice;
-        while (L > 1 && lista.length) {
+        while (L > 1 && list.length) {
             what = a[--L];
-            while ((indice = lista.indexOf(what)) !== -1) {
-                lista.splice(indice, 1);
+            while ((indice = list.indexOf(what)) !== -1) {
+                list.splice(indice, 1);
             }
         }
-        return lista;
+        return list;
     }
     kill(){
-        this.organisms = this.remove(this.organisms);
+        Organism.organisms = this.remove(Organism.organisms, this);
     }
 
     checaId(id){

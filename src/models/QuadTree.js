@@ -165,24 +165,25 @@ class QuadTree{
         }
     }
 
-    find_prey_element(circle, located){
+    find_prey_element(circle,predator_id,located){
         if(!located){
             located = [];
         }
         if(!this.rectangle.does_intercept_circle(circle)){ // Se NÃO se interceptam, não executa o código
             return located;
         } else{ // Se eles se interceptam
+            let possible_prey_organisms = this.organisms.filter(item => item.id !== predator_id);
             for(let o of this.organisms){ // Para os organismos dessa QuadTree
-                if(circle.contains_point(o)){ // Se o organismo pertencer ao círculo
+                if((o.id != predator_id) && circle.contains_point(o)){ // Se o organismo pertencer ao círculo e não for o predador
                     located.push(o);
                 }
             }
 
             if(this.is_divided){ // Se a QuadTree tiver QuadTrees filhas
-                this.northwest.find_prey_element(circle, located); 
-                this.northeast.find_prey_element(circle, located); 
-                this.southwest.find_prey_element(circle, located); 
-                this.southeast.find_prey_element(circle, located);
+                this.northwest.find_prey_element(circle,predator_id, located); 
+                this.northeast.find_prey_element(circle, predator_id, located); 
+                this.southwest.find_prey_element(circle, predator_id, located); 
+                this.southeast.find_prey_element(circle, predator_id, located);
             }
 
             return located;

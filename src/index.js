@@ -469,14 +469,13 @@ function animate(){
     Organism.organisms.forEach(organism => {
         organism.update();
         organism.roam();
-
+        
         // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
         let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
 
-        // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a procreate infinitamente
-        // if(organism.energy <= organism.max_energy * percentual_energy_to_eat){ // FOME
-        //     organism.find_prey(qtree, vision);
-        // }
+        if(organism.energy <= organism.max_energy * percentual_energy_to_eat){ // FOME            
+            organism.find_prey(qtree, vision);
+        }
     })
 }
 
