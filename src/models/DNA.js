@@ -1,8 +1,8 @@
 class DNA{
-    constructor(initial_radius, max_speed, max_strength, color, initial_detection_radius, litter_interval, sex){
+    constructor(initial_radius, max_speed, max_force, color, initial_detection_radius, litter_interval, sex){
         this.initial_radius = initial_radius;
         this.max_speed = max_speed;
-        this.max_strength = max_strength;
+        this.max_force = max_force;
         this.color = color;
         this.initial_detection_radius = initial_detection_radius;
         this.litter_interval = litter_interval;
@@ -24,7 +24,7 @@ class DNA{
         }
 
         // força máxima
-        var offspring_max_force = newMutation(this.max_strength);
+        var offspring_max_force = newMutation(this.max_force);
 
         // color
         var offspring_color = corMutacao(this.color);

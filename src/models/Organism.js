@@ -13,7 +13,7 @@ class Organism{
 
         this.initial_radius = dna.initial_radius;
         this.max_speed = dna.max_speed;
-        this.max_strength = dna.max_strength;
+        this.max_force = dna.max_force;
         this.color = dna.color;
         this.initial_detection_radius = dna.initial_detection_radius;
         this.litter_interval = dna.litter_interval; //ninhada
@@ -25,7 +25,7 @@ class Organism{
         this.dna = new DNA(
             this.initial_radius,
             this.max_speed,
-            this.max_strength,
+            this.max_force,
             this.color,
             this.initial_detection_radius,
             this.litter_interval,
@@ -53,6 +53,7 @@ class Organism{
         this.max_energy_consumption_rate = this.minimal_consumption + (Math.pow(this.initial_radius * 1.5, 2) * Math.pow(this.max_speed, 2)) * 0.00012;;
         this.procreation_probability = 0.5;
         this.status;
+        this.meat_eater_probability =  Math.random(0,1)
         this.food_eaten = 0;
         this.procreation_count = 0;
         this.birth_moment_in_seconds = total_of_seconds; // "segundo" é a variável global
@@ -211,7 +212,7 @@ class Organism{
             desired_speed.normalize(); // Normaliza (transforma para ter tamanho 1) o vector desired_speed
             desired_speed.multiply(this.max_speed); // Multiplica o vector (que agora tem tamanho 1) pela velocidade máxima
             var redirection = desired_speed.subtract(this.speed); // Cria um vector de força que redirecionará o organism
-            redirection.limit(this.max_strength * 100); // Limita essa força com uma folga maior para dar chances dela ser maior que as outras forças atuantes nele
+            redirection.limit(this.max_force * 100); // Limita essa força com uma folga maior para dar chances dela ser maior que as outras forças atuantes nele
             this.apply_force(redirection); // Aplica esta força no organism e a deixa levemente mais forte para ganhar prioridade em relação a outras forças
         }
     }
@@ -223,10 +224,7 @@ class Organism{
         // Podemos considerar a massa no cálculo também: A = F / M (não implementado)
         this.acceleration.add(force);
     }
-
-    find_prey(qtree, vision){
-        this.status = "looking_for_prey"
-        this.is_eating = false;
+    find_close_organisms(qtree,vision){
         // Var min_distance: qual a menor distância (a recorde) de um organism até agora
         var min_distance = Infinity; // Inicialmente, setaremos essa distância como sendo infinita
         var closer_index = -1; // Qual o índice na lista de organisms do organism mais perto até agora
@@ -236,22 +234,62 @@ class Organism{
 
         // Loop que analisa cada organism na lista de organisms
         for(var i = close_organisms.length - 1; i >= 0; i--){
-            // Distância d entre este organismo e o atual organism sendo analisado na lista (lista_organisms[i])
-            // var d = this.position.dist(lista_organisms[i].position);
-
             var d2 = Math.pow(this.position.x - close_organisms[i].position.x, 2) + Math.pow(this.position.y - close_organisms[i].position.y, 2);
             
             if (d2 <= min_distance){ // Caso a distância seja menor que a distância min_distance,
                 min_distance = d2; // min_distance passa a ter o valor de d
                 closer_index = i; // e o atual indivíduo passa a ser o closer_index 
             }
-            
         }
+
+        return min_distance,close_organisms,closer_index
+    }
+    detect_predator(qtree,vision){
+        this.is_running_away = false;
+        
+        let min_distance,close_organisms,closer_index = this.find_close_organisms(qtree,vision)
+
+        // Momento em que ele vai fugir!
+        if(min_distance <= Math.pow(this.detection_radius, 2)){
+            if(close_organisms.length != 0){
+                this.run_away(close_organisms[closer_index]); 
+            }
+        }
+    }
+
+    // Método que atualiza a velocidade (portanto a posição) do organismo presa a fim de fazê-lo andar na direção contrária
+    // à do predador
+    run_away(target){
+        // O vetor da velocidade desejada é o vetor de posição do alvo menos o da própria posição
+        var desired_speed = target.position.subtract_new(this.position); // Um vetor apontando da localização dele para o alvo
+        // Por enquanto, a velocidade desejada está apontando para o carnívoro. Assim, precisamos inverter os valores
+        // de x e de y do vetor para que ele aponte para o lado oposto. É como num plano cartesiano: se invertermos o x,
+        // a reta é espelhada verticalmente. Se invertermos só o y, é espelhada horizontalmente. Se invertermos ambos,
+        // a reta fica diametralmente oposta, ou seja, aponta exatamente para a direção contrária.
+        desired_speed.x = -desired_speed.x; // Invertendo x
+        desired_speed.y = -desired_speed.y // Invertendo y
+        // Amplia a velocidade desejada para a velocidade máxima do herbívoro
+        desired_speed.set_magnitude(this.max_speed);
+
+        // Redirecionamento = velocidade desejada - velocidade. Trata-se da força que será aplicada no herbívoro
+        // para que sua velocidade mude de direção
+        var redirection = desired_speed.subtract_new(this.speed);
+        redirection.limit(this.max_force); // Limita o redirecionamento para a força máxima
+
+        // Soma a força de redirecionamento à aceleração
+        this.apply_force(redirection);
+    }
+
+
+
+    find_prey(qtree, vision){
+        this.is_eating = false;
+       
+        let min_distance,close_organisms,closer_index = this.find_close_organisms(qtree,vision)
         // Momento em que ele vai comer!
         if(min_distance <= Math.pow(this.detection_radius, 2)){
             this.is_eating = true;
             this.is_roaming = false;
-            this.status = "hunting"
 
             // close_organisms[closer_index].is_running_away = true;
             // close_organisms[closer_index].is_eating = false;
@@ -336,7 +374,7 @@ class Organism{
 
         // Redirecionamento = velocidade desejada - velocidade
         var redirection = desired_speed.subtract_new(this.speed);
-        redirection.limit(this.max_strength); // Limita o redirection para a força máxima
+        redirection.limit(this.max_force); // Limita o redirection para a força máxima
 
         // Soma a força de redirecionamento à aceleração
         this.apply_force(redirection);
@@ -372,9 +410,9 @@ class Organism{
 
         // Força máxima
         if(Math.random() < 0.5){
-            offspring_dna.push(this.dna.max_strength)
+            offspring_dna.push(this.dna.max_force)
         } else{
-            offspring_dna.push(partner.dna.max_strength)
+            offspring_dna.push(partner.dna.max_force)
         }
 
         // Cor
@@ -425,12 +463,9 @@ class Organism{
         }
         return list;
     }
+
     kill(){
         Organism.organisms = this.remove(Organism.organisms, this);
-    }
-
-    checaId(id){
-        return (id == this.id);
     }
 
     display(){
@@ -441,6 +476,12 @@ class Organism{
         c.lineWidth = 5;
         c.stroke();
         c.fill();
+
+        // desenhando o raio de detecção
+        c.beginPath();
+        c.arc(this.position.x, this.position.y, this.detection_radius, 0, Math.PI * 2);
+        c.strokeStyle = "grey";
+        c.stroke();
     }
 
 }

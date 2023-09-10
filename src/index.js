@@ -146,7 +146,7 @@ function geraVegetable(x,y){
 function geraOrganism(x,y){ // função para poder adicionar mais carnívoros manualmente 
     var initial_radius = generate_number_per_interval(3, 8);
     var max_speed = generate_number_per_interval(1, 2.2); 
-    var max_strength = generate_number_per_interval(0.01, 0.05);
+    var max_force = generate_number_per_interval(0.01, 0.05);
     var color = geraCor();
     var initial_detection_radius = generate_number_per_interval(40, 120);
     var ninhada_min = generateInteger(1, 1);
@@ -163,7 +163,7 @@ function geraOrganism(x,y){ // função para poder adicionar mais carnívoros ma
     if(conf_c) {
         initial_radius = conf_c.initial_radius;
         max_speed = conf_c.max_speed;
-        max_strength = conf_c.max_strength;
+        max_force = conf_c.max_force;
         color = conf_c.color;
         litter_interval = conf_c.litter_interval
         sex = conf_c.sex
@@ -172,7 +172,7 @@ function geraOrganism(x,y){ // função para poder adicionar mais carnívoros ma
     var dna = new DNA(
         initial_radius,
         max_speed,
-        max_strength,
+        max_force,
         color,
         initial_detection_radius,
         litter_interval,
@@ -458,7 +458,7 @@ function animate(){
     })
 
     Organism.organisms.forEach((organism) => {
-        organism.create_space_delimitation(false); // telaDividida: false
+        organism.create_space_delimitation(false); 
     })
 
     Organism.organisms.forEach(organism => {
@@ -476,6 +476,7 @@ function animate(){
         if(organism.energy <= organism.max_energy * percentual_energy_to_eat){ // FOME            
             organism.find_prey(qtree, vision);
         }
+        organism.detect_predator(qtree, vision)
     })
 }
 
