@@ -1,9 +1,9 @@
 import { Point } from "@/resources";
 
 class Circle {
-  private x: number;
-  private y: number;
-  private radius: number;
+  public x: number;
+  public y: number;
+  public radius: number;
   constructor(x: number, y: number, radius: number) {
     this.x = x;
     this.y = y;
