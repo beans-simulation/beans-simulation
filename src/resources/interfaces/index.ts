@@ -1,3 +1,3 @@
+export * from "./color-operation";
 export * from "./drawable";
-export * from "./point";
 export * from "./sex";
