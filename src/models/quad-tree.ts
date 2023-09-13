@@ -1,20 +1,12 @@
 import { Drawable } from "@/resources";
-import { Rectangle } from "./Rectangle";
-import { Vegetable } from "./Vegetable";
-import { Circle } from "./Circle";
-
-enum TreeListCategory {
-  organism = "organism",
-  point = "point",
-  vegetable = "vegetable",
-}
+import { Circle, Organism, Point, Rectangle, Vegetable } from ".";
 
 interface QuadTreeProps {
   rectangle: Rectangle;
   supported_amount_of_point: number;
   points: Point[];
   vegetables: Vegetable[];
-  organisms: any[];
+  organisms: Organism[];
   division: {
     northeast: QuadTree;
     northwest: QuadTree;
@@ -28,7 +20,7 @@ export class QuadTree implements QuadTreeProps, Drawable {
   public supported_amount_of_point: number; // A partir de quantos points (neste caso, seres vivos) o retângulo se subdivide
   public points: Point[] = [];
   public vegetables: Vegetable[] = [];
-  public organisms = [];
+  public organisms: Organism[] = [];
   public division: QuadTreeProps["division"] | null;
 
   constructor(rectangle: Rectangle, supported_amount_of_point: number) {
@@ -57,25 +49,13 @@ export class QuadTree implements QuadTreeProps, Drawable {
     };
   }
 
-  private get_insert_list(category: TreeListCategory): Point[] {
-    switch (category) {
-      case TreeListCategory.organism:
-        return this.organisms;
-      case TreeListCategory.point:
-        return this.points;
-      case TreeListCategory.vegetable:
-        return this.vegetables;
-      default:
-        throw new Error(`Invalid category while inserting list: ${category}`);
-    }
-  }
-
-  protected insert(point: Point, category: TreeListCategory): void {
-    if (this.rectangle.contains_point(point)) {
-      const list = this.get_insert_list(category);
-
+  protected insert<T extends Organism | Vegetable | Point>(
+    item: T,
+    list: T[]
+  ): void {
+    if (this.rectangle.contains_point(item)) {
       if (list.length < this.supported_amount_of_point) {
-        list.push(point);
+        list.push(item);
       } else {
         // Se a supported_amount_of_point máxima tiver sido atingida
         if (!this.division) {
@@ -84,10 +64,10 @@ export class QuadTree implements QuadTreeProps, Drawable {
         }
 
         // Não checamos a localização do point pois ele será checado no começo de cada chamada desses métodos
-        this.division?.northeast.insert(point, category);
-        this.division?.northwest.insert(point, category);
-        this.division?.southeast.insert(point, category);
-        this.division?.southwest.insert(point, category);
+        this.division?.northeast.insert(item, list);
+        this.division?.northwest.insert(item, list);
+        this.division?.southeast.insert(item, list);
+        this.division?.southwest.insert(item, list);
       }
     }
   }
@@ -99,13 +79,12 @@ export class QuadTree implements QuadTreeProps, Drawable {
     return this.rectangle.does_intercept_rectangle(scope);
   }
 
-  protected search(
+  protected search<T extends Organism | Vegetable | Point>(
     scope: Rectangle | Circle,
-    category: TreeListCategory
-  ): Point[] {
-    const result: Point[] = [];
+    list: T[]
+  ): T[] {
+    const result: T[] = [];
     if (this.intercepts_by_scope(scope)) {
-      const list = this.get_insert_list(category);
       for (const point of list) {
         // Para os points dessa QuadTree
         if (scope.contains_point(point)) {
@@ -115,10 +94,10 @@ export class QuadTree implements QuadTreeProps, Drawable {
 
         if (this.division) {
           // Se a QuadTree tiver QuadTrees filhas
-          const nw = this.division.northwest.search(scope, category);
-          const ne = this.division.northeast.search(scope, category);
-          const sw = this.division.southwest.search(scope, category);
-          const se = this.division.southeast.search(scope, category);
+          const nw = this.division.northwest.search(scope, list);
+          const ne = this.division.northeast.search(scope, list);
+          const sw = this.division.southwest.search(scope, list);
+          const se = this.division.southeast.search(scope, list);
           result.push(...nw, ...ne, ...sw, ...se);
         }
       }
@@ -127,32 +106,32 @@ export class QuadTree implements QuadTreeProps, Drawable {
   }
 
   insert_point(point: Point): void {
-    this.insert(point, TreeListCategory.point);
+    this.insert(point, this.points);
   }
 
   insert_vegetable(vegetable: Vegetable) {
-    this.insert(vegetable, TreeListCategory.vegetable);
+    this.insert(vegetable, this.vegetables);
   }
 
-  insert_organism(organism: any) {
-    this.insert(organism, TreeListCategory.organism);
+  insert_organism(organism: Organism) {
+    this.insert(organism, this.organisms);
   }
 
-  search_points(rectangle: Rectangle): Point[] {
-    return this.search(rectangle, TreeListCategory.point);
+  search_points(rectangle: Rectangle) {
+    return this.search(rectangle, this.points);
   }
 
-  search_vegetables(circle: Circle) {
-    return this.search(circle, TreeListCategory.vegetable);
+  search_vegetables(detection_circle: Circle) {
+    return this.search(detection_circle, this.vegetables);
   }
 
-  find_prey_element(circle: Circle) {
-    return this.search(circle, TreeListCategory.organism);
+  find_prey_element(detection_circle: Circle) {
+    return this.search(detection_circle, this.organisms);
   }
 
   // função para a procura de predador
-  find_predator_element(circle: Circle) {
-    return this.search(circle, TreeListCategory.organism);
+  find_predator_element(detection_circle: Circle) {
+    return this.search(detection_circle, this.organisms);
   }
 
   display(context: CanvasRenderingContext2D) {
