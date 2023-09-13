@@ -8,13 +8,13 @@ import {
 import { generate_integer } from "@/utils";
 
 class DNA {
-  private initial_radius: number;
-  private max_speed: number;
-  private max_strength: number;
-  private color: string;
-  private initial_detection_radius: number;
-  private litter_interval: number[];
-  private sex: sex_type;
+  public readonly initial_radius: number;
+  public readonly max_speed: number;
+  public readonly max_strength: number;
+  public readonly color: string;
+  public readonly initial_detection_radius: number;
+  public readonly litter_interval: number[];
+  public readonly sex: sex_type;
 
   constructor(
     initial_radius: number,

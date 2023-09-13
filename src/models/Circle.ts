@@ -11,7 +11,7 @@ class Circle {
   }
 
   // Checa se o point esta contido dentro de seus limites (fronteiras)
-  contains_point(point: Point) {
+  contains_point(point: Point): boolean {
     const xPoint = point.x;
     const yPoint = point.y;
 
@@ -22,7 +22,7 @@ class Circle {
   }
 
   // Método para saber se os retangulos se interseptam
-  intersect(scope) {
+  intersect(scope): boolean {
     return !(
       // Se essa expressao for verdade, eles NÃO se interceptam
       (

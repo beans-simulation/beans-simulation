@@ -1,5 +1,5 @@
 // classe para a construção de vectors
-class Vector {
+export class Vector {
   public x: number;
   public y: number;
 
@@ -78,7 +78,7 @@ class Vector {
 
   // retorna a distância entre dois points (definidos por x e y de um vector v)
   distance(vector: Vector) {
-    return vector.copy().subtract(this).magnitude();
+    return vector.subtract_new(this).magnitude();
   }
 
   // limita o tamanho do vector para um valor limite (usamos esse método para limitar a velocidade, por exemplo)
