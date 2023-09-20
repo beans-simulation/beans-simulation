@@ -1,3 +1,5 @@
+import { Info } from "./Info";
+
 class History {
   public organisms: Info;
   public seconds: number[];
