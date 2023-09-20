@@ -1,4 +1,4 @@
-class Info {
+export class Info {
   public population: number[];
   public speed: number[];
   public agility: number[];

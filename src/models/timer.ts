@@ -8,8 +8,9 @@ interface ITimer {
   seconds: number;
   minutes: number;
   milliseconds: number;
-  start: () => void;
+  play: () => void;
   reset: () => void;
+  restart: () => void;
   pause: () => void;
 }
 
@@ -17,18 +18,16 @@ export class Timer implements ITimer {
   private time = 0;
 
   private interval?: NodeJS.Timeout;
-  private interval_miliseconds = 10;
+  private interval_milliseconds = 10;
 
-  constructor() {
-    this.start();
-  }
+  constructor() {}
 
   private run(): void {
-    this.time += this.interval_miliseconds;
+    this.time += this.interval_milliseconds;
   }
 
-  public start(): void {
-    this.interval = setInterval(this.run, this.interval_miliseconds);
+  public play(): void {
+    this.interval = setInterval(this.run, this.interval_milliseconds);
   }
 
   // document.getElementById("hora").innerText = returnData(hora);
@@ -39,6 +38,11 @@ export class Timer implements ITimer {
   public reset(): void {
     this.time = 0;
     clearInterval(this.interval);
+  }
+
+  public restart(): void {
+    this.reset();
+    this.play();
   }
 
   public pause(): void {
@@ -82,5 +86,9 @@ export class Timer implements ITimer {
 
   get total(): number {
     return this.time;
+  }
+
+  get is_paused(): boolean {
+    return !!this.interval;
   }
 }
