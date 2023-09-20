@@ -1,4 +1,4 @@
-import { Circle } from "./Circle";
+import { Circle, Point } from ".";
 
 export class Rectangle {
   public x: number;

@@ -1,11 +1,10 @@
 import {
   color_operation,
   color_operation_type,
-  magnitude_mutacao,
-  probabilidade_mutacao,
+  globals,
   sex_type,
-} from "@/resources";
-import { generate_integer } from "@/utils";
+} from "../resources";
+import { generate_integer } from "../utils";
 
 class DNA {
   public readonly initial_radius: number;
@@ -45,7 +44,7 @@ class DNA {
   }
 
   private variate_litter(min: number, max: number) {
-    const maximumRange = Math.floor(magnitude_mutacao * 10) + 2;
+    const maximumRange = Math.floor(globals.mutation_magnitude * 10) + 2;
     // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
     const min_variation = generate_integer(0, maximumRange);
     const max_variation = generate_integer(0, maximumRange);
@@ -69,7 +68,7 @@ class DNA {
     const min_litter = this.litter_interval[0];
     const max_litter = this.litter_interval[1];
 
-    if (Math.random() < probabilidade_mutacao) {
+    if (Math.random() < globals.mutation_probability) {
       const { min, max } = this.variate_litter(min_litter, max_litter);
 
       const min_mutated = min >= 0 ? min : 0;
@@ -110,10 +109,10 @@ class DNA {
 
   private new_mutation(value: number) {
     // exemplo: valor = 20;  magnitude_mutacao = 0.05 || 5%
-    if (Math.random() < probabilidade_mutacao) {
+    if (Math.random() < globals.mutation_probability) {
       // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
       const multiplier = this.get_new_mutation_multiplier();
-      const variation = value * magnitude_mutacao * multiplier;
+      const variation = value * globals.mutation_magnitude * multiplier;
 
       const minimum = this.get_minimum(value, variation);
       const double_variation = variation * 2; //  puxo o point de referência para o menor valor possível. Logo, o resultado variará de
@@ -146,7 +145,8 @@ class DNA {
     operation: color_operation_type,
     multiplier: number
   ): number {
-    const mutation = color * (Math.random() * magnitude_mutacao * multiplier);
+    const mutation =
+      color * (Math.random() * globals.mutation_magnitude * multiplier);
 
     const value =
       operation === color_operation.addition
@@ -172,7 +172,7 @@ class DNA {
 
   private get_color_mutation() {
     const color = this.color;
-    if (Math.random() < probabilidade_mutacao) {
+    if (Math.random() < globals.mutation_probability) {
       // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
       const colors = color
         .replace(/[^\d,]/g, "") // remover os caracteres de texto. ex: "rgb(256,20,40)"

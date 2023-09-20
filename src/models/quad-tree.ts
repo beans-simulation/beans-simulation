@@ -1,4 +1,4 @@
-import { Drawable } from "@/resources";
+import { Drawable } from "../resources";
 import { Circle, Organism, Point, Rectangle, Vegetable } from ".";
 
 interface QuadTreeProps {

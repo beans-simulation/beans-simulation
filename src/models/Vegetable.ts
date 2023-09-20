@@ -1,4 +1,4 @@
-import { Drawable } from "@/resources";
+import { Drawable } from "../resources";
 import { Vector } from ".";
 
 class Vegetable implements Drawable {

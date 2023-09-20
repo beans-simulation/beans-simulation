@@ -4,11 +4,10 @@ import {
   organism_status,
   organism_status_type,
   sex_type,
-  universe_height,
-  universe_width,
-} from "@/resources";
+  globals,
+} from "../resources";
 import { DNA, QuadTree, Circle, Vector } from ".";
-import { generate_integer } from "@/utils";
+import { generate_float, generate_integer } from "../utils";
 
 const EAT_DISTANCE = 5;
 
@@ -36,7 +35,7 @@ export class Organism implements Drawable {
   public is_eating = false;
   public is_roaming = false; //vagar sem direção
   public is_running_away = false;
-  public lifetime = generate_integer(200, 300); // tempo de vida do organism
+  public lifetime = generate_float(200, 300); // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
   public max_energy_consumption_rate: number;
@@ -186,8 +185,6 @@ export class Organism implements Drawable {
 
     // Reseta a aceleração para 0 a cada ciclo
     this.acceleration.multiply(0);
-
-    // this.display();
   }
 
   increase_size() {
@@ -202,7 +199,7 @@ export class Organism implements Drawable {
   private get nearRightBorder() {
     return (
       this.position.x + this.radius >
-      universe_width - this.border_distance_until_make_curves
+      globals.universe_width - this.border_distance_until_make_curves
     );
   }
   private get nearLeftBorder() {
@@ -213,7 +210,7 @@ export class Organism implements Drawable {
   private get nearBottom() {
     return (
       this.position.y + this.radius >
-      universe_height - this.border_distance_until_make_curves
+      globals.universe_height - this.border_distance_until_make_curves
     );
   }
   private get nearTop() {
@@ -365,10 +362,10 @@ export class Organism implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    if (this.is_eating || this.is_running_away) {
-      // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
-      roaming_force.multiply(0.03);
-    }
+    // if (this.is_eating || this.is_running_away) {
+    //   // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
+    //   roaming_force.multiply(0.03);
+    // }
     this.apply_force(roaming_force.multiply(0.2));
     // }
   }

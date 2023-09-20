@@ -1,4 +1,4 @@
-import { Point } from "@/resources";
+import { Point } from ".";
 
 class Circle {
   public x: number;
@@ -12,8 +12,8 @@ class Circle {
 
   // Checa se o point esta contido dentro de seus limites (fronteiras)
   contains_point(point: Point): boolean {
-    const xPoint = point.x;
-    const yPoint = point.y;
+    const xPoint = point.position.x;
+    const yPoint = point.position.y;
 
     return (
       Math.sqrt(Math.pow(xPoint - this.x, 2) + Math.pow(yPoint - this.y, 2)) <=
@@ -22,7 +22,7 @@ class Circle {
   }
 
   // Método para saber se os retangulos se interseptam
-  intersect(scope): boolean {
+  intersect(scope: any): boolean {
     return !(
       // Se essa expressao for verdade, eles NÃO se interceptam
       (
