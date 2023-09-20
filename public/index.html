@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <link rel="shortcut icon" type="image/x-icon" href="Images/logoEscuroSemFundo.png"> -->
-    <link rel="stylesheet" href="./src/style.css" />
+    <link rel="stylesheet" href="./style.css" />
     <link
       rel="stylesheet"
       href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
@@ -13,18 +13,6 @@
       crossorigin="anonymous"
     />
     <title>beans</title>
-
-    <!-- A ordem de importar o script deve ser do que não depende de nada até os que dependem... (pra n bugar)-->
-    <script type="text/javascript" src="./src/models/Vector.js"></script>
-    <script type="text/javascript" src="./src/models/Circle.js"></script>
-    <script type="text/javascript" src="./src/models/Point.js"></script>
-    <script type="text/javascript" src="./src/models/Rectangle.js"></script>
-    <script type="text/javascript" src="./src/models/QuadTree.js"></script>
-    <script type="text/javascript" src="./src/models/DNA.js"></script>
-    <script type="text/javascript" src="./src/models/Vegetable.js"></script>
-    <script type="text/javascript" src="./src/models/Organism.js"></script>
-    <script type="text/javascript" src="./src/models/Info.js"></script>
-    <script type="text/javascript" src="./src/models/History.js"></script>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script
@@ -52,10 +40,8 @@
         margin: 0;
       }
     </style>
-    <script type="text/javascript">
-      var hora = (minuto = segundo = milisegundo = 0);
-      var segundos_totais = 0;
-    </script>
+    <script type="text/javascript" src="../dist/app.bundle.js"></script>
+
   </head>
 
   <body style="background: #222">
@@ -168,7 +154,7 @@
                 class="slider-yellow"
                 step="1"
                 id="input_vegetable_rate"
-                oninput="change_vegetable_rate()"
+                oninput="num_vegetable_rate.textContent=input_vegetable_rate.value"
                 onchange="update_vegetables_apparition_interval(input_vegetable_rate.value)"
               />
 
@@ -186,7 +172,7 @@
                 value="10"
                 class="slider-blue"
                 id="input_mutation_probability"
-                oninput="change_mutation_probability()"
+                oninput="num_mutation_probability.textContent=input_mutation_probability.value"
                 onchange="update_mutation_probability(input_mutation_probability.value)"
               />
 
@@ -204,7 +190,7 @@
                 value="5"
                 class="slider-blue"
                 id="input_mutation_magnitude"
-                oninput="change_mutation_magnitude()"
+                oninput="num_mutation_magnitude.textContent=input_mutation_magnitude.value"
                 onchange="update_mutation_magnitude(input_mutation_magnitude.value)"
               />
 
@@ -292,217 +278,8 @@
         </div>    
     </div> -->
 
-    <script type="text/javascript">
-      var input_vegetable_rate = document.getElementById(
-        "input_vegetable_rate"
-      );
-      const label_vegetable_rate =
-        document.getElementById("num_vegetable_rate");
-
-      var input_mutation_probability = document.getElementById(
-        "input_mutation_probability"
-      );
-      const label_mutation_probability = document.getElementById(
-        "num_mutation_probability"
-      );
-
-      var input_mutation_magnitude = document.getElementById(
-        "input_mutation_magnitude"
-      );
-      const label_mutation_magnitude = document.getElementById(
-        "num_mutation_magnitude"
-      );
-
-      var n_organisms;
-      var n_vegetables;
-
-      var is_before_play = true;
-
-      var is_running = false;
-
-      // Variável para pausar e despausar o jogo
-      var is_paused = false;
-
-      // Variáveis para auxiliar a atualizar os valores dos sliders
-      var slider_input_organisms = document.getElementById(
-        "slider_input_organisms"
-      );
-      var output_organisms = document.getElementById("output_organisms");
-      output_organisms.innerHTML = slider_input_organisms.value;
-
-      var slider_input_vegetables = document.getElementById(
-        "slider_input_vegetables"
-      );
-      var output_vegetables = document.getElementById("output_vegetables");
-      output_vegetables.innerHTML = slider_input_vegetables.value;
-
-      // Variáveis para pausar e despausar a simulação
-      var button_pause_simulation = document.getElementById(
-        "button_pause_simulation"
-      );
-      var button_resume_simulation = document.getElementById(
-        "button_resume_simulation"
-      );
-
-      // Update do valor do slider a cada vez que ele é modificado
-      slider_input_organisms.oninput = function () {
-        output_organisms.innerHTML = this.value;
-        n_organisms = output_organisms.innerHTML;
-      };
-
-      slider_input_vegetables.oninput = function () {
-        output_vegetables.innerHTML = this.value;
-        n_vegetables = output_vegetables.innerHTML;
-      };
-
-      $(document).ready(function () {
-        document
-          .querySelectorAll(".tab-info")
-          .forEach((element) => drag_screen_element(element));
-      });
-
-      function startSimulation() {
-        universe_size = 1;
-        n_organisms =
-          parseInt(document.getElementById("output_organisms").textContent) *
-          universe_size;
-        n_vegetables =
-          parseInt(document.getElementById("output_vegetables").textContent) *
-          universe_size;
-
-        is_before_play = false;
-        destroy_objects();
-        reset_timer();
-        history.clear(); //julia:checar se está sendo utilizado
-        create_timer();
-        create_universe(universe_size);
-        create_objects(n_organisms, n_vegetables);
-
-        input_vegetable_rate = document.getElementById("input_vegetable_rate");
-        update_vegetables_apparition_interval(input_vegetable_rate.value, true);
-        input_mutation_probability = document.getElementById(
-          "input_mutation_probability"
-        );
-        update_mutation_probability(input_mutation_probability.value);
-        input_mutation_magnitude = document.getElementById(
-          "input_mutation_magnitude"
-        );
-        update_mutation_magnitude(input_mutation_magnitude.value);
-        // document.getElementById("initial_inputs").classList.add("d-none");
-        // document.getElementById("divTamanhoUniverso").classList.add("d-none");
-        // document.getElementById("extra_panel").classList.remove("d-none");
-        // document.getElementById("initial_buttons").classList.add("d-none");
-        // document.getElementById("extra_buttons").classList.remove("d-none");
-        // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
-        if (!is_running && !is_paused) {
-          animate();
-        }
-        is_running = true;
-      }
-
-      function set_default_config() {
-        // volta os parâmetros para o padrão inicial
-        document.getElementById("output_organisms").textContent = 35;
-        document.getElementById("slider_input_organisms").value = 35;
-
-        document.getElementById("output_vegetables").textContent = 800;
-        document.getElementById("slider_input_vegetables").value = 800;
-
-        document.getElementById("num_mutation_probability").textContent = 10;
-        document.getElementById("num_mutation_magnitude").textContent = 5;
-
-        label_vegetable_rate.textContent = 100;
-        input_vegetable_rate.value = 100;
-        input_mutation_probability.value = 10;
-        input_mutation_magnitude.value = 5;
-      }
-
-      function show_initial_panel() {
-        destroy_objects();
-        reset_timer();
-        is_before_play = true;
-        input_vegetable_rate = document.getElementById("input_vegetable_rate");
-        update_vegetables_apparition_interval(input_vegetable_rate.value);
-        input_mutation_probability = document.getElementById(
-          "input_mutation_probability"
-        );
-        update_mutation_probability(input_mutation_probability.value);
-        input_mutation_magnitude = document.getElementById(
-          "input_mutation_magnitude"
-        );
-        update_mutation_magnitude(input_mutation_magnitude.value);
-        document.getElementById("initial_inputs").classList.remove("d-none");
-        document.getElementById("initial_buttons").classList.remove("d-none");
-        document.getElementById("extra_buttons").classList.add("d-none");
-        document.getElementById("extra_panel").classList.add("d-none");
-      }
-
-      function change_mutation_probability() {
-        label_mutation_probability.textContent =
-          input_mutation_probability.value;
-      }
-
-      function change_mutation_magnitude() {
-        label_mutation_magnitude.textContent = input_mutation_magnitude.value;
-      }
-
-      function change_vegetable_rate() {
-        if (input_vegetable_rate.value > 0) {
-          label_vegetable_rate.textContent = input_vegetable_rate.value;
-        } else {
-          label_vegetable_rate.textContent = "nenhum";
-        }
-      }
-
-      function drag_screen_element(element) {
-        let pos1 = 0,
-          pos2 = 0,
-          pos3 = 0,
-          pos4 = 0;
-
-        // se for uma tab
-        if (element.classList.contains("tab-info")) {
-          // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)
-          element.children[0].onmousedown = drag_mouse_down;
-        } else {
-          // otherwise, move the DIV from anywhere inside the DIV:
-          element.onmousedown = drag_mouse_down;
-        }
-
-        function drag_mouse_down(e) {
-          e = e || window.event;
-          e.preventDefault();
-          // get the mouse cursor position at startup:
-          pos3 = e.clientX;
-          pos4 = e.clientY;
-          document.onmouseup = close_drag_element;
-          // call a function whenever the cursor moves:
-          document.onmousemove = element_drag;
-        }
-
-        function element_drag(e) {
-          e = e || window.event;
-          e.preventDefault();
-          // calculate the new cursor position:
-          pos1 = pos3 - e.clientX;
-          pos2 = pos4 - e.clientY;
-          pos3 = e.clientX;
-          pos4 = e.clientY;
-          // set the element's new position:
-          element.style.top = element.offsetTop - pos2 + "px";
-          element.style.left = element.offsetLeft - pos1 + "px";
-        }
-
-        function close_drag_element() {
-          // stop moving when mouse button is released:
-          document.onmouseup = null;
-          document.onmousemove = null;
-        }
-      }
-    </script>
-    <script type="text/javascript" src="app.js"></script>
-    <script type="text/javascript" src="./src/index.js"></script>
-    <script type="text/javascript" src="./src/chart.js"></script>
+    <script type="text/javascript" src="../dist/app.bundle.js"></script>
+    <script type="text/javascript" src="../src/chart.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
       integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
