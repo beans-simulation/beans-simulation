@@ -1,49 +1,48 @@
 // Função para retornar o ultimo elemento de um array sem retira-lo de la
-Array.prototype.last = function() {
+Array.prototype.last = function () {
   return this[this.length - 1];
-}
+};
 
 var cnt = 0;
 var segundoRepetido = -1;
-const chart = document.getElementById("chart")
-const chartSecundario = document.getElementById("chartSecundario")
+const chart = document.getElementById("chart");
+const chartSecundario = document.getElementById("chartSecundario");
 
 let history = new History();
 let historicoE = new History();
 let historicoD = new History();
-
 
 function resetChart() {
   Plotly.purge(chart);
 }
 
 function removeChartTitle() {
-  $(chart).html("")
-  $(chartSecundario).html("")
+  $(chart).html("");
+  $(chartSecundario).html("");
 }
 
 function insertNextDataChart() {
   // Não deixa inserir dados para segundos repetidos
-  if(total_of_seconds == segundoRepetido) {
+  if (total_of_seconds == segundoRepetido) {
     return;
   }
   segundoRepetido = total_of_seconds;
   // Salva os valores atuais no(s) history(s) ---------------------------------------------
-    //  Carnivoros
-    history.carnivoros.population.push(popC.sem_div)
-    history.carnivoros.speed.push(velMedC.sem_div)
-    history.carnivoros.agility.push(forceMedC.sem_div)
-    history.carnivoros.radius.push(radiusMedC.sem_div)
-    history.carnivoros.detection.push(radiusDetMedC.sem_div)
-    history.carnivoros.energy.push(energMedC.sem_div)
-    history.carnivoros.energy_expenditure.push(taxaEnergMedC.sem_div)
-    history.carnivoros.avg_litter_size.push(ninhadaMediaC.sem_div)
+  //  Carnivoros
+  history.carnivoros.population.push(popC.sem_div);
+  history.carnivoros.speed.push(velMedC.sem_div);
+  history.carnivoros.agility.push(forceMedC.sem_div);
+  history.carnivoros.radius.push(radiusMedC.sem_div);
+  history.carnivoros.detection.push(radiusDetMedC.sem_div);
+  history.carnivoros.energy.push(energMedC.sem_div);
+  history.carnivoros.energy_expenditure.push(taxaEnergMedC.sem_div);
+  history.carnivoros.avg_litter_size.push(ninhadaMediaC.sem_div);
 
-    //  Segundos
-    history.seconds.push(total_of_seconds)
+  //  Segundos
+  history.seconds.push(total_of_seconds);
 
-    // Outras infos para a análise de dados
-    history.vegetables_per_seconds.push(input_vegetable_rate.value)
+  // Outras infos para a análise de dados
+  history.vegetables_per_seconds.push(input_vegetable_rate.value);
 
   // ------------------------------------------------------------------------------------------
   // Mesma variável de tempo para todos
@@ -52,7 +51,7 @@ function insertNextDataChart() {
   // Identificar qual o gráfico atual
   let valores;
 
-  switch(chartType) {
+  switch (chartType) {
     case 1:
       valores = [history.carnivoros.population.last()];
       break;
@@ -78,20 +77,19 @@ function insertNextDataChart() {
       valores = [history.carnivoros.avg_litter_size.last()];
   }
 
-  Plotly.extendTraces(chart,{y: valores, x: arraySeconds}, [0,1]);
+  Plotly.extendTraces(chart, { y: valores, x: arraySeconds }, [0, 1]);
   cnt++;
-    if(cnt >500) {
-        Plotly.relayout('chart',{
-            xaxis: {
-                range: [cnt-500,cnt]
-            }
-        });
-    }
-
+  if (cnt > 500) {
+    Plotly.relayout("chart", {
+      xaxis: {
+        range: [cnt - 500, cnt],
+      },
+    });
+  }
 }
 
 function changeChart(type) {
-  if(type == chartType || type < 1 || type > 8) {
+  if (type == chartType || type < 1 || type > 8) {
     return;
   }
   resetChart();
@@ -163,42 +161,40 @@ function buildChart(type) {
   let carnivoros = {
     x: history.seconds,
     y: data[0],
-    type: 'scatter',
-    mode: 'lines',
-    name: 'Carnívoros',
-    line: { color: 'red', shape: 'spline'}
+    type: "scatter",
+    mode: "lines",
+    name: "Carnívoros",
+    line: { color: "red", shape: "spline" },
   };
 
   let dataConfig = [carnivoros];
 
   var layout = {
-  title: title,
+    title: title,
 
-  xaxis: {
+    xaxis: {
       showline: true,
       domain: [0],
       title: "Segundos",
-      showgrid: true
-  },
-  yaxis: { 
-      showline: true, 
-      title: yTitle, 
-      rangemode: "tozero" 
-  },
-  legend: {
-      orientation: 'h',
-          traceorder: 'reversed',
+      showgrid: true,
+    },
+    yaxis: {
+      showline: true,
+      title: yTitle,
+      rangemode: "tozero",
+    },
+    legend: {
+      orientation: "h",
+      traceorder: "reversed",
       x: 0.05,
-      y: -.3
-  },
-  plot_bgcolor:"#222",
-  paper_bgcolor:"#222",
-  font: {
-      color: '#ddd'
-  }
+      y: -0.3,
+    },
+    plot_bgcolor: "#222",
+    paper_bgcolor: "#222",
+    font: {
+      color: "#ddd",
+    },
+  };
+
+  Plotly.newPlot("chart", dataConfig, layout);
 }
-
-  Plotly.newPlot('chart', dataConfig, layout);
-
-}
-
