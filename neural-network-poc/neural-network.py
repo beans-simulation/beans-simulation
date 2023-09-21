@@ -41,6 +41,7 @@ REMOVE_NEURON_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de neurôni
 ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
 REMOVE_CONNECTION_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos 
+CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.2 # Taxa de mutação para mudança do estado de ativação de conexões 
 
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
 MAX_WEIGHT_CHANGE = 0.1
@@ -112,6 +113,7 @@ class Connection:
         self.from_neuron = from_neuron
         self.to_neuron = to_neuron
         self.weight = weight
+        self.activated = True
 
 
 class NeuralNetwork:
@@ -157,7 +159,7 @@ class NeuralNetwork:
             if neuron.neuron_type != 'Input':
                 # Busca todas as conexões de entrada para este neurônio
                 incoming_connections = [c for c in self.connections if c.to_neuron == neuron_id]
-                weighted_inputs = [self.neurons[conn.from_neuron].output * conn.weight for conn in incoming_connections]
+                weighted_inputs = [self.neurons[c.from_neuron].output * c.weight if c.activated else 0 for c in incoming_connections]
                 
                 # Usa a função do neurônio para calcular seu output
                 neuron.compute_output(weighted_inputs)
@@ -363,12 +365,24 @@ class NeuralNetwork:
         if len(self.connections) == 0:
             return
 
-        # Escolhe uma mutação aleatória para mudar o peso
+        # Escolhe uma conexão aleatória para mudar o peso
         connection_to_change = random.choice(self.connections)
 
         # Altera o peso da conexão
         delta = random.uniform(-MAX_WEIGHT_CHANGE, MAX_WEIGHT_CHANGE)
         connection_to_change.weight = round(connection_to_change.weight + delta, MAX_DECIMAL_PLACES)
+
+
+    def change_active_state(self):
+        # Só continua se houver conexões para alterar
+        if len(self.connections) == 0:
+            return
+
+        # Escolhe uma conexão aleatória para mudar o estado de ativação
+        connection_to_change = random.choice(self.connections)
+
+        # Altera o estado de ativação da conexão (True -> False // False -> True)
+        connection_to_change.activated = not connection_to_change.activated
 
 
     # Função responsável por qualquer tipo de mutação
@@ -380,6 +394,8 @@ class NeuralNetwork:
             self.add_connection()
         if random.random() < CHANGE_WEIGHT_MUTATION_RATE:
             self.change_weight()
+        if random.random() < CHANGE_ACTIVE_STATE_MUTATION_RATE:
+            self.change_active_state()
         if random.random() < REMOVE_NEURON_MUTATION_RATE:
             self.remove_neuron()
         if random.random() < REMOVE_CONNECTION_MUTATION_RATE:
@@ -471,7 +487,7 @@ class NeuralNetwork:
         for connection in self.connections:
             from_neuron = next(neuron for neuron in self.neurons.values() if neuron.id == connection.from_neuron)
             to_neuron = next(neuron for neuron in self.neurons.values() if neuron.id == connection.to_neuron)
-            print("{:>25}({})     ------>   {:>18}({}) |  W={}".format(from_neuron.name, from_neuron.id, to_neuron.name, to_neuron.id, connection.weight))
+            print("{:>25}({})     ------>   {:>18}({}) |  W={}  |  Activated={}".format(from_neuron.name, from_neuron.id, to_neuron.name, to_neuron.id, connection.weight, connection.activated))
 
 
 
@@ -548,7 +564,7 @@ print("Valores de output:", basic_network.feed_forward(input_values))
 print("\n------------------------- Rede Após mutação -------------------------")
 
 # Realizando a mutação
-for i in range(1, 5):
+for i in range(1, 2):
     basic_network.mutate()
 
 basic_network.print_network_info()
