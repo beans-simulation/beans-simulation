@@ -122,6 +122,7 @@ class NeuralNetwork:
         self.connections = []
         self.valid = True # Essa flag servirá para dizer se a rede é válida ou não, isso é, se passa por todas as regras de validação
         self.topological_order = [] # Guardará os neurônios em ordem topológica após qualquer alteração na topologia da rede
+        self.dna = [] # Guardará um gene (dicionário) para cada conexão
 
     # Função para calcular a ordem topológica da rede apenas 1x, e que será utilizada em todos os frames
     # dentro da função feed_forward()
@@ -474,6 +475,23 @@ class NeuralNetwork:
         return True
 
 
+    # Essa função
+    def construct_dna(self):
+        # Só continua se houver conexões
+        if len(self.connections) == 0:
+            return
+        
+        for c in self.connections:
+            gene = {
+                'from_neuron': c.from_neuron, 
+                'to_neuron': c.to_neuron, 
+                'weight': c.weight, 
+                'active_state': c.activated 
+            }
+
+            self.dna.append(gene)
+
+
     # Método para retornar informações da rede neural, como seus neurônios e suas conexões
     def print_network_info(self):
         input_neurons = [neuron.name for neuron in self.neurons.values() if neuron.neuron_type == 'Input']
@@ -564,13 +582,17 @@ print("Valores de output:", basic_network.feed_forward(input_values))
 print("\n------------------------- Rede Após mutação -------------------------")
 
 # Realizando a mutação
-for i in range(1, 2):
-    basic_network.mutate()
+# for i in range(1, 2):
+#     basic_network.mutate()
 
 basic_network.print_network_info()
 
 
 print("\nValores de output:", basic_network.feed_forward(input_values))
+
+basic_network.construct_dna()
+
+print(f"\n\nDNA:\n{basic_network.dna}")
 
 
 # Testando rapidez do método feed_forward (que será chamado 1x por frame por organismo)
