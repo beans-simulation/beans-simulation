@@ -466,15 +466,15 @@ function get_input_values_for_neuralnet(){
     input_values = {
       'EnergyLevel': organism.energy, 
       'Temperature': get_temperature(),  
-      'Health': 85, //checar o que isso significa
+      'Health': organism.health,
       'AngleToClosestFood': angle_food,
       'DistToClosestFood': distance_food,
       'NumOfFoodInView': get_amount_of_vegetable_in_vision_angle(organism), 
       'AngleToClosestOrganism': angle_organism,
       'DistToClosestOrganism': distance_organism,
       'NumOfOrganismsInView': get_amount_of_organisms_in_vision_angle(organism),
-      'Luminosity': get_luminosity(), //como calcular isso?
-      'Maturity': 0.83, //checar regras 
+      'Luminosity': get_luminosity(), 
+      'Maturity': organism.maturity, 
       'TimeAlive': get_time_alive_in_seconds(organism) 
     }
     });
@@ -527,8 +527,11 @@ function get_luminosity() {
 }
 
 function get_time_alive_in_seconds(organism: Organism) {
+  // TODO: checar se o valor está fazendo sentido
   return (global_timer.total - organism.birth_moment_in_milliseconds)/1000;
 }
+
+
 // function animate() {
 //   if (is_paused == false) {
 //     idAnimate = requestAnimationFrame(animate);

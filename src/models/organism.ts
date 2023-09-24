@@ -27,6 +27,8 @@ export class Organism implements Drawable {
   public distance_make_circle = 2;
   public dna: DNA;
   public energy: number;
+  public health: number = 85;
+  public maturity: number = 0.83;
   public fixed_max_energy: number;
   public food_eaten = 0;
   public id: number;
@@ -170,6 +172,16 @@ export class Organism implements Drawable {
       }
     } else {
       this.kill();
+    }
+
+    // Alteração do atributo de health
+    // TODO: elaborar lógica para alterar saúde (health) do organismo
+    this.health = 85
+
+    // Alteração do atributo de maturity
+    // TODO: elaborar lógica para alterar maturidade (maturity) do organismo, baseado no limite "time_to_maturity"
+    if(this.maturity<1){ //dummy
+      this.maturity = 0.83
     }
 
     //Delimitação de bordas
