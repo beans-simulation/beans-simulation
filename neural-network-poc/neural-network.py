@@ -3,6 +3,7 @@ import random
 import math
 from collections import deque
 import time
+import string
 
 # -------------------------------------------------------------------------------
 # ---------------------------------- FUNÇÕES ------------------------------------
@@ -27,6 +28,14 @@ def absolute(weighted_inputs):
 def sin(weighted_inputs):
     summed_input = sum(weighted_inputs)
     return math.sin(summed_input)
+
+
+# Funções auxiliares
+def generate_random_string(length):
+    characters = string.ascii_letters + string.digits  # Dígitos e letras ASCII (maiúsculas e minúsculas)
+    random_string = ''.join(random.choices(characters, k=length))
+    return random_string
+
 
 # -------------------------------------------------------------------------------
 # ------------------------- VARIÁVEIS E LISTAS GLOBAIS --------------------------
@@ -92,8 +101,11 @@ neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
 # ---------------------------------- CLASSES ------------------------------------
 # -------------------------------------------------------------------------------
 class Neuron:
-    def __init__(self, id, neuron_type, name):
-        self.id = id
+    def __init__(self, neuron_type, name, id=None):
+        if id is None:
+            self.id = name + generate_random_string(5)
+        else:
+            self.id = id
         self.neuron_type = neuron_type # (Input/Hidden/Output)
         self.name = name # Deve estar na lista "possible_neurons"
         self.activation_function = None
@@ -118,55 +130,77 @@ class Connection:
 
 class NeuralNetwork:
     def __init__(self):
-        self.neurons = {}
+        self.neurons = []
         self.connections = []
         self.valid = True # Essa flag servirá para dizer se a rede é válida ou não, isso é, se passa por todas as regras de validação
         self.topological_order = [] # Guardará os neurônios em ordem topológica após qualquer alteração na topologia da rede
         self.dna = [] # Guardará um gene (dicionário) para cada conexão
+        self.neuron_by_id = {} # Guardará um dicionário dos ids dos neurônios dessa rede
+
+
+    # Função para atualizar a lista de ids dos neurônios dessa rede
+    def update_neuron_by_id(self):
+        self.neuron_by_id = {neuron.id: neuron for neuron in self.neurons}
 
     # Função para calcular a ordem topológica da rede apenas 1x, e que será utilizada em todos os frames
     # dentro da função feed_forward()
     def update_topological_order(self):
         visited = set()
-        topological_order = deque()
-
-        def dfs(start_neuron):
-            visited.add(start_neuron)
-            for target_neuron in [connection.to_neuron for connection in self.connections if connection.from_neuron == start_neuron]:
-                if target_neuron not in visited:
-                    dfs(target_neuron)
-            topological_order.appendleft(start_neuron)
-
-        for neuron_id in self.neurons.keys():
-            if neuron_id not in visited:
-                dfs(neuron_id)
+        topological_order = []
         
-        self.topological_order = list(topological_order)
+        # Começa adicionando os neurônios de input a topological_order
+        input_neurons = [neuron for neuron in self.neurons if neuron.neuron_type == 'Input']
+        topological_order.extend(input_neurons)
+        visited.update(neuron for neuron in input_neurons)
+
+        # Atualiza o dicionário de IDs da rede
+        self.update_neuron_by_id()
+    
+        # Adiciona os neurônios conectados aos neurônios anteriores (de Input)
+        i = 0
+        while i < len(topological_order):
+            current_neuron = topological_order[i]
+            
+            # Encontra os neurônios que se conectam ao atual neurônio de Input
+            connected_neurons = [connection.to_neuron for connection in self.connections if connection.from_neuron == current_neuron.id]
+
+            # Adiciona os neurônios encontrados a topological_order
+            for next_neuron_id in connected_neurons:
+                next_neuron = self.neuron_by_id.get(next_neuron_id)
+                if next_neuron and next_neuron not in visited:
+                    topological_order.append(next_neuron)
+                    visited.add(next_neuron)
+            i += 1
+        
+        self.topological_order = topological_order
+
+        
+
 
 
     # Função que passa os valores input por todas as camadas para calcular os valores de saída. 
     # ESSA É A FUNÇÃO QUE IRÁ RODAR A CADA FRAME!!!
     def feed_forward(self, input_values):
         # Inicializando os neurônios de input com valores fornecidos no dicionário input_values
-        for neuron_id, neuron in self.neurons.items():
+        for neuron in self.neurons:
             if neuron.neuron_type == 'Input':
                 neuron.output = input_values.get(neuron.name, 0) if neuron.name != "Constant" else CONSTANT_NEURON_VALUE
-        
+    
+
         # Usa a ordem topológica da rede pra calcular os outputs corretamente
-        for neuron_id in self.topological_order:
-            neuron = self.neurons[neuron_id]
-            
+        for neuron in self.topological_order:            
             # Pula os neurônios de Input já que seus outputs são definidos fora da rede (no nosso contexto, são os sentidos do organismo)
             if neuron.neuron_type != 'Input':
                 # Busca todas as conexões de entrada para este neurônio
-                incoming_connections = [c for c in self.connections if c.to_neuron == neuron_id]
-                weighted_inputs = [self.neurons[c.from_neuron].output * c.weight if c.activated else 0 for c in incoming_connections]
+                incoming_connections = [c for c in self.connections if c.to_neuron == neuron.id]
+                weighted_inputs = [self.neuron_by_id[c.from_neuron].output * c.weight if c.activated else 0 for c in incoming_connections]
                 
                 # Usa a função do neurônio para calcular seu output
                 neuron.compute_output(weighted_inputs)
                 
         # Extrai e retorna os valores de output dos neurônios da última camada
-        output_values = {neuron.name: neuron.output for _, neuron in self.neurons.items() if neuron.neuron_type == 'Output'}
+        output_values = {neuron.name: neuron.output for neuron in self.neurons if neuron.neuron_type == 'Output'}
+        
         return output_values # É DAQUI QUE SAIRÃO OS VALORES PARA O COMPORTAMENTO DOS ORGANISMOS!!!
 
     
@@ -177,8 +211,8 @@ class NeuralNetwork:
         # Tenta adicionar uma conexão válida até max_trials vezes ou até conseguir
         while trials < max_trials:
             # Primeiro pega os neurônios de input/output já existentes na rede
-            existing_inputs = [neuron.name for _, neuron in self.neurons.items() if neuron.neuron_type == "Input"]
-            existing_outputs = [neuron.name for _, neuron in self.neurons.items() if neuron.neuron_type == "Output"]
+            existing_inputs = [neuron.name for neuron in self.neurons if neuron.neuron_type == "Input"]
+            existing_outputs = [neuron.name for neuron in self.neurons if neuron.neuron_type == "Output"]
             
             # Retira da lista possible_neurons os neurônio input/output já existentes para evitar duplicação
             available_neurons = [n for n in possible_neurons if not (
@@ -193,14 +227,13 @@ class NeuralNetwork:
             neuron_type, name = random.choice(available_neurons)
             
             # Cria e adiciona o neurônio novo
-            new_id = max(self.neurons.keys(), default=-1) + 1  # Adiciona 1 ao key máximo
-            new_neuron = Neuron(new_id, neuron_type, name)
-            self.neurons[new_id] = new_neuron
+            new_neuron = Neuron(neuron_type, name)
+            self.neurons.append(new_neuron)
             
             # Lida com as conexões do novo neurônio de acordo com o seu tipo
             if neuron_type == 'Hidden': # Precisam ter 2 conexões
-                input_or_hidden_neurons = [n for n in self.neurons.values() if n.neuron_type in ['Input', 'Hidden'] and n.id != new_id]
-                output_or_hidden_neurons = [n for n in self.neurons.values() if n.neuron_type in ['Output', 'Hidden'] and n.id != new_id]
+                input_or_hidden_neurons = [n for n in self.neurons if n.neuron_type in ['Input', 'Hidden'] and n.id != new_neuron.id]
+                output_or_hidden_neurons = [n for n in self.neurons if n.neuron_type in ['Output', 'Hidden'] and n.id != new_neuron.id]
                 
                 # Se existe algum neurônio para se conectar
                 if input_or_hidden_neurons and output_or_hidden_neurons:
@@ -214,27 +247,27 @@ class NeuralNetwork:
                         self.connections.remove(existing_connection)
                     
                     # Adiciona as novas conexões
-                    self.connections.append(Connection(from_neuron.id, new_id))
-                    self.connections.append(Connection(new_id, to_neuron.id))
+                    self.connections.append(Connection(from_neuron.id, new_neuron.id))
+                    self.connections.append(Connection(new_neuron.id, to_neuron.id))
 
                     
             else: # Se o neurônio for do tipo input ou output, só cria 1 conexão
-                target_neurons = [n for n in self.neurons.values() if n.neuron_type in ['Hidden', 'Output']] if neuron_type == 'Input' else [n for n in self.neurons.values() if n.neuron_type in ['Input', 'Hidden']]
+                target_neurons = [n for n in self.neurons if n.neuron_type in ['Hidden', 'Output']] if neuron_type == 'Input' else [n for n in self.neurons if n.neuron_type in ['Input', 'Hidden']]
                 
                 # Caso não haja mais neurônio novo para se conectar
                 if not target_neurons:
                     return
                 
                 chosen_target = random.choice(target_neurons)
-                self.connections.append(Connection(new_id, chosen_target.id) if neuron_type == 'Input' else Connection(chosen_target.id, new_id))
+                self.connections.append(Connection(new_neuron.id, chosen_target.id) if neuron_type == 'Input' else Connection(chosen_target.id, new_neuron.id))
 
             # Valida a rede neural depois que o neurônio foi adicionado
             if self.validate_network():
                 break
             else: # Se algo deu errado
-                del self.neurons[new_id]  # Remove o neurônio adicionado
+                del self.neurons[new_neuron.id]  # Remove o neurônio adicionado
                  # Remove as conexões ligadas ao neurônio adicionado
-                self.connections = [c for c in self.connections if c.from_neuron != new_id and c.to_neuron != new_id]
+                self.connections = [c for c in self.connections if c.from_neuron != new_neuron.id and c.to_neuron != new_neuron.id]
 
             trials += 1
 
@@ -249,7 +282,7 @@ class NeuralNetwork:
         if len(self.neurons) > 0:
 
             # Escolhe aleatoriamente um neurônio para remover
-            neuron_to_remove = random.choice(list(self.neurons.values()))
+            neuron_to_remove = random.choice(list(self.neurons))
 
             # Se o neurônio escolhido para remoção é da camada oculta, os neurônios
             # aos quais ele estava conectado precisam se conectar
@@ -266,7 +299,8 @@ class NeuralNetwork:
                         self.connections.append(Connection(i, o))
 
             # Remove o neurônio do dicionário de neurônios
-            del self.neurons[neuron_to_remove.id]
+            self.neurons = [neuron for neuron in self.neurons if neuron.id != neuron_to_remove.id]
+
 
             # Atualiza as conexões da rede
             self.connections = [connection for connection in self.connections if connection.from_neuron != neuron_to_remove.id and connection.to_neuron != neuron_to_remove.id]
@@ -282,7 +316,7 @@ class NeuralNetwork:
         # Loop para identificar e remover qualquer neurônio solto
         while True:
             loose_neurons = []
-            for _, neuron in self.neurons.items():
+            for neuron in self.neurons:
                 # Pega a conexão de entrada do neurônio
                 incoming = [connection for connection in self.connections if connection.to_neuron == neuron.id]
                 # Pega a conexão de saída do neurônio
@@ -298,9 +332,9 @@ class NeuralNetwork:
                 break
 
             # Remove todos os neurônios soltos que encontrou nessa iteração
-            for neuron in loose_neurons:
-                del self.neurons[neuron.id]  # Remove do dicionário de neurônios
-                self.connections = [connection for connection in self.connections if connection.from_neuron != neuron.id and connection.to_neuron != neuron.id]
+            for neuron_to_remove in loose_neurons:
+                self.neurons = [neuron for neuron in self.neurons if neuron.id != neuron_to_remove.id]
+                self.connections = [connection for connection in self.connections if connection.from_neuron != neuron_to_remove.id and connection.to_neuron != neuron_to_remove.id]
 
             self.update_topological_order() # Atualiza a topologia da rede
 
@@ -314,8 +348,8 @@ class NeuralNetwork:
             # Tenta adicionar uma conexão válida até max_trials vezes ou até conseguir
             while trials < max_trials:
                 # Seleciona dois neurônios aleatórios para se conectarem
-                from_neuron = random.choice([n for n in self.neurons.values() if n.neuron_type != "Output"])
-                to_neuron = random.choice([n for n in self.neurons.values() if n.neuron_type != "Input" and n.id != from_neuron.id])
+                from_neuron = random.choice([n for n in self.neurons if n.neuron_type != "Output"])
+                to_neuron = random.choice([n for n in self.neurons if n.neuron_type != "Input" and n.id != from_neuron.id])
 
                 if not from_neuron or not to_neuron:
                     print("Não há neurônios disponíveis para fazer a conexão.")
@@ -409,6 +443,9 @@ class NeuralNetwork:
             self.neurons = []
             self.connections = []
 
+        # Atualiza a topologia da rede
+        self.update_topological_order() 
+
 
     # Função para validar a rede neural e checar se ela está seguindo as regras
     def validate_network(self):
@@ -420,7 +457,7 @@ class NeuralNetwork:
             return False
 
         # Checa se as conexões fazem sentido com os tipos de neurônios
-        for neuron in self.neurons.values():
+        for neuron in self.neurons:
             incoming = [connection for connection in self.connections if connection.to_neuron == neuron.id]
             outgoing = [connection for connection in self.connections if connection.from_neuron == neuron.id]
             
@@ -443,7 +480,7 @@ class NeuralNetwork:
             return False
 
         # Checa por loops de conexão (Ex.: A->B, B->C, C->A)
-        for start_neuron in self.neurons.values():
+        for start_neuron in self.neurons:
             visited = set() # Para acompanhar quais neurônios já visitamos
 
             # Armazena tuplas em que cada tupla armazena o ID do neurônio e um iterador de todos os seus neurônios-filho
@@ -482,11 +519,13 @@ class NeuralNetwork:
             return
         
         for c in self.connections:
+            connection_id = str(c.from_neuron) + str(c.to_neuron)
             gene = {
                 'from_neuron': c.from_neuron, 
                 'to_neuron': c.to_neuron, 
                 'weight': c.weight, 
-                'active_state': c.activated 
+                'active_state': c.activated,
+                'connection_id': connection_id
             }
 
             self.dna.append(gene)
@@ -494,18 +533,18 @@ class NeuralNetwork:
 
     # Método para retornar informações da rede neural, como seus neurônios e suas conexões
     def print_network_info(self):
-        input_neurons = [neuron.name for neuron in self.neurons.values() if neuron.neuron_type == 'Input']
-        hidden_neurons = [neuron.name for neuron in self.neurons.values() if neuron.neuron_type == 'Hidden']
-        output_neurons = [neuron.name for neuron in self.neurons.values() if neuron.neuron_type == 'Output']
+        input_neurons = [neuron.name for neuron in self.neurons if neuron.neuron_type == 'Input']
+        hidden_neurons = [neuron.name for neuron in self.neurons if neuron.neuron_type == 'Hidden']
+        output_neurons = [neuron.name for neuron in self.neurons if neuron.neuron_type == 'Output']
         
         print(f"\nNeurônios Input: {input_neurons}")
         print(f"Neurônios Hidden: {hidden_neurons}")
         print(f"Neurônios Output: {output_neurons}\n")
         print("Conexões:")
         for connection in self.connections:
-            from_neuron = next(neuron for neuron in self.neurons.values() if neuron.id == connection.from_neuron)
-            to_neuron = next(neuron for neuron in self.neurons.values() if neuron.id == connection.to_neuron)
-            print("{:>25}({})     ------>   {:>18}({}) |  W={}  |  Activated={}".format(from_neuron.name, from_neuron.id, to_neuron.name, to_neuron.id, connection.weight, connection.activated))
+            from_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.from_neuron)
+            to_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.to_neuron)
+            print("{:>25}     ------>   {:>18} |  W={}  |  Activated={}".format(from_neuron.name, to_neuron.name, connection.weight, connection.activated))
 
 
 
@@ -524,18 +563,18 @@ Constant --------------------------------------------------> Accelerate
 AngleToClosestFood ----------> PiecewiseConstant ----------> Rotate
 """
 # Adicionando os neurônios na rede
-basic_network.neurons = {
-    0: Neuron(0, 'Input', 'AngleToClosestFood'),
-    1: Neuron(1, 'Input', 'Constant'),
-    2: Neuron(2, 'Input', 'Health'),
-    3: Neuron(3, 'Input', 'TimeAlive'),
-    4: Neuron(4, 'Hidden', 'PiecewiseConstant'),
-    5: Neuron(5, 'Hidden', 'Sin'),
-    6: Neuron(6, 'Hidden', 'Absolute'),
-    7: Neuron(7, 'Output', 'Accelerate'),
-    8: Neuron(8, 'Output', 'Rotate'),
-    9: Neuron(9, 'Output', 'DesireToEat'),
-}
+basic_network.neurons = [
+    Neuron('Input', 'AngleToClosestFood', 0),
+    Neuron('Input', 'Constant', 1),
+    Neuron('Input', 'Health', 2),
+    Neuron('Input', 'TimeAlive', 3),
+    Neuron('Hidden', 'PiecewiseConstant', 4),
+    Neuron('Hidden', 'Sin', 5),
+    Neuron('Hidden', 'Absolute', 6),
+    Neuron('Output', 'Accelerate', 7),
+    Neuron('Output', 'Rotate', 8),
+    Neuron('Output', 'DesireToEat', 9),
+]
 
 # Criando as conexões entre os neurônios
 basic_network.connections = [
@@ -582,8 +621,9 @@ print("Valores de output:", basic_network.feed_forward(input_values))
 print("\n------------------------- Rede Após mutação -------------------------")
 
 # Realizando a mutação
-# for i in range(1, 2):
-#     basic_network.mutate()
+for i in range(1, 2):
+    basic_network.mutate()
+
 
 basic_network.print_network_info()
 
