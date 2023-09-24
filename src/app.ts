@@ -469,10 +469,10 @@ function get_input_values_for_neuralnet(){
       'Health': organism.health,
       'AngleToClosestFood': angle_food,
       'DistToClosestFood': distance_food,
-      'NumOfFoodInView': get_amount_of_vegetable_in_vision_angle(organism), 
+      'NumOfFoodInView': get_amount_of_vegetable_in_view(organism), 
       'AngleToClosestOrganism': angle_organism,
       'DistToClosestOrganism': distance_organism,
-      'NumOfOrganismsInView': get_amount_of_organisms_in_vision_angle(organism),
+      'NumOfOrganismsInView': get_amount_of_organisms_in_view(organism),
       'Luminosity': get_luminosity(), 
       'Maturity': organism.maturity, 
       'TimeAlive': get_time_alive_in_seconds(organism) 
@@ -489,7 +489,7 @@ function get_distance_and_angle_to_closest_vegetable(organism: Organism) {
   return distance_and_angle;
 }
 
-function get_amount_of_vegetable_in_vision_angle(organism: Organism) {
+function get_amount_of_vegetable_in_view(organism: Organism) {
   var food:number = 3;
   // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
   // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos, 
@@ -506,7 +506,7 @@ function get_distance_and_angle_to_closest_organism(organism: Organism) {
   return distance_and_angle;
 }
 
-function get_amount_of_organisms_in_vision_angle(organism: Organism) {
+function get_amount_of_organisms_in_view(organism: Organism) {
   var amount:number = 0;
   // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
   // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos, 
