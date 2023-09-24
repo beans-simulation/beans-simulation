@@ -432,20 +432,6 @@ function desacelera() {
 }
 // estrutura geral da função que vai alimentara rede neural
 function get_input_values_for_neuralnet(){
-//   input_values = { # ESSES VALORES SÃO ARBITRÁRIOS AQUI
-//     'EnergyLevel': 25, 
-//     'Temperature': 16,
-//     'Health': 85,
-//     'AngleToClosestFood': -30, # A rede inicial só precisa desse valor, já que não possui os outros neurônios
-//     'DistToClosestFood': 56,
-//     'NumOfFoodInView': 3,
-//     'AngleToClosestOrganism': -77,
-//     'DistToClosestOrganism': 172,
-//     'NumOfOrganismsInView': 0,
-//     'Luminosity': 0.56,
-//     'Maturity': 0.83,
-//     'TimeAlive': 104
-// }
   var input_values: {};
   var distance_food: number;
   var angle_food: number;
