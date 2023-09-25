@@ -1,4 +1,4 @@
-import { Organism, Vegetable } from "./models";
+import { global_timer, Organism, Timer, Vegetable } from "./models";
 import {
   animate,
   create_context,
@@ -8,14 +8,20 @@ import {
 import {
   DEFAULT_INPUTS,
   button_pause_simulation,
+  button_restart_simulation,
   button_resume_simulation,
-  global_timer,
+  button_set_default,
+  button_start_simulation,
   globals,
   input_mutation_magnitude,
   input_mutation_probability,
   input_slider_organisms,
   input_slider_vegetables,
   input_vegetable_rate,
+  label_mutation_magnitude,
+  label_mutation_probability,
+  label_timer,
+  label_vegetable_rate,
 } from "./resources";
 
 const { canvas, context } = create_context();
@@ -72,8 +78,49 @@ var is_paused = false;
 // a função setInterval() permite que ele chame o loop a cada x milisegundos
 let vegetable_generation_interval: NodeJS.Timeout | undefined;
 
+function add_on_change_event_input(
+  input: HTMLInputElement | null,
+  label: HTMLElement | null,
+  action: (value: string) => void
+): void {
+  input?.addEventListener("change", () => {
+    const new_value = input?.value || "";
+    action(new_value);
+    if (label) label.textContent = new_value;
+  });
+}
+
 document.addEventListener("DOMContentLoaded", (_) => {
   document.querySelectorAll(".tab-info").forEach(drag_screen_element);
+
+  // botoes de controle da simulacao
+  button_set_default?.addEventListener("click", set_default_config);
+  button_start_simulation?.addEventListener("click", start_simulation);
+  button_restart_simulation?.addEventListener("click", show_initial_panel);
+  button_pause_simulation?.addEventListener("click", pausa);
+  button_resume_simulation?.addEventListener("click", despausa);
+
+  // slider inputs
+  add_on_change_event_input(
+    input_mutation_probability,
+    label_mutation_probability,
+    update_mutation_probability
+  );
+  add_on_change_event_input(
+    input_mutation_magnitude,
+    label_mutation_magnitude,
+    update_mutation_magnitude
+  );
+  add_on_change_event_input(
+    input_mutation_probability,
+    label_mutation_probability,
+    update_mutation_probability
+  );
+  add_on_change_event_input(
+    input_vegetable_rate,
+    label_vegetable_rate,
+    update_vegetables_apparition_interval
+  );
 });
 
 function destroy_objects() {
@@ -109,7 +156,6 @@ function update_vegetables_apparition_interval(vegetable_rate?: string) {
   }
 }
 
-// TODO: TEM
 function set_default_config() {
   // volta os parâmetros para o padrão inicial
   if (input_slider_organisms)
@@ -124,14 +170,12 @@ function set_default_config() {
     input_vegetable_rate.value = DEFAULT_INPUTS.vegetables_rate;
 }
 
-// TODO: TEM
 function update_mutation_probability(value?: string) {
   if (value) {
     globals.mutation_probability = Number(value) / 100;
   }
 }
 
-// TODO: TEM
 function update_mutation_magnitude(value?: string) {
   if (value) {
     globals.mutation_magnitude = Number(value) / 100;
@@ -145,8 +189,11 @@ function set_universe(canvas: HTMLCanvasElement | null) {
   }
 }
 
-// TODO: TEM
-function startSimulation() {
+function update_timer_display(time: number, formattedTime?: string) {
+  if (label_timer && formattedTime) label_timer.textContent = formattedTime;
+}
+
+function start_simulation() {
   const n_organisms =
     parseInt(input_slider_organisms?.value || "0") * globals.universe_size;
 
@@ -155,7 +202,7 @@ function startSimulation() {
 
   // is_before_play = false;
   destroy_objects();
-  global_timer.restart();
+  global_timer.play(update_timer_display);
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
   create_objects(n_organisms, n_vegetables);
@@ -182,7 +229,6 @@ function startSimulation() {
   // is_running = true;
 }
 
-// TODO: TEM
 function show_initial_panel() {
   destroy_objects();
   global_timer.reset();
@@ -204,26 +250,6 @@ function show_initial_panel() {
   // document.getElementById("extra_buttons").classList.add("d-none");
   // document.getElementById("extra_panel").classList.add("d-none");
 }
-
-// // TODO: TEM
-// function change_mutation_probability() {
-//   label_mutation_probability.textContent =
-//     input_mutation_probability.value;
-// }
-
-// // TODO: TEM
-// function change_mutation_magnitude() {
-//   label_mutation_magnitude.textContent = input_mutation_magnitude.value;
-// }
-
-// // TODO: TEM
-// function change_vegetable_rate() {
-//   if (input_vegetable_rate.value > 0) {
-//     label_vegetable_rate.textContent = input_vegetable_rate.value;
-//   } else {
-//     label_vegetable_rate.textContent = "nenhum";
-//   }
-// }
 
 // function drag_mouse_down(event: MouseEvent) {
 //   event.preventDefault();
@@ -402,7 +428,6 @@ var limitador_de_loop = 0;
 
 var idAnimate;
 
-// TODO: TEM
 function pausa() {
   global_timer.pause();
 
@@ -410,7 +435,6 @@ function pausa() {
   button_resume_simulation?.classList.remove("d-none");
 }
 
-// TODO: TEM
 function despausa() {
   global_timer.play();
 
@@ -418,14 +442,12 @@ function despausa() {
   button_pause_simulation?.classList.remove("d-none");
 }
 
-// TODO: TEM
 function acelera() {
   animate(context);
 
   // btnDesacelera.classList.remove("d-none");
 }
 
-// TODO: TEM
 function desacelera() {
   pausa();
   setTimeout(despausa, 10);
