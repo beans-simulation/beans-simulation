@@ -90,6 +90,11 @@ def reconstruct_neural_network_from_dna(dna):
     return nn
 
 
+def update_neural_network(nn):
+    nn.update_topological_order()
+    nn.construct_dna()
+
+
 # -------------------------------------------------------------------------------
 # ------------------------- VARIÁVEIS E LISTAS GLOBAIS --------------------------
 # -------------------------------------------------------------------------------
@@ -569,6 +574,7 @@ class NeuralNetwork:
         if len(self.connections) == 0:
             return
         
+        dna = []
         for c in self.connections:
             connection_id = str(c.from_neuron) + "-" + str(c.to_neuron)
 
@@ -585,7 +591,9 @@ class NeuralNetwork:
                 'connection_id': connection_id
             }
 
-            self.dna.append(gene)
+            dna.append(gene)
+
+        self.dna = dna
 
 
 
@@ -666,8 +674,6 @@ basic_network.connections = [
     Connection(6, 8, 1.0)   # Absolute --> Rotate
 ]
 
-# Atualizando a ordem topológica da rede
-basic_network.update_topological_order()
 
 # Criando os valores de input manualmente. Na simulação, esses valores virão dos sentidos do organismo
 # A maioria desses neurônios não está presente nessa rede, mas caso a mutação introduza esses neurônios,
@@ -690,6 +696,8 @@ input_values = { # ESSES VALORES SÃO ARBITRÁRIOS AQUI
 
 print("\n--------------------------- Rede Inicial ---------------------------")
 
+update_neural_network(basic_network)
+
 # Imprimindo na tela informações gerais da rede
 basic_network.print_network_info()
 
@@ -709,9 +717,9 @@ basic_network.print_network_info()
 
 print("\nValores de output:", basic_network.feed_forward(input_values))
 
-basic_network.construct_dna()
+update_neural_network(basic_network)
 
-# # print(f"\n\nDNA PAI:\n{basic_network.dna}")
+print(f"\n\nDNA PAI:\n{basic_network.dna}")
 
 
 print("\n--------------------------- Rede Filha ---------------------------")
@@ -723,9 +731,9 @@ nn_filha.print_network_info()
 
 print("Valores de output:", nn_filha.feed_forward(input_values))
 
-# nn_filha.construct_dna()
+update_neural_network(nn_filha)
 
-# print(f"\n\nDNA FILHA:\n{basic_network.dna}")
+print(f"\n\nDNA FILHA:\n{basic_network.dna}")
 
 
 
