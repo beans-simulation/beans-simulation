@@ -53,9 +53,6 @@ def reconstruct_neural_network_from_dna(dna):
         from_neuron_id = gene['from_neuron_id']
         to_neuron_id = gene['to_neuron_id']
 
-        # from_neuron_type = [ntype for ntype, nname in possible_neurons if nname == from_neuron_name][0]
-        # to_neuron_type = [ntype for ntype, nname in possible_neurons if nname == to_neuron_name][0]
-        
         neurons_names_and_id.append([from_neuron_name, from_neuron_id])
         neurons_names_and_id.append([to_neuron_name, to_neuron_id])
 
@@ -84,7 +81,6 @@ def reconstruct_neural_network_from_dna(dna):
     
     nn.connections = connections
 
-
     # Criando novos IDs dos neurônios para que não fiquem iguais aos do DNA-pai
     nn.create_new_ids() 
 
@@ -102,10 +98,10 @@ def reconstruct_neural_network_from_dna(dna):
 CONSTANT_NEURON_VALUE = 1
 
 # MUtação
-ADD_NEURON_MUTATION_RATE = 0.5 # Taxa de mutação para adição de neurônios
-REMOVE_NEURON_MUTATION_RATE = 0 # Taxa de mutação para remoção de neurônios
+ADD_NEURON_MUTATION_RATE = 0.7 # Taxa de mutação para adição de neurônios
+REMOVE_NEURON_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de neurônios
 ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
-REMOVE_CONNECTION_MUTATION_RATE = 0 # Taxa de mutação para remoção de conexões
+REMOVE_CONNECTION_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos 
 CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.2 # Taxa de mutação para mudança do estado de ativação de conexões 
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
@@ -199,40 +195,36 @@ class NeuralNetwork:
     def update_neuron_by_id(self):
         self.neuron_by_id = {neuron.id: neuron for neuron in self.neurons}
 
+    
+    # Função auxiliar para update_topological_order()
+    def dfs_topological_sort(self, neuron, visited, stack):
+        visited.add(neuron)
+
+        # Pega os neurônios conectados ao neurônio atual
+        connected_neurons = [connection.to_neuron for connection in self.connections if connection.from_neuron == neuron.id]
+        
+        for next_neuron_id in connected_neurons:
+            next_neuron = self.neuron_by_id.get(next_neuron_id) # Pega o objeto Neuron com base no ID
+            if next_neuron and next_neuron not in visited:
+                self.dfs_topological_sort(next_neuron, visited, stack) # Recursividade
+        
+        stack.append(neuron)
+
     # Função para calcular a ordem topológica da rede apenas 1x, e que será utilizada em todos os frames
     # dentro da função feed_forward()
     def update_topological_order(self):
         visited = set()
-        topological_order = []
+        stack = []
         
-        # Começa adicionando os neurônios de input a topological_order
-        input_neurons = [neuron for neuron in self.neurons if neuron.neuron_type == 'Input']
-        topological_order.extend(input_neurons)
-        visited.update(neuron for neuron in input_neurons)
-
         # Atualiza o dicionário de IDs da rede
         self.update_neuron_by_id()
-    
-        # Adiciona os neurônios conectados aos neurônios anteriores (de Input)
-        i = 0
-        while i < len(topological_order):
-            current_neuron = topological_order[i]
-            
-            # Encontra os neurônios que se conectam ao atual neurônio de Input
-            connected_neurons = [connection.to_neuron for connection in self.connections if connection.from_neuron == current_neuron.id]
-
-            # Adiciona os neurônios encontrados a topological_order
-            for next_neuron_id in connected_neurons:
-                next_neuron = self.neuron_by_id.get(next_neuron_id)
-                if next_neuron and next_neuron not in visited:
-                    topological_order.append(next_neuron)
-                    visited.add(next_neuron)
-            i += 1
         
-        self.topological_order = topological_order
-
+        for neuron in self.neurons:
+            if neuron not in visited:
+                self.dfs_topological_sort(neuron, visited, stack)
+                
+        self.topological_order = list(reversed(stack))
         
-
 
 
     # Função que passa os valores input por todas as camadas para calcular os valores de saída. 
@@ -250,6 +242,8 @@ class NeuralNetwork:
             if neuron.neuron_type != 'Input':
                 # Busca todas as conexões de entrada para este neurônio
                 incoming_connections = [c for c in self.connections if c.to_neuron == neuron.id]
+                # print(f"DEBUG -> from_neuron.name = {[self.neuron_by_id[c.from_neuron].name if c.activated else 0 for c in incoming_connections]}")
+                # print(f"DEBUG -> outputs = {[self.neuron_by_id[c.from_neuron].output if c.activated else 0 for c in incoming_connections]}")
                 weighted_inputs = [self.neuron_by_id[c.from_neuron].output * c.weight if c.activated else 0 for c in incoming_connections]
                 
                 # Usa a função do neurônio para calcular seu output
@@ -322,7 +316,7 @@ class NeuralNetwork:
             if self.validate_network():
                 break
             else: # Se algo deu errado
-                del self.neurons[new_neuron.id]  # Remove o neurônio adicionado
+                self.neurons = [neuron for neuron in self.neurons if neuron.id != new_neuron.id] # Remove o neurônio adicionado
                  # Remove as conexões ligadas ao neurônio adicionado
                 self.connections = [c for c in self.connections if c.from_neuron != new_neuron.id and c.to_neuron != new_neuron.id]
 
@@ -706,7 +700,7 @@ print("Valores de output:", basic_network.feed_forward(input_values))
 print("\n------------------------- Rede Após mutação -------------------------")
 
 # Realizando a mutação
-for i in range(1, 2):
+for i in range(1, 5):
     basic_network.mutate()
 
 
@@ -717,7 +711,7 @@ print("\nValores de output:", basic_network.feed_forward(input_values))
 
 basic_network.construct_dna()
 
-# print(f"\n\nDNA PAI:\n{basic_network.dna}")
+# # print(f"\n\nDNA PAI:\n{basic_network.dna}")
 
 
 print("\n--------------------------- Rede Filha ---------------------------")
@@ -729,7 +723,7 @@ nn_filha.print_network_info()
 
 print("Valores de output:", nn_filha.feed_forward(input_values))
 
-nn_filha.construct_dna()
+# nn_filha.construct_dna()
 
 # print(f"\n\nDNA FILHA:\n{basic_network.dna}")
 
