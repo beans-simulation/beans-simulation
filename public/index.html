@@ -35,13 +35,6 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
       rel="stylesheet"
     />
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
-    <script type="text/javascript" src="../dist/app.bundle.js"></script>
-
   </head>
 
   <body style="background: #222">
@@ -57,11 +50,7 @@
     <!-- <div id="link">
         <a id="linkGit"  target="__blank" href="https://github.com/e-llo/beans">GitHub: https://github.com/e-llo/beans </a>
     </div> -->
-    <div class="cronometro">
-      <span id="hora">00</span>:<span id="minuto">00</span>:<span id="segundo"
-        >00</span
-      >:<span id="milisegundo">00</span>
-    </div>
+    <div id="label_timer" class="cronometro">00:00:00.000</div>
 
     <!-- <div class="framerate">
         <p>Frame rate: <span id="framerate"></span></p>
@@ -106,64 +95,51 @@
           <div class="tab-body">
             <div id="painelInicial">
               <div id="initial_inputs" class="p-0 m-0">
-                <label
-                  id="organism"
-                  name="organism"
-                  for="slider_input_organisms"
-                  >Carnívoros: <label id="output_organisms">35</label></label
+                <label for="slider_input_organisms"
+                  >Organismos: <label id="label_organisms">35</label></label
                 >
                 <input
                   type="range"
                   min="0"
                   max="500"
-                  value="4"
+                  value="35"
                   class="slider-red"
                   step="1"
                   id="slider_input_organisms"
-                  oninput="output_organisms.textContent=slider_input_organisms.value"
+                  oninput="label_organisms.textContent=slider_input_organisms.value"
                 />
-                <label
-                  id="vegetable"
-                  name="vegetable"
-                  for="slider_input_vegetables"
-                  >Vegetais: <label id="output_vegetables">800</label></label
+                <label for="slider_input_vegetables"
+                  >Vegetais: <label id="label_vegetables">800</label></label
                 >
                 <input
                   type="range"
                   min="0"
                   max="3000"
-                  value="100"
+                  value="800"
                   class="slider-yellow"
                   step="5"
                   id="slider_input_vegetables"
-                  oninput="output_vegetables.textContent=slider_input_vegetables.value"
+                  oninput="label_vegetables.textContent=slider_input_vegetables.value"
                 />
               </div>
-              <label
-                id="taxavegetable"
-                name="taxavegetable"
-                for="input_vegetable_rate"
+              <label for="input_vegetable_rate"
                 >Aparição de vegetais:
-                <label id="num_vegetable_rate">100</label> por segundo</label
+                <label id="label_vegetable_rate">100</label> por segundo</label
               >
               <input
                 type="range"
                 min="0"
                 max="1000"
-                value="10"
+                value="100"
                 class="slider-yellow"
                 step="1"
                 id="input_vegetable_rate"
-                oninput="num_vegetable_rate.textContent=input_vegetable_rate.value"
-                onchange="update_vegetables_apparition_interval(input_vegetable_rate.value)"
+                oninput="label_vegetable_rate.textContent=input_vegetable_rate.value"
               />
 
-              <label
-                id="probMutacao"
-                name="probMutacao"
-                for="input_mutation_probability"
+              <label for="input_mutation_probability"
                 >Probabilidade de mutação:
-                <label id="num_mutation_probability">10</label>%</label
+                <label id="label_mutation_probability">10</label>%</label
               >
               <input
                 type="range"
@@ -172,16 +148,12 @@
                 value="10"
                 class="slider-blue"
                 id="input_mutation_probability"
-                oninput="num_mutation_probability.textContent=input_mutation_probability.value"
-                onchange="update_mutation_probability(input_mutation_probability.value)"
+                oninput="label_mutation_probability.textContent=input_mutation_probability.value"
               />
 
-              <label
-                id="magMutacao"
-                name="magMutacao"
-                for="input_mutation_magnitude"
+              <label for="input_mutation_magnitude"
                 >Magnitude das mutações:
-                <label id="num_mutation_magnitude">5</label>%</label
+                <label id="label_mutation_magnitude">5</label>%</label
               >
               <input
                 type="range"
@@ -190,26 +162,25 @@
                 value="5"
                 class="slider-blue"
                 id="input_mutation_magnitude"
-                oninput="num_mutation_magnitude.textContent=input_mutation_magnitude.value"
-                onchange="update_mutation_magnitude(input_mutation_magnitude.value)"
+                oninput="label_mutation_magnitude.textContent=input_mutation_magnitude.value"
               />
 
               <div id="initial_buttons" class="row mt-3">
                 <div class="col-sm-3 d-grid gap-2">
                   <button
+                    id="button_set_default"
                     type="button"
                     class="btn btn-sm btn-outline-secondary"
                     style="color: #ddd"
-                    onclick="set_default_config()"
                   >
                     Default
                   </button>
                 </div>
                 <div class="col-sm-9 d-grid gap-2">
                   <button
+                    id="button_start_simulation"
                     type="button"
                     class="btn btn-sm btn-success"
-                    onclick="startSimulation()"
                   >
                     Play
                   </button>
@@ -217,26 +188,23 @@
               </div>
               <div id="extra_buttons" class="mt-3 text-center d-none">
                 <button
-                  id="restartBtn"
+                  id="button_restart_simulation"
                   type="button"
                   class="btn btn-sm btn-block btn-outline-secondary"
                   style="color: #ddd"
-                  onclick="show_initial_panel()"
                 >
                   Restart
                 </button>
-                <div
+                <!-- <div
                   id="btnDesacelera"
                   class=""
                   onclick="desacelera()"
                   style="cursor: pointer; display: inline; margin-left: 10px"
                 >
                   <i class="fas fa-arrow-alt-to-left"></i>
-                </div>
+                </div> -->
                 <div
                   id="button_pause_simulation"
-                  class=""
-                  onclick="pausa()"
                   style="cursor: pointer; display: inline; margin-left: 10px"
                 >
                   <i class="fas fa-pause"></i>
@@ -244,19 +212,18 @@
                 <div
                   id="button_resume_simulation"
                   class="d-none"
-                  onclick="despausa()"
                   style="cursor: pointer; display: inline; margin-left: 10px"
                 >
                   <i class="fas fa-play"></i>
                 </div>
-                <div
+                <!-- <div
                   id="btnAcelera"
                   class=""
                   onclick="acelera()"
                   style="cursor: pointer; display: inline; margin-left: 10px"
                 >
                   <i class="fas fa-angle-double-right"></i>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -277,9 +244,9 @@
             </div>
         </div>    
     </div> -->
-
-    <script type="text/javascript" src="../dist/app.bundle.js"></script>
-    <script type="text/javascript" src="../src/chart.js"></script>
+    <% for (var js in htmlWebpackPlugin.files.js) { %>
+    <script src="<%= htmlWebpackPlugin.files.js[js] %>"></script>
+    <% } %>
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
       integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
