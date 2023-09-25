@@ -1,9 +1,10 @@
 # Importando bibliotecas
-import random
 import math
-from collections import deque
+from collections import deque, defaultdict
 import time
 import string
+import random
+from random import randint
 
 # -------------------------------------------------------------------------------
 # ---------------------------------- FUNÇÕES ------------------------------------
@@ -36,6 +37,62 @@ def generate_random_string(length):
     random_string = ''.join(random.choices(characters, k=length))
     return random_string
 
+def create_new_id(neuron_name):
+    return (neuron_name + "-" + generate_random_string(NUM_RANDOM_CHARACTERS_NEURONS_ID))
+
+
+def reconstruct_neural_network_from_dna(dna):
+    nn = NeuralNetwork()
+    neurons_names_and_id = [] # [[nome1, id1], [nome2, id2], ...]
+    connections = []
+    
+    for gene in dna:
+        from_neuron_name = gene['from_neuron_name']
+        to_neuron_name = gene['to_neuron_name']
+
+        from_neuron_id = gene['from_neuron_id']
+        to_neuron_id = gene['to_neuron_id']
+
+        # from_neuron_type = [ntype for ntype, nname in possible_neurons if nname == from_neuron_name][0]
+        # to_neuron_type = [ntype for ntype, nname in possible_neurons if nname == to_neuron_name][0]
+        
+        neurons_names_and_id.append([from_neuron_name, from_neuron_id])
+        neurons_names_and_id.append([to_neuron_name, to_neuron_id])
+
+
+    # Removendo duplicados de neurons_names_and_id
+    unique_values = set(tuple(name_id) for name_id in neurons_names_and_id)
+    neurons_names_and_id = [list(name_id) for name_id in unique_values]
+
+    # Criando lista final de neurônios que vão fazer parte da rede neural
+    neurons_to_add = []
+
+    for neuron_name_id in neurons_names_and_id:
+            neuron_type = [ntype for ntype, nname in possible_neurons if nname == neuron_name_id[0]][0]
+            neurons_to_add.append(Neuron(neuron_type, neuron_name_id[0], neuron_name_id[1]))
+
+    nn.neurons = neurons_to_add
+
+    # Agora conectando os neurônios
+    for gene in dna:
+        from_neuron_id = gene['from_neuron_id']
+        to_neuron_id = gene['to_neuron_id']
+        weight = gene['weight']
+        active_state = gene['active_state']
+
+        connections.append(Connection(from_neuron_id, to_neuron_id, weight, active_state))
+    
+    nn.connections = connections
+
+
+    # Criando novos IDs dos neurônios para que não fiquem iguais aos do DNA-pai
+    nn.create_new_ids() 
+
+    nn.update_neuron_by_id()
+    nn.update_topological_order()
+            
+    return nn
+
 
 # -------------------------------------------------------------------------------
 # ------------------------- VARIÁVEIS E LISTAS GLOBAIS --------------------------
@@ -44,19 +101,19 @@ def generate_random_string(length):
 # Valor que o neurônio de input "Constant" vai sempre retornar
 CONSTANT_NEURON_VALUE = 1
 
-# Taxas de mutação
+# MUtação
 ADD_NEURON_MUTATION_RATE = 0.5 # Taxa de mutação para adição de neurônios
-REMOVE_NEURON_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de neurônios
+REMOVE_NEURON_MUTATION_RATE = 0 # Taxa de mutação para remoção de neurônios
 ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
-REMOVE_CONNECTION_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de conexões
+REMOVE_CONNECTION_MUTATION_RATE = 0 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos 
 CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.2 # Taxa de mutação para mudança do estado de ativação de conexões 
-
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
 MAX_WEIGHT_CHANGE = 0.1
 
-# Número máximo de decimais que pesos e outputs podem ter.
-MAX_DECIMAL_PLACES = 5
+# Outras regras
+MAX_DECIMAL_PLACES = 5 # Número máximo de decimais que pesos e outputs podem ter
+NUM_RANDOM_CHARACTERS_NEURONS_ID = 5 # Número de caracteres aleatórios no ID dos neurônios
 
 # Lista de neurônios que um organismo pode vir a ter.
 # A lista contém tuplas no seguinte formato: (type, name), indicando o tipo do neurônio e o seu nome
@@ -103,7 +160,7 @@ neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
 class Neuron:
     def __init__(self, neuron_type, name, id=None):
         if id is None:
-            self.id = name + generate_random_string(5)
+            self.id = name + generate_random_string(NUM_RANDOM_CHARACTERS_NEURONS_ID)
         else:
             self.id = id
         self.neuron_type = neuron_type # (Input/Hidden/Output)
@@ -121,11 +178,11 @@ class Neuron:
 
 
 class Connection:
-    def __init__(self, from_neuron, to_neuron, weight=1.0):
+    def __init__(self, from_neuron, to_neuron, weight=1.0, activated=True):
         self.from_neuron = from_neuron
         self.to_neuron = to_neuron
         self.weight = weight
-        self.activated = True
+        self.activated = activated
 
 
 class NeuralNetwork:
@@ -519,16 +576,44 @@ class NeuralNetwork:
             return
         
         for c in self.connections:
-            connection_id = str(c.from_neuron) + str(c.to_neuron)
+            connection_id = str(c.from_neuron) + "-" + str(c.to_neuron)
+
+            from_neuron = self.neuron_by_id.get(c.from_neuron)
+            to_neuron = self.neuron_by_id.get(c.to_neuron)
+
             gene = {
-                'from_neuron': c.from_neuron, 
-                'to_neuron': c.to_neuron, 
+                'from_neuron_id': from_neuron.id, 
+                'from_neuron_name': from_neuron.name, 
+                'to_neuron_id': to_neuron.id,
+                'to_neuron_name': to_neuron.name,
                 'weight': c.weight, 
                 'active_state': c.activated,
                 'connection_id': connection_id
             }
 
             self.dna.append(gene)
+
+
+
+    def create_new_ids(self):
+        if len(self.neurons) < 2:
+            return
+
+        for neuron in self.neurons:
+            old_id = neuron.id
+
+            # Atualizando o id do neurônio
+            new_id = create_new_id(neuron.name)
+            neuron.id = new_id
+
+            # Atualizando o id do neurônio na lista de conexões
+            for conn in self.connections:
+
+                if conn.from_neuron == old_id:
+                    conn.from_neuron = new_id
+
+                if conn.to_neuron == old_id:
+                    conn.to_neuron = new_id
 
 
     # Método para retornar informações da rede neural, como seus neurônios e suas conexões
@@ -544,7 +629,7 @@ class NeuralNetwork:
         for connection in self.connections:
             from_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.from_neuron)
             to_neuron = next(neuron for neuron in self.neurons if neuron.id == connection.to_neuron)
-            print("{:>25}     ------>   {:>18} |  W={}  |  Activated={}".format(from_neuron.name, to_neuron.name, connection.weight, connection.activated))
+            print("{:>25}    ------>   {:>18}|  W={}  |  Activated={}".format(from_neuron.name, to_neuron.name, connection.weight, connection.activated))
 
 
 
@@ -632,7 +717,22 @@ print("\nValores de output:", basic_network.feed_forward(input_values))
 
 basic_network.construct_dna()
 
-print(f"\n\nDNA:\n{basic_network.dna}")
+# print(f"\n\nDNA PAI:\n{basic_network.dna}")
+
+
+print("\n--------------------------- Rede Filha ---------------------------")
+
+nn_filha = reconstruct_neural_network_from_dna(basic_network.dna)
+
+# Imprimindo na tela informações gerais da rede
+nn_filha.print_network_info()
+
+print("Valores de output:", nn_filha.feed_forward(input_values))
+
+nn_filha.construct_dna()
+
+# print(f"\n\nDNA FILHA:\n{basic_network.dna}")
+
 
 
 # Testando rapidez do método feed_forward (que será chamado 1x por frame por organismo)
