@@ -1,12 +1,11 @@
 import {
   Drawable,
-  global_timer,
   organism_status,
   organism_status_type,
   sex_type,
   globals,
 } from "../resources";
-import { DNA, QuadTree, Circle, Vector } from ".";
+import { Circle, DNA, global_timer, QuadTree, Vector } from ".";
 import { generate_float, generate_integer } from "../utils";
 
 const EAT_DISTANCE = 5;

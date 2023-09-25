@@ -1,5 +1,6 @@
 import { DNA, Organism, Vegetable } from "../models";
 import { sex, globals } from "../resources";
+import { generate_color, generate_float, generate_integer } from ".";
 
 function generate_organism(x: number, y: number): Organism {
   // função para poder adicionar mais carnívoros manualmente

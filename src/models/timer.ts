@@ -19,21 +19,21 @@ export class Timer implements ITimer {
 
   private interval?: NodeJS.Timeout;
   private interval_milliseconds = 10;
+  private callback:
+    | ((time: number, formatted_time?: string) => void)
+    | undefined = undefined;
 
   constructor() {}
 
   private run(): void {
     this.time += this.interval_milliseconds;
+    if (this.callback) this.callback(this.time, this.formatted_timer);
   }
 
-  public play(): void {
-    this.interval = setInterval(this.run, this.interval_milliseconds);
+  public play(callback?: (time: number) => void): void {
+    if (callback) this.callback = callback;
+    this.interval = setInterval(() => this.run(), this.interval_milliseconds);
   }
-
-  // document.getElementById("hora").innerText = returnData(hora);
-  // document.getElementById("minuto").innerText = returnData(minuto);
-  // document.getElementById("segundo").innerText = returnData(segundo);
-  // document.getElementById("milisegundo").innerText = returnData(milisegundo);
 
   public reset(): void {
     this.time = 0;
@@ -43,6 +43,10 @@ export class Timer implements ITimer {
   public restart(): void {
     this.reset();
     this.play();
+  }
+
+  public clear_callback(): void {
+    this.callback = undefined;
   }
 
   public pause(): void {
@@ -76,7 +80,7 @@ export class Timer implements ITimer {
 
   get seconds(): number {
     return Math.floor(
-      (this.time % (MINUTES_LIMIT * SECONDS_LIMIT)) / MILLISECONDS_LIMIT
+      (this.time % (SECONDS_LIMIT * MILLISECONDS_LIMIT)) / MILLISECONDS_LIMIT
     );
   }
 
@@ -92,3 +96,5 @@ export class Timer implements ITimer {
     return !!this.interval;
   }
 }
+
+export const global_timer = new Timer();

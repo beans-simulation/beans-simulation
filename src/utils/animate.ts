@@ -1,5 +1,5 @@
-import { Organism, Vegetable } from "../models";
-import { global_timer, globals } from "../resources";
+import { global_timer, Organism, Vegetable } from "../models";
+import { globals } from "../resources";
 
 function create_background(context: CanvasRenderingContext2D) {
   context.clearRect(0, 0, globals.universe_width, globals.universe_height);
