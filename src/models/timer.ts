@@ -35,9 +35,14 @@ export class Timer implements ITimer {
     this.interval = setInterval(() => this.run(), this.interval_milliseconds);
   }
 
-  public reset(): void {
-    this.time = 0;
+  public pause(): void {
     clearInterval(this.interval);
+    this.interval = undefined;
+  }
+
+  public reset(): void {
+    this.pause();
+    this.time = 0;
   }
 
   public restart(): void {
@@ -47,10 +52,6 @@ export class Timer implements ITimer {
 
   public clear_callback(): void {
     this.callback = undefined;
-  }
-
-  public pause(): void {
-    clearInterval(this.interval);
   }
 
   private formatTime(time: number, min_length = 2): string {
@@ -93,7 +94,7 @@ export class Timer implements ITimer {
   }
 
   get is_paused(): boolean {
-    return !!this.interval;
+    return !this.interval;
   }
 }
 

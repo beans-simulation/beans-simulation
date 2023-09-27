@@ -15,9 +15,9 @@ function create_background(context: CanvasRenderingContext2D) {
 
 export function animate(context: CanvasRenderingContext2D | null) {
   if (!global_timer.is_paused && context) {
-    //   if (is_paused == false) {
-    //     idAnimate = requestAnimationFrame(animate);
-    //   }
+    // if (is_paused == false) {
+    requestAnimationFrame(() => animate(context));
+    // }
 
     create_background(context);
 
