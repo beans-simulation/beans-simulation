@@ -36,16 +36,16 @@ function random_position(size: number) {
   return Math.random() * (size - 50) + 25;
 }
 
-export function create_objects(n_organisms: number, n_vegetables: number) {
+export function create_entities(n_organisms: number, n_vegetables: number) {
   for (let i = 0; i < n_organisms; i++) {
     const x = random_position(globals.universe_width);
     const y = random_position(globals.universe_height);
-    generate_organism(x, y);
+    Organism.organisms.push(generate_organism(x, y));
   }
 
   for (let i = 0; i < n_vegetables; i++) {
     const x = random_position(globals.universe_width);
     const y = random_position(globals.universe_height);
-    generate_vegetable(x, y);
+    Vegetable.vegetables.push(generate_vegetable(x, y));
   }
 }

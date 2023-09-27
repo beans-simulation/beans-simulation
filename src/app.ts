@@ -1,18 +1,20 @@
-import { global_timer, Organism, Timer, Vegetable } from "./models";
+import { global_timer, Organism, Vegetable } from "./models";
 import {
   animate,
   create_context,
-  create_objects,
+  create_entities,
   drag_screen_element,
+  set_input_defaults,
 } from "./utils";
 import {
-  DEFAULT_INPUTS,
   button_pause_simulation,
   button_restart_simulation,
   button_resume_simulation,
   button_set_default,
   button_start_simulation,
   globals,
+  group_extra_buttons,
+  group_extra_panel,
   input_mutation_magnitude,
   input_mutation_probability,
   input_slider_organisms,
@@ -27,7 +29,6 @@ import {
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
-
 // var universe_width = canvas.width * universe_size;
 // var universe_height = canvas.height * universe_size;
 
@@ -64,11 +65,6 @@ var popover_id = 1;
 // var conf_c;
 // var conf_h;
 
-let n_organisms = input_slider_organisms?.value;
-let n_vegetables = input_slider_vegetables?.value;
-
-var is_before_play = true;
-
 var is_running = false;
 
 // Variável para pausar e despausar o jogo
@@ -94,7 +90,7 @@ document.addEventListener("DOMContentLoaded", (_) => {
   document.querySelectorAll(".tab-info").forEach(drag_screen_element);
 
   // botoes de controle da simulacao
-  button_set_default?.addEventListener("click", set_default_config);
+  button_set_default?.addEventListener("click", set_input_defaults);
   button_start_simulation?.addEventListener("click", start_simulation);
   button_restart_simulation?.addEventListener("click", show_initial_panel);
   button_pause_simulation?.addEventListener("click", pausa);
@@ -136,7 +132,7 @@ function criaVegetablesGradativo() {
     const x = Math.random() * (globals.universe_width - 62) + 31;
     const y = Math.random() * (globals.universe_height - 62) + 31;
     const radius = Math.random() * 1.5 + 1;
-    new Vegetable(x, y, radius);
+    Vegetable.vegetables.push(new Vegetable(x, y, radius));
   }
 }
 
@@ -154,20 +150,6 @@ function update_vegetables_apparition_interval(vegetable_rate?: string) {
       );
     }
   }
-}
-
-function set_default_config() {
-  // volta os parâmetros para o padrão inicial
-  if (input_slider_organisms)
-    input_slider_organisms.value = DEFAULT_INPUTS.organisms_amount;
-  if (input_slider_vegetables)
-    input_slider_vegetables.value = DEFAULT_INPUTS.vegetables_amount;
-  if (input_mutation_magnitude)
-    input_mutation_magnitude.value = DEFAULT_INPUTS.mutation_magnitude;
-  if (input_mutation_probability)
-    input_mutation_probability.value = DEFAULT_INPUTS.mutation_probability;
-  if (input_vegetable_rate)
-    input_vegetable_rate.value = DEFAULT_INPUTS.vegetables_rate;
 }
 
 function update_mutation_probability(value?: string) {
@@ -205,7 +187,7 @@ function start_simulation() {
   global_timer.play(update_timer_display);
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
-  create_objects(n_organisms, n_vegetables);
+  create_entities(n_organisms, n_vegetables);
 
   // input_vegetable_rate = document.getElementById("input_vegetable_rate");
   update_vegetables_apparition_interval(input_vegetable_rate?.value);
@@ -217,20 +199,26 @@ function start_simulation() {
   //   "input_mutation_magnitude"
   // );
   update_mutation_magnitude(input_mutation_magnitude?.value);
+
+  group_extra_panel?.classList.remove("d-none");
+  group_extra_buttons?.classList.remove("d-none");
   // document.getElementById("initial_inputs").classList.add("d-none");
   // document.getElementById("divTamanhoUniverso").classList.add("d-none");
   // document.getElementById("extra_panel").classList.remove("d-none");
   // document.getElementById("initial_buttons").classList.add("d-none");
   // document.getElementById("extra_buttons").classList.remove("d-none");
   // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
-  if (!is_running && !global_timer.is_paused) {
+
+  if (!is_running) {
     animate(context);
   }
-  // is_running = true;
+
+  is_running = true;
 }
 
 function show_initial_panel() {
   destroy_objects();
+  global_timer.pause();
   global_timer.reset();
   // is_before_play = true;
   // input_vegetable_rate = document.getElementById("input_vegetable_rate");
@@ -250,46 +238,6 @@ function show_initial_panel() {
   // document.getElementById("extra_buttons").classList.add("d-none");
   // document.getElementById("extra_panel").classList.add("d-none");
 }
-
-// function drag_mouse_down(event: MouseEvent) {
-//   event.preventDefault();
-//   // get the mouse cursor position at startup:
-//   document.onmouseup = close_drag_element;
-//   // call a function whenever the cursor moves:
-//   document.onmousemove = element_drag;
-// }
-
-// function element_drag(event: MouseEvent) {
-//   event.preventDefault();
-//   const element = event.target as HTMLDivElement | null;
-
-//   if (element) {
-//     // calculate the new cursor position:
-//     const x = event.clientX;
-//     const y = event.clientY;
-
-//     // set the element's new position:
-//     element.style.left = element.offsetLeft - x + "px";
-//     element.style.top = element.offsetTop - y + "px";
-//   }
-// }
-
-// function close_drag_element() {
-//   // stop moving when mouse button is released:
-//   document.onmouseup = null;
-//   document.onmousemove = null;
-// }
-
-// function drag_screen_element(element: HTMLDivElement) {
-//   // se for uma tab
-//   if (element.classList.contains("tab-info")) {
-//     // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)
-//     (element.children[0] as HTMLDivElement).onmousedown = drag_mouse_down;
-//   } else {
-//     // otherwise, move the DIV from anywhere inside the DIV:
-//     element.onmousedown = drag_mouse_down;
-//   }
-// }
 
 // ---------------------------------------------------------------------------------------
 //                                  FUNÇÕES
@@ -353,56 +301,6 @@ function desenhaTudo(context: CanvasRenderingContext2D) {
 // variáveis de auxílio para a implementação da divisão de tela
 var limitador_de_loop = 0;
 
-// function geraVegetable(x, y) {
-//   var radius = generate_number_per_interval(1, 2);
-//   return new Vegetable(x, y, radius);
-// }
-
-// function geraOrganism(x, y) {
-//   // função para poder adicionar mais carnívoros manualmente
-//   var initial_radius = generate_number_per_interval(3, 8);
-//   var max_speed = generate_number_per_interval(1, 2.2);
-//   var max_strength = generate_number_per_interval(0.01, 0.05);
-//   var color = geraCor();
-//   var initial_detection_radius = generate_number_per_interval(40, 120);
-//   var ninhada_min = generateInteger(1, 1);
-//   var ninhada_max = ninhada_min + generateInteger(1, 8);
-//   var litter_interval = [ninhada_min, ninhada_max];
-//   var sex;
-
-//   if (Math.random() < 0.5) {
-//     sex = "XX";
-//   } else {
-//     sex = "XY";
-//   }
-
-//   if (conf_c) {
-//     initial_radius = conf_c.initial_radius;
-//     max_speed = conf_c.max_speed;
-//     max_strength = conf_c.max_strength;
-//     color = conf_c.color;
-//     litter_interval = conf_c.litter_interval;
-//     sex = conf_c.sex;
-//   }
-
-//   var dna = new DNA(
-//     initial_radius,
-//     max_speed,
-//     max_strength,
-//     color,
-//     initial_detection_radius,
-//     litter_interval,
-//     sex
-//   );
-
-//   return new Organism(x, y, dna);
-// }
-
-// function generate_number_per_interval(min, max) {
-//   let delta = max - min; // exemplo: 4000 e 6000. 6000 - 4000 = 2000
-//   return parseFloat((Math.random() * delta + min).toFixed(4)); // Math.random() * 2000 + 4000
-// }
-
 // function displayQuadTree(qtree) {
 //   qtree.display();
 
@@ -442,66 +340,15 @@ function despausa() {
   button_pause_simulation?.classList.remove("d-none");
 }
 
-function acelera() {
-  animate(context);
+// function acelera() {
+//   animate(context);
 
-  // btnDesacelera.classList.remove("d-none");
-}
+//   // btnDesacelera.classList.remove("d-none");
+// }
 
-function desacelera() {
-  pausa();
-  setTimeout(despausa, 10);
-}
-
-// function animate() {
-//   if (is_paused == false) {
-//     idAnimate = requestAnimationFrame(animate);
-//   }
-
-//   c.clearRect(0, 0, universe_width, universe_height);
-//   c.beginPath();
-//   c.moveTo(-3, -4);
-//   c.lineTo(universe_width + 3, -3);
-//   c.lineTo(universe_width + 3, universe_height + 3);
-//   c.lineTo(-3, universe_height + 3);
-//   c.lineTo(-3, -3);
-//   c.strokeStyle = "white";
-//   c.stroke();
-
-//   // Criando a Quadtree
-//   let qtree = new QuadTree(retanguloCanvas, 10);
-
-//   // limitador_de_loop = 0;
-
-//   Vegetable.vegetables.forEach((vegetable) => {
-//     vegetable.display();
-//     qtree.insert_vegetable(vegetable); // Insere o vegetable na QuadTree
-//   });
-
-//   Organism.organisms.forEach((organism) => {
-//     organism.create_space_delimitation(false); // telaDividida: false
-//   });
-
-//   Organism.organisms.forEach((organism) => {
-//     qtree.insert_organism(organism); // Insere o organism na QuadTree
-//   });
-
-//   Organism.organisms.forEach((organism) => {
-//     organism.update();
-//     organism.roam();
-
-//     // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-//     let vision = new Circle(
-//       organism.position.x,
-//       organism.position.y,
-//       organism.detection_radius
-//     );
-
-//     // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a procreate infinitamente
-//     // if(organism.energy <= organism.max_energy * percentual_energy_to_eat){ // FOME
-//     //     organism.find_prey(qtree, vision);
-//     // }
-//   });
+// function desacelera() {
+//   pausa();
+//   setTimeout(despausa, 10);
 // }
 
 // ----------------------------------------------------------------------------------------------
