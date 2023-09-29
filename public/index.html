@@ -242,7 +242,7 @@
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-        </div>    
+        </div>
     </div> -->
     <% for (var js in htmlWebpackPlugin.files.js) { %>
     <script src="<%= htmlWebpackPlugin.files.js[js] %>"></script>
@@ -257,5 +257,7 @@
       integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT"
       crossorigin="anonymous"
     ></script>
+    <script src="https://pyodide.cdn.iodide.io/pyodide.js"></script>
+
   </body>
 </html>

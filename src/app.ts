@@ -5,6 +5,7 @@ import {
   create_entities,
   drag_screen_element,
   set_input_defaults,
+  get_input_values_for_neuralnet,
 } from "./utils";
 import {
   button_pause_simulation,
@@ -346,149 +347,23 @@ function despausa() {
 //   // btnDesacelera.classList.remove("d-none");
 // }
 
-// TODO: TEM
-function desacelera() {
-  pausa();
-  setTimeout(despausa, 10);
-}
-// estrutura geral da função que vai alimentara rede neural
-function get_input_values_for_neuralnet() {
-  var input_values: {};
-  var distance_food: number;
-  var angle_food: number;
-  var distance_organism: number;
-  var angle_organism: number;
-  var vegetable_distance_and_angle: Array<number>;
-  var organism_distance_and_angle: Array<number>;
-
-  Organism.organisms.forEach((organism) => {
-    vegetable_distance_and_angle = get_distance_and_angle_to_closest_vegetable(organism)
-    distance_food = vegetable_distance_and_angle[0]
-    angle_food = vegetable_distance_and_angle[1]
-
-    organism_distance_and_angle = get_distance_and_angle_to_closest_organism(organism)
-    distance_organism = organism_distance_and_angle[0]
-    angle_organism = organism_distance_and_angle[1]
-
-    input_values = {
-      'EnergyLevel': organism.energy,
-      'Temperature': get_temperature(),
-      'Health': organism.health,
-      'AngleToClosestFood': angle_food,
-      'DistToClosestFood': distance_food,
-      'NumOfFoodInView': get_amount_of_vegetable_in_view(organism),
-      'AngleToClosestOrganism': angle_organism,
-      'DistToClosestOrganism': distance_organism,
-      'NumOfOrganismsInView': get_amount_of_organisms_in_view(organism),
-      'Luminosity': get_luminosity(),
-      'Maturity': organism.maturity,
-      'TimeAlive': get_time_alive_in_seconds(organism)
-    }
-  });
-}
-
-function get_distance_and_angle_to_closest_vegetable(organism: Organism) {
-  var distance = 56
-  var angle = - 30;
-
-  //TODO: Código para encontrar alimento mais próximo (só vegetal por enquanto)
-  let distance_and_angle: [number, number] = [distance, angle];
-  return distance_and_angle;
-}
-
-function get_amount_of_vegetable_in_view(organism: Organism) {
-  var food: number = 3;
-  // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
-  // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos,
-  // que retona os organismos proximos, ou na função da evolve de encontrar alimento
-  return food
-}
-
-function get_distance_and_angle_to_closest_organism(organism: Organism) {
-  var distance = 172
-  var angle = -77;
-
-  //TODO: Código para encontrar o organismo mais próximo
-  let distance_and_angle: [number, number] = [distance, angle];
-  return distance_and_angle;
-}
-
-function get_amount_of_organisms_in_view(organism: Organism) {
-  var amount: number = 0;
-  // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
-  // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos,
-  // que retona os organismos proximos, ou na função da evolve de encontrar alimento
-  return amount
-}
-
-function get_temperature() {
-  // Baseado na quantidade de elementos vivos, calcula a temperatura do ambiente
-  var temperature: number = 16;
-  // TODO: código para calcular temperatura
-  return temperature
-}
-
-function get_luminosity() {
-  // TODO: checar como calcular isso e construir o código
-  return 0.56;
-}
-
-function get_time_alive_in_seconds(organism: Organism) {
-  // TODO: checar se o valor está fazendo sentido
-  return (global_timer.total - organism.birth_moment_in_milliseconds) / 1000;
-}
-
-
-// function animate() {
-//   if (is_paused == false) {
-//     idAnimate = requestAnimationFrame(animate);
-//   }
-
-//   c.clearRect(0, 0, universe_width, universe_height);
-//   c.beginPath();
-//   c.moveTo(-3, -4);
-//   c.lineTo(universe_width + 3, -3);
-//   c.lineTo(universe_width + 3, universe_height + 3);
-//   c.lineTo(-3, universe_height + 3);
-//   c.lineTo(-3, -3);
-//   c.strokeStyle = "white";
-//   c.stroke();
-
-//   // Criando a Quadtree
-//   let qtree = new QuadTree(retanguloCanvas, 10);
-
-//   // limitador_de_loop = 0;
-
-//   Vegetable.vegetables.forEach((vegetable) => {
-//     vegetable.display();
-//     qtree.insert_vegetable(vegetable); // Insere o vegetable na QuadTree
-//   });
-
-//   Organism.organisms.forEach((organism) => {
-//     organism.create_space_delimitation(false); // telaDividida: false
-//   });
-
-//   Organism.organisms.forEach((organism) => {
-//     qtree.insert_organism(organism); // Insere o organism na QuadTree
-//   });
-
-//   Organism.organisms.forEach((organism) => {
-//     organism.update();
-//     organism.roam();
-
-//     // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-//     let vision = new Circle(
-//       organism.position.x,
-//       organism.position.y,
-//       organism.detection_radius
-//     );
-
-//     // julia: essa chamada de função não está funcionando, vale checar se a função está correta, quando tiro o comentário ele começa a procreate infinitamente
-//     // if(organism.energy <= organism.max_energy * percentual_energy_to_eat){ // FOME
-//     //     organism.find_prey(qtree, vision);
-//     // }
-//   });
+// function desacelera() {
+//   pausa();
+//   setTimeout(despausa, 10);
 // }
+
+
+// estrutura geral da função que vai alimentar a rede neural
+// aqui precisa da integração com o pyodide
+function feed_neural_net(organism: Organism) {
+  var input_values = get_input_values_for_neuralnet(organism)
+  console.log(input_values)
+}
+Organism.organisms.forEach((organism) => {
+  feed_neural_net(organism)
+});
+
+
 
 // ----------------------------------------------------------------------------------------------
 //                                         Frame rate
