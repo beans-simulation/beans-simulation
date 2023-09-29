@@ -10,10 +10,6 @@
     "strict": true,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "sourceMap": true,
-    "typeRoots": ["./node_modules/@types"],
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["*"]
-    }
+    "typeRoots": ["./node_modules/@types"]
   }
 }

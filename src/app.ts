@@ -1,27 +1,34 @@
-import { Organism, Vegetable } from "./models";
+import { global_timer, Organism, Vegetable } from "./models";
 import {
   animate,
   create_context,
-  create_objects,
+  create_entities,
   drag_screen_element,
+  set_input_defaults,
 } from "./utils";
 import {
-  DEFAULT_INPUTS,
   button_pause_simulation,
+  button_restart_simulation,
   button_resume_simulation,
-  global_timer,
+  button_set_default,
+  button_start_simulation,
   globals,
+  group_extra_buttons,
+  group_extra_panel,
   input_mutation_magnitude,
   input_mutation_probability,
   input_slider_organisms,
   input_slider_vegetables,
   input_vegetable_rate,
+  label_mutation_magnitude,
+  label_mutation_probability,
+  label_timer,
+  label_vegetable_rate,
 } from "./resources";
 
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
-
 // var universe_width = canvas.width * universe_size;
 // var universe_height = canvas.height * universe_size;
 
@@ -58,11 +65,6 @@ var popover_id = 1;
 // var conf_c;
 // var conf_h;
 
-let n_organisms = input_slider_organisms?.value;
-let n_vegetables = input_slider_vegetables?.value;
-
-var is_before_play = true;
-
 var is_running = false;
 
 // Variável para pausar e despausar o jogo
@@ -72,8 +74,49 @@ var is_paused = false;
 // a função setInterval() permite que ele chame o loop a cada x milisegundos
 let vegetable_generation_interval: NodeJS.Timeout | undefined;
 
+function add_on_change_event_input(
+  input: HTMLInputElement | null,
+  label: HTMLElement | null,
+  action: (value: string) => void
+): void {
+  input?.addEventListener("change", () => {
+    const new_value = input?.value || "";
+    action(new_value);
+    if (label) label.textContent = new_value;
+  });
+}
+
 document.addEventListener("DOMContentLoaded", (_) => {
   document.querySelectorAll(".tab-info").forEach(drag_screen_element);
+
+  // botoes de controle da simulacao
+  button_set_default?.addEventListener("click", set_input_defaults);
+  button_start_simulation?.addEventListener("click", start_simulation);
+  button_restart_simulation?.addEventListener("click", show_initial_panel);
+  button_pause_simulation?.addEventListener("click", pausa);
+  button_resume_simulation?.addEventListener("click", despausa);
+
+  // slider inputs
+  add_on_change_event_input(
+    input_mutation_probability,
+    label_mutation_probability,
+    update_mutation_probability
+  );
+  add_on_change_event_input(
+    input_mutation_magnitude,
+    label_mutation_magnitude,
+    update_mutation_magnitude
+  );
+  add_on_change_event_input(
+    input_mutation_probability,
+    label_mutation_probability,
+    update_mutation_probability
+  );
+  add_on_change_event_input(
+    input_vegetable_rate,
+    label_vegetable_rate,
+    update_vegetables_apparition_interval
+  );
 });
 
 function destroy_objects() {
@@ -89,7 +132,7 @@ function criaVegetablesGradativo() {
     const x = Math.random() * (globals.universe_width - 62) + 31;
     const y = Math.random() * (globals.universe_height - 62) + 31;
     const radius = Math.random() * 1.5 + 1;
-    new Vegetable(x, y, radius);
+    Vegetable.vegetables.push(new Vegetable(x, y, radius));
   }
 }
 
@@ -109,29 +152,12 @@ function update_vegetables_apparition_interval(vegetable_rate?: string) {
   }
 }
 
-// TODO: TEM
-function set_default_config() {
-  // volta os parâmetros para o padrão inicial
-  if (input_slider_organisms)
-    input_slider_organisms.value = DEFAULT_INPUTS.organisms_amount;
-  if (input_slider_vegetables)
-    input_slider_vegetables.value = DEFAULT_INPUTS.vegetables_amount;
-  if (input_mutation_magnitude)
-    input_mutation_magnitude.value = DEFAULT_INPUTS.mutation_magnitude;
-  if (input_mutation_probability)
-    input_mutation_probability.value = DEFAULT_INPUTS.mutation_probability;
-  if (input_vegetable_rate)
-    input_vegetable_rate.value = DEFAULT_INPUTS.vegetables_rate;
-}
-
-// TODO: TEM
 function update_mutation_probability(value?: string) {
   if (value) {
     globals.mutation_probability = Number(value) / 100;
   }
 }
 
-// TODO: TEM
 function update_mutation_magnitude(value?: string) {
   if (value) {
     globals.mutation_magnitude = Number(value) / 100;
@@ -145,8 +171,11 @@ function set_universe(canvas: HTMLCanvasElement | null) {
   }
 }
 
-// TODO: TEM
-function startSimulation() {
+function update_timer_display(time: number, formattedTime?: string) {
+  if (label_timer && formattedTime) label_timer.textContent = formattedTime;
+}
+
+function start_simulation() {
   const n_organisms =
     parseInt(input_slider_organisms?.value || "0") * globals.universe_size;
 
@@ -155,10 +184,10 @@ function startSimulation() {
 
   // is_before_play = false;
   destroy_objects();
-  global_timer.restart();
+  global_timer.play(update_timer_display);
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
-  create_objects(n_organisms, n_vegetables);
+  create_entities(n_organisms, n_vegetables);
 
   // input_vegetable_rate = document.getElementById("input_vegetable_rate");
   update_vegetables_apparition_interval(input_vegetable_rate?.value);
@@ -170,21 +199,26 @@ function startSimulation() {
   //   "input_mutation_magnitude"
   // );
   update_mutation_magnitude(input_mutation_magnitude?.value);
+
+  group_extra_panel?.classList.remove("d-none");
+  group_extra_buttons?.classList.remove("d-none");
   // document.getElementById("initial_inputs").classList.add("d-none");
   // document.getElementById("divTamanhoUniverso").classList.add("d-none");
   // document.getElementById("extra_panel").classList.remove("d-none");
   // document.getElementById("initial_buttons").classList.add("d-none");
   // document.getElementById("extra_buttons").classList.remove("d-none");
   // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
-  if (!is_running && !global_timer.is_paused) {
+
+  if (!is_running) {
     animate(context);
   }
-  // is_running = true;
+
+  is_running = true;
 }
 
-// TODO: TEM
 function show_initial_panel() {
   destroy_objects();
+  global_timer.pause();
   global_timer.reset();
   // is_before_play = true;
   // input_vegetable_rate = document.getElementById("input_vegetable_rate");
@@ -204,66 +238,6 @@ function show_initial_panel() {
   // document.getElementById("extra_buttons").classList.add("d-none");
   // document.getElementById("extra_panel").classList.add("d-none");
 }
-
-// // TODO: TEM
-// function change_mutation_probability() {
-//   label_mutation_probability.textContent =
-//     input_mutation_probability.value;
-// }
-
-// // TODO: TEM
-// function change_mutation_magnitude() {
-//   label_mutation_magnitude.textContent = input_mutation_magnitude.value;
-// }
-
-// // TODO: TEM
-// function change_vegetable_rate() {
-//   if (input_vegetable_rate.value > 0) {
-//     label_vegetable_rate.textContent = input_vegetable_rate.value;
-//   } else {
-//     label_vegetable_rate.textContent = "nenhum";
-//   }
-// }
-
-// function drag_mouse_down(event: MouseEvent) {
-//   event.preventDefault();
-//   // get the mouse cursor position at startup:
-//   document.onmouseup = close_drag_element;
-//   // call a function whenever the cursor moves:
-//   document.onmousemove = element_drag;
-// }
-
-// function element_drag(event: MouseEvent) {
-//   event.preventDefault();
-//   const element = event.target as HTMLDivElement | null;
-
-//   if (element) {
-//     // calculate the new cursor position:
-//     const x = event.clientX;
-//     const y = event.clientY;
-
-//     // set the element's new position:
-//     element.style.left = element.offsetLeft - x + "px";
-//     element.style.top = element.offsetTop - y + "px";
-//   }
-// }
-
-// function close_drag_element() {
-//   // stop moving when mouse button is released:
-//   document.onmouseup = null;
-//   document.onmousemove = null;
-// }
-
-// function drag_screen_element(element: HTMLDivElement) {
-//   // se for uma tab
-//   if (element.classList.contains("tab-info")) {
-//     // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)
-//     (element.children[0] as HTMLDivElement).onmousedown = drag_mouse_down;
-//   } else {
-//     // otherwise, move the DIV from anywhere inside the DIV:
-//     element.onmousedown = drag_mouse_down;
-//   }
-// }
 
 // ---------------------------------------------------------------------------------------
 //                                  FUNÇÕES
@@ -327,56 +301,6 @@ function desenhaTudo(context: CanvasRenderingContext2D) {
 // variáveis de auxílio para a implementação da divisão de tela
 var limitador_de_loop = 0;
 
-// function geraVegetable(x, y) {
-//   var radius = generate_number_per_interval(1, 2);
-//   return new Vegetable(x, y, radius);
-// }
-
-// function geraOrganism(x, y) {
-//   // função para poder adicionar mais carnívoros manualmente
-//   var initial_radius = generate_number_per_interval(3, 8);
-//   var max_speed = generate_number_per_interval(1, 2.2);
-//   var max_strength = generate_number_per_interval(0.01, 0.05);
-//   var color = geraCor();
-//   var initial_detection_radius = generate_number_per_interval(40, 120);
-//   var ninhada_min = generateInteger(1, 1);
-//   var ninhada_max = ninhada_min + generateInteger(1, 8);
-//   var litter_interval = [ninhada_min, ninhada_max];
-//   var sex;
-
-//   if (Math.random() < 0.5) {
-//     sex = "XX";
-//   } else {
-//     sex = "XY";
-//   }
-
-//   if (conf_c) {
-//     initial_radius = conf_c.initial_radius;
-//     max_speed = conf_c.max_speed;
-//     max_strength = conf_c.max_strength;
-//     color = conf_c.color;
-//     litter_interval = conf_c.litter_interval;
-//     sex = conf_c.sex;
-//   }
-
-//   var dna = new DNA(
-//     initial_radius,
-//     max_speed,
-//     max_strength,
-//     color,
-//     initial_detection_radius,
-//     litter_interval,
-//     sex
-//   );
-
-//   return new Organism(x, y, dna);
-// }
-
-// function generate_number_per_interval(min, max) {
-//   let delta = max - min; // exemplo: 4000 e 6000. 6000 - 4000 = 2000
-//   return parseFloat((Math.random() * delta + min).toFixed(4)); // Math.random() * 2000 + 4000
-// }
-
 // function displayQuadTree(qtree) {
 //   qtree.display();
 
@@ -402,7 +326,6 @@ var limitador_de_loop = 0;
 
 var idAnimate;
 
-// TODO: TEM
 function pausa() {
   global_timer.pause();
 
@@ -410,7 +333,6 @@ function pausa() {
   button_resume_simulation?.classList.remove("d-none");
 }
 
-// TODO: TEM
 function despausa() {
   global_timer.play();
 
@@ -418,12 +340,11 @@ function despausa() {
   button_pause_simulation?.classList.remove("d-none");
 }
 
-// TODO: TEM
-function acelera() {
-  animate(context);
+// function acelera() {
+//   animate(context);
 
-  // btnDesacelera.classList.remove("d-none");
-}
+//   // btnDesacelera.classList.remove("d-none");
+// }
 
 // TODO: TEM
 function desacelera() {
@@ -431,14 +352,14 @@ function desacelera() {
   setTimeout(despausa, 10);
 }
 // estrutura geral da função que vai alimentara rede neural
-function get_input_values_for_neuralnet(){
+function get_input_values_for_neuralnet() {
   var input_values: {};
   var distance_food: number;
   var angle_food: number;
   var distance_organism: number;
   var angle_organism: number;
-  var vegetable_distance_and_angle:Array<number>;
-  var organism_distance_and_angle:Array<number>;
+  var vegetable_distance_and_angle: Array<number>;
+  var organism_distance_and_angle: Array<number>;
 
   Organism.organisms.forEach((organism) => {
     vegetable_distance_and_angle = get_distance_and_angle_to_closest_vegetable(organism)
@@ -447,28 +368,28 @@ function get_input_values_for_neuralnet(){
 
     organism_distance_and_angle = get_distance_and_angle_to_closest_organism(organism)
     distance_organism = organism_distance_and_angle[0]
-    angle_organism = organism_distance_and_angle[1] 
-    
+    angle_organism = organism_distance_and_angle[1]
+
     input_values = {
-      'EnergyLevel': organism.energy, 
-      'Temperature': get_temperature(),  
+      'EnergyLevel': organism.energy,
+      'Temperature': get_temperature(),
       'Health': organism.health,
       'AngleToClosestFood': angle_food,
       'DistToClosestFood': distance_food,
-      'NumOfFoodInView': get_amount_of_vegetable_in_view(organism), 
+      'NumOfFoodInView': get_amount_of_vegetable_in_view(organism),
       'AngleToClosestOrganism': angle_organism,
       'DistToClosestOrganism': distance_organism,
       'NumOfOrganismsInView': get_amount_of_organisms_in_view(organism),
-      'Luminosity': get_luminosity(), 
-      'Maturity': organism.maturity, 
-      'TimeAlive': get_time_alive_in_seconds(organism) 
+      'Luminosity': get_luminosity(),
+      'Maturity': organism.maturity,
+      'TimeAlive': get_time_alive_in_seconds(organism)
     }
-    });
+  });
 }
 
 function get_distance_and_angle_to_closest_vegetable(organism: Organism) {
   var distance = 56
-  var angle = - 30;  
+  var angle = - 30;
 
   //TODO: Código para encontrar alimento mais próximo (só vegetal por enquanto)
   let distance_and_angle: [number, number] = [distance, angle];
@@ -476,26 +397,26 @@ function get_distance_and_angle_to_closest_vegetable(organism: Organism) {
 }
 
 function get_amount_of_vegetable_in_view(organism: Organism) {
-  var food:number = 3;
+  var food: number = 3;
   // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
-  // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos, 
+  // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos,
   // que retona os organismos proximos, ou na função da evolve de encontrar alimento
   return food
 }
 
 function get_distance_and_angle_to_closest_organism(organism: Organism) {
   var distance = 172
-  var angle = -77;  
+  var angle = -77;
 
-  //TODO: Código para encontrar o organismo mais próximo 
+  //TODO: Código para encontrar o organismo mais próximo
   let distance_and_angle: [number, number] = [distance, angle];
   return distance_and_angle;
 }
 
 function get_amount_of_organisms_in_view(organism: Organism) {
-  var amount:number = 0;
+  var amount: number = 0;
   // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
-  // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos, 
+  // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos,
   // que retona os organismos proximos, ou na função da evolve de encontrar alimento
   return amount
 }
@@ -514,7 +435,7 @@ function get_luminosity() {
 
 function get_time_alive_in_seconds(organism: Organism) {
   // TODO: checar se o valor está fazendo sentido
-  return (global_timer.total - organism.birth_moment_in_milliseconds)/1000;
+  return (global_timer.total - organism.birth_moment_in_milliseconds) / 1000;
 }
 
 

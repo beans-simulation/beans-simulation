@@ -1,5 +1,5 @@
-import { Organism, Vegetable } from "../models";
-import { global_timer, globals } from "../resources";
+import { global_timer, Organism, Vegetable } from "../models";
+import { globals } from "../resources";
 
 function create_background(context: CanvasRenderingContext2D) {
   context.clearRect(0, 0, globals.universe_width, globals.universe_height);
@@ -15,9 +15,9 @@ function create_background(context: CanvasRenderingContext2D) {
 
 export function animate(context: CanvasRenderingContext2D | null) {
   if (!global_timer.is_paused && context) {
-    //   if (is_paused == false) {
-    //     idAnimate = requestAnimationFrame(animate);
-    //   }
+    // if (is_paused == false) {
+    requestAnimationFrame(() => animate(context));
+    // }
 
     create_background(context);
 

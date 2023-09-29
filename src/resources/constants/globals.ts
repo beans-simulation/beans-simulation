@@ -1,7 +1,3 @@
-import { Timer } from "../../models";
-
-export const global_timer = new Timer();
-
 export const DEFAULT_INPUTS = {
   mutation_magnitude: "5",
   mutation_probability: "10",

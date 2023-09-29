@@ -1,4 +1,4 @@
-import { Info } from "./Info";
+import { Info } from "./info";
 
 class History {
   public organisms: Info;

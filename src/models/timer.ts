@@ -19,25 +19,30 @@ export class Timer implements ITimer {
 
   private interval?: NodeJS.Timeout;
   private interval_milliseconds = 10;
+  private callback:
+    | ((time: number, formatted_time?: string) => void)
+    | undefined = undefined;
 
   constructor() {}
 
   private run(): void {
     this.time += this.interval_milliseconds;
+    if (this.callback) this.callback(this.time, this.formatted_timer);
   }
 
-  public play(): void {
-    this.interval = setInterval(this.run, this.interval_milliseconds);
+  public play(callback?: (time: number) => void): void {
+    if (callback) this.callback = callback;
+    this.interval = setInterval(() => this.run(), this.interval_milliseconds);
   }
 
-  // document.getElementById("hora").innerText = returnData(hora);
-  // document.getElementById("minuto").innerText = returnData(minuto);
-  // document.getElementById("segundo").innerText = returnData(segundo);
-  // document.getElementById("milisegundo").innerText = returnData(milisegundo);
+  public pause(): void {
+    clearInterval(this.interval);
+    this.interval = undefined;
+  }
 
   public reset(): void {
+    this.pause();
     this.time = 0;
-    clearInterval(this.interval);
   }
 
   public restart(): void {
@@ -45,8 +50,8 @@ export class Timer implements ITimer {
     this.play();
   }
 
-  public pause(): void {
-    clearInterval(this.interval);
+  public clear_callback(): void {
+    this.callback = undefined;
   }
 
   private formatTime(time: number, min_length = 2): string {
@@ -76,7 +81,7 @@ export class Timer implements ITimer {
 
   get seconds(): number {
     return Math.floor(
-      (this.time % (MINUTES_LIMIT * SECONDS_LIMIT)) / MILLISECONDS_LIMIT
+      (this.time % (SECONDS_LIMIT * MILLISECONDS_LIMIT)) / MILLISECONDS_LIMIT
     );
   }
 
@@ -89,6 +94,8 @@ export class Timer implements ITimer {
   }
 
   get is_paused(): boolean {
-    return !!this.interval;
+    return !this.interval;
   }
 }
+
+export const global_timer = new Timer();
