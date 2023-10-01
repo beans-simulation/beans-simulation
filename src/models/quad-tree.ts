@@ -31,6 +31,7 @@ export class QuadTree implements QuadTreeProps, Drawable {
 
   // Subdivide a QuadTree em 4 retângulos children
   subdivide() {
+    console.log("subdivide")
     const { x, y, h, w } = this.rectangle;
 
     const ne = new Rectangle(x + w / 2, y - h / 2, w / 2, h / 2);
@@ -55,9 +56,11 @@ export class QuadTree implements QuadTreeProps, Drawable {
   ): void {
     if (this.rectangle.contains_point(item)) {
       if (list.length < this.supported_amount_of_point) {
-        list.push(item);
+        console.log("fez push")
+        list.push(item); // ta fazendo o push dos 10
       } else {
         // Se a supported_amount_of_point máxima tiver sido atingida
+        console.log("ta no eslse")
         if (!this.division) {
           // A QuadTree não irá se subdividir caso já o tenha feito
           this.subdivide();
@@ -125,8 +128,9 @@ export class QuadTree implements QuadTreeProps, Drawable {
     return this.search(detection_circle, this.vegetables);
   }
 
-  find_prey_element(detection_circle: Circle) {
-    return this.search(detection_circle, this.organisms);
+  find_prey_element(detection_circle: Circle, predator_id:number) {
+    let prey_organisms = this.organisms.filter(item => item.id !== predator_id);
+    return this.search(detection_circle, prey_organisms);
   }
 
   // função para a procura de predador
