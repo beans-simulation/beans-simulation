@@ -6,7 +6,7 @@ function generate_organism(x: number, y: number): Organism {
   // função para poder adicionar mais carnívoros manualmente
   const initial_radius = generate_float(3, 8);
   const max_speed = generate_float(1, 2.2);
-  const max_strength = generate_float(0.01, 0.05);
+  const max_force = generate_float(0.01, 0.05);
   const color = generate_color();
   const initial_detection_radius = generate_float(40, 120);
   const ninhada_min = generate_integer(1, 1);
@@ -17,7 +17,7 @@ function generate_organism(x: number, y: number): Organism {
   var dna = new DNA(
     initial_radius,
     max_speed,
-    max_strength,
+    max_force,
     color,
     initial_detection_radius,
     litter_interval,
