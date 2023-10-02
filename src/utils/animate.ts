@@ -1,4 +1,4 @@
-import { global_timer, Organism, Vegetable, QuadTree, Rectangle} from "../models";
+import { global_timer, Organism, Vegetable, QuadTree, Rectangle, Circle} from "../models";
 import { globals } from "../resources";
 
 function create_background(context: CanvasRenderingContext2D) {
@@ -52,12 +52,12 @@ export function animate(context: CanvasRenderingContext2D | null) {
       organism.roam();
       organism.display(context);
 
-      // // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-      // let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
+      // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
+      let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
 
-      // if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
-      //     organism.hunt(qtree, vision);
-      // }
+      if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
+        // organism.hunt(qtree, vision);
+      }
       // organism.detect_predator(qtree, vision)
 
     });

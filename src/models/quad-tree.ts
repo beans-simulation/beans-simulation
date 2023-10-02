@@ -125,7 +125,7 @@ export class QuadTree implements QuadTreeProps, Drawable {
   }
 
   find_prey_element(detection_circle: Circle, predator_id:number) {
-    let prey_organisms = this.organisms.filter(item => item.id !== predator_id);
+    const prey_organisms = this.organisms.filter(item => item.id !== predator_id);
     return this.search(detection_circle, prey_organisms);
   }
 

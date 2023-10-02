@@ -34,7 +34,7 @@ export class Organism implements Drawable {
   public is_eating = false;
   public is_roaming = false; //vagar sem direção
   public is_running_away = false;
-  public lifetime = generate_float(200, 300); // tempo de vida do organism
+  public lifetime_in_miliseconds = generate_float(200, 300)*100; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
   public max_energy_consumption_rate: number;
@@ -140,14 +140,15 @@ export class Organism implements Drawable {
   // Método para atualizar o estado do organism
   update() {
     this.consumed_energy_rate =
-      Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
+     Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
+    const achieved_age_limit =
+      (global_timer.total - this.birth_moment_in_milliseconds) > this.lifetime_in_miliseconds;
 
-    const age_limit =
-      global_timer.total - this.birth_moment_in_milliseconds > this.lifetime;
     // Taxa de diminuição de energy
-    if (this.energy > 0 && !age_limit) {
+    if (this.energy > 0 && !achieved_age_limit) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption;
 
+      // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
       if (Math.random() < (0.0005 * this.food_eaten) / 10) {
         // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
         // Remover reproducao assexuada
