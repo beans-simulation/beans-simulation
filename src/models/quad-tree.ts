@@ -55,7 +55,7 @@ export class QuadTree implements QuadTreeProps, Drawable {
   ): void {
     if (this.rectangle.contains_point(item)) {
       if (list.length < this.supported_amount_of_point) {
-        list.push(item); // ta fazendo o push dos 10
+        list.push(item);
       } else {
         // Se a supported_amount_of_point máxima tiver sido atingida
         if (!this.division) {
@@ -85,24 +85,23 @@ export class QuadTree implements QuadTreeProps, Drawable {
     const result: T[] = [];
     if (this.intercepts_by_scope(scope)) {
       for (const point of list) {
-        // Para os points dessa QuadTree
         if (scope.contains_point(point)) {
-          // Se o point pertencer ao retângulo "scope"
           result.push(point);
         }
+      }
 
-        if (this.division) {
-          // Se a QuadTree tiver QuadTrees filhas
-          const nw = this.division.northwest.search(scope, list);
-          const ne = this.division.northeast.search(scope, list);
-          const sw = this.division.southwest.search(scope, list);
-          const se = this.division.southeast.search(scope, list);
-          result.push(...nw, ...ne, ...sw, ...se);
-        }
+      if (this.division) {
+        // Check if the current node has subdivisions
+        const nw = this.division.northwest.search(scope, list);
+        const ne = this.division.northeast.search(scope, list);
+        const sw = this.division.southwest.search(scope, list);
+        const se = this.division.southeast.search(scope, list);
+        result.push(...nw, ...ne, ...sw, ...se);
       }
     }
     return result;
   }
+
 
   insert_point(point: Point): void {
     this.insert(point, this.points);
