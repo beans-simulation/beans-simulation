@@ -30,6 +30,7 @@ const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
 
+
 // var mudarGrafico = false;
 
 // Variáveis para o gráfico (carnívoro)

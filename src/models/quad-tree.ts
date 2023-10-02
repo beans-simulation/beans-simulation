@@ -31,7 +31,6 @@ export class QuadTree implements QuadTreeProps, Drawable {
 
   // Subdivide a QuadTree em 4 retângulos children
   subdivide() {
-    console.log("subdivide")
     const { x, y, h, w } = this.rectangle;
 
     const ne = new Rectangle(x + w / 2, y - h / 2, w / 2, h / 2);
@@ -56,25 +55,22 @@ export class QuadTree implements QuadTreeProps, Drawable {
   ): void {
     if (this.rectangle.contains_point(item)) {
       if (list.length < this.supported_amount_of_point) {
-        console.log("fez push")
         list.push(item); // ta fazendo o push dos 10
       } else {
         // Se a supported_amount_of_point máxima tiver sido atingida
-        console.log("ta no eslse")
         if (!this.division) {
           // A QuadTree não irá se subdividir caso já o tenha feito
           this.subdivide();
+        }else{
+          // Não checamos a localização do point pois ele será checado no começo de cada chamada desses métodos
+          this.division?.northeast.insert(item, list);
+          this.division?.northwest.insert(item, list);
+          this.division?.southeast.insert(item, list);
+          this.division?.southwest.insert(item, list);
         }
-
-        // Não checamos a localização do point pois ele será checado no começo de cada chamada desses métodos
-        this.division?.northeast.insert(item, list);
-        this.division?.northwest.insert(item, list);
-        this.division?.southeast.insert(item, list);
-        this.division?.southwest.insert(item, list);
       }
     }
   }
-
   private intercepts_by_scope(scope: Circle | Rectangle) {
     if (scope instanceof Circle) {
       return this.rectangle.does_intercept_circle(scope);
