@@ -544,11 +544,8 @@ export class Organism implements Drawable {
     return filtered;
   }
   kill() {
-    const index = Organism.organisms.indexOf(this);
-    delete Organism.organisms[index];
-    // is not deleting the organism from the list
-    // console.log(Organism.organisms.length);
-    // console.log(Organism.organisms[index]);
+    // more performatic than reording the list with .slice(), without letting a blank space on the list
+    Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }
 
   checaId(id: number) {
