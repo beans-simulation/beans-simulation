@@ -118,7 +118,7 @@ function criaVegetablesGradativo() {
     const x = Math.random() * (globals.universe_width - 62) + 31;
     const y = Math.random() * (globals.universe_height - 62) + 31;
     const radius = Math.random() * 1.5 + 1;
-    Vegetable.vegetables.push(new Vegetable(x, y, radius));
+    new Vegetable(x, y, radius);
   }
 }
 
@@ -170,6 +170,8 @@ function start_simulation() {
 
   // is_before_play = false;
   destroy_objects();
+  global_timer.pause();
+  global_timer.reset();
   global_timer.play(update_timer_display);
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
