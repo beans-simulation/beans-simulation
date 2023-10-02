@@ -40,34 +40,22 @@ export function animate(context: CanvasRenderingContext2D | null) {
     });
 
     Organism.organisms.forEach((organism) => {
-        organism.create_space_delimitation();
-    })
+     // Insere o organism na QuadTree
 
-    Organism.organisms.forEach(organism => {
-        qtree.insert_organism(organism); // Insere o organism na QuadTree
-    });
-
-    Organism.organisms.forEach((organism) => {
-      organism.update();
+      qtree.insert_organism(organism);
+      organism.update(context);
       organism.roam();
-      organism.display(context);
+
 
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
 
       if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
-        // organism.hunt(qtree, vision);
+        organism.hunt(qtree, vision);
       }
       // organism.detect_predator(qtree, vision)
 
     });
-
-    // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-    //   let vision = new Circle(
-    //     organism.position.x,
-    //     organism.position.y,
-    //     organism.detection_radius
-    //   );
 
   }
 }
