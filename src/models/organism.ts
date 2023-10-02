@@ -138,7 +138,7 @@ export class Organism implements Drawable {
   }
 
   // Método para atualizar o estado do organism
-  update() {
+  update(context: CanvasRenderingContext2D) {
     this.consumed_energy_rate =
      Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
     const achieved_age_limit =
@@ -187,6 +187,7 @@ export class Organism implements Drawable {
 
     // Reseta a aceleração para 0 a cada ciclo
     this.acceleration.multiply(0);
+    this.display(context);
   }
 
   increase_size() {
@@ -545,6 +546,9 @@ export class Organism implements Drawable {
   kill() {
     const index = Organism.organisms.indexOf(this);
     delete Organism.organisms[index];
+    // is not deleting the organism from the list
+    // console.log(Organism.organisms.length);
+    // console.log(Organism.organisms[index]);
   }
 
   checaId(id: number) {
