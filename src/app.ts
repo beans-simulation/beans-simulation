@@ -1,4 +1,4 @@
-import { global_timer, Organism, Vegetable } from "./models";
+import { global_timer, Organism, Vegetable, Rectangle} from "./models";
 import {
   animate,
   create_context,
@@ -30,10 +30,7 @@ import {
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
-// var universe_width = canvas.width * universe_size;
-// var universe_height = canvas.height * universe_size;
 
-// var percentual_energy_to_eat = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
 
 // var mudarGrafico = false;
 
@@ -48,17 +45,6 @@ if (!canvas || !context) throw new Error("Couldn't find canvas element");
 
 // Variáveis para alterações nas mutações
 // var probabilidade_mutacao = label_mutation_probability; // chances de cada gene (atributo) sofrer mutação
-
-// var lado_direito_vazio = true;
-// var lado_esquerdo_vazio = true;
-
-// QuadTree
-// const canvasRectangle = new Rectangle(
-//   universe_width / 2,
-//   universe_height / 2,
-//   universe_width / 2,
-//   universe_height / 2
-// );
 
 var popover_id = 1;
 
@@ -133,7 +119,7 @@ function criaVegetablesGradativo() {
     const x = Math.random() * (globals.universe_width - 62) + 31;
     const y = Math.random() * (globals.universe_height - 62) + 31;
     const radius = Math.random() * 1.5 + 1;
-    Vegetable.vegetables.push(new Vegetable(x, y, radius));
+    new Vegetable(x, y, radius);
   }
 }
 
@@ -185,6 +171,8 @@ function start_simulation() {
 
   // is_before_play = false;
   destroy_objects();
+  global_timer.pause();
+  global_timer.reset();
   global_timer.play(update_timer_display);
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
@@ -371,13 +359,13 @@ Organism.organisms.forEach((organism) => {
 
 // // The higher this value, the less the fps will reflect temporary variations
 // // A value of 1 will only keep the last value
-// var filterStrength = 20;
+// var filterforce = 20;
 // var frameTime = 0, lastLoop = new Date, thisLoop;
 
 // function gameLoop(){
 //   // ...
 //   var thisFrameTime = (thisLoop=new Date) - lastLoop;
-//   frameTime+= (thisFrameTime - frameTime) / filterStrength;
+//   frameTime+= (thisFrameTime - frameTime) / filterforce;
 //   lastLoop = thisLoop;
 // }
 

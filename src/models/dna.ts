@@ -9,7 +9,7 @@ import { generate_integer } from "../utils";
 class DNA {
   public readonly initial_radius: number;
   public readonly max_speed: number;
-  public readonly max_strength: number;
+  public readonly max_force: number;
   public readonly color: string;
   public readonly initial_detection_radius: number;
   public readonly litter_interval: number[];
@@ -18,7 +18,7 @@ class DNA {
   constructor(
     initial_radius: number,
     max_speed: number,
-    max_strength: number,
+    max_force: number,
     color: string,
     initial_detection_radius: number,
     litter_interval: number[],
@@ -26,7 +26,7 @@ class DNA {
   ) {
     this.initial_radius = initial_radius;
     this.max_speed = max_speed;
-    this.max_strength = max_strength;
+    this.max_force = max_force;
     this.color = color;
     this.initial_detection_radius = initial_detection_radius;
     this.litter_interval = litter_interval;
@@ -204,7 +204,7 @@ class DNA {
     const offspring_max_speed = this.get_positive_mutation(this.max_speed);
 
     // força máxima
-    var offspring_max_force = this.new_mutation(this.max_strength);
+    var offspring_max_force = this.new_mutation(this.max_force);
 
     // color
     var offspring_color = this.get_color_mutation();
