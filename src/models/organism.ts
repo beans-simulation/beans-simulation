@@ -34,7 +34,7 @@ export class Organism implements Drawable {
   public is_eating = false;
   public is_roaming = false; //vagar sem direção
   public is_running_away = false;
-  public lifetime_in_miliseconds = generate_float(200, 300)*100; // tempo de vida do organism
+  public lifetime_in_miliseconds = generate_float(200, 300)*1000; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
   public max_energy_consumption_rate: number;
