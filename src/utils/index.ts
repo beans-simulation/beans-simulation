@@ -8,3 +8,5 @@ export * from "./generate-integer";
 export * from "./hex-to-rgb";
 export * from "./rgb-to-hex";
 export * from "./set-input-defaults";
+export * from "./find-nearby-element";
+export * from "./remove-from-global-list";
