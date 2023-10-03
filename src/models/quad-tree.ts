@@ -61,17 +61,16 @@ export class QuadTree implements QuadTreeProps, Drawable {
         if (!this.division) {
           // A QuadTree não irá se subdividir caso já o tenha feito
           this.subdivide();
+        }else{
+          // Não checamos a localização do point pois ele será checado no começo de cada chamada desses métodos
+          this.division?.northeast.insert(item, list);
+          this.division?.northwest.insert(item, list);
+          this.division?.southeast.insert(item, list);
+          this.division?.southwest.insert(item, list);
         }
-
-        // Não checamos a localização do point pois ele será checado no começo de cada chamada desses métodos
-        this.division?.northeast.insert(item, list);
-        this.division?.northwest.insert(item, list);
-        this.division?.southeast.insert(item, list);
-        this.division?.southwest.insert(item, list);
       }
     }
   }
-
   private intercepts_by_scope(scope: Circle | Rectangle) {
     if (scope instanceof Circle) {
       return this.rectangle.does_intercept_circle(scope);
@@ -86,24 +85,23 @@ export class QuadTree implements QuadTreeProps, Drawable {
     const result: T[] = [];
     if (this.intercepts_by_scope(scope)) {
       for (const point of list) {
-        // Para os points dessa QuadTree
         if (scope.contains_point(point)) {
-          // Se o point pertencer ao retângulo "scope"
           result.push(point);
         }
+      }
 
-        if (this.division) {
-          // Se a QuadTree tiver QuadTrees filhas
-          const nw = this.division.northwest.search(scope, list);
-          const ne = this.division.northeast.search(scope, list);
-          const sw = this.division.southwest.search(scope, list);
-          const se = this.division.southeast.search(scope, list);
-          result.push(...nw, ...ne, ...sw, ...se);
-        }
+      if (this.division) {
+        // Check if the current node has subdivisions
+        const nw = this.division.northwest.search(scope, list);
+        const ne = this.division.northeast.search(scope, list);
+        const sw = this.division.southwest.search(scope, list);
+        const se = this.division.southeast.search(scope, list);
+        result.push(...nw, ...ne, ...sw, ...se);
       }
     }
     return result;
   }
+
 
   insert_point(point: Point): void {
     this.insert(point, this.points);
@@ -125,8 +123,9 @@ export class QuadTree implements QuadTreeProps, Drawable {
     return this.search(detection_circle, this.vegetables);
   }
 
-  find_prey_element(detection_circle: Circle) {
-    return this.search(detection_circle, this.organisms);
+  find_prey_element(detection_circle: Circle, predator_id:number) {
+    const prey_organisms = this.organisms.filter(item => item.id !== predator_id);
+    return this.search(detection_circle, prey_organisms);
   }
 
   // função para a procura de predador
