@@ -1,3 +1,3 @@
-export interface Drawable {
+interface Drawable {
   display: (context: CanvasRenderingContext2D) => void;
 }
