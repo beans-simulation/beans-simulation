@@ -14,6 +14,7 @@
     "removeComments": true,
   },
 	"files": [
+    "src/pyodide.d.ts",
     "src/resources/constants/globals.ts",
     "src/resources/constants/page-elements.ts",
     "src/resources/interfaces/color-operation.ts",

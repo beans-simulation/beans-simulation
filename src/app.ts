@@ -311,6 +311,24 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
+async function main() {
+	console.log("Carregando Pyodide...");
+
+	let pyodide = await loadPyodide();
+
+	console.log("Carregando arquivo .py...");
+
+	let response = await fetch("/public/python/rede.py");
+	let codigo = await response.text();
+
+	console.log("Executando arquivo .py...");
+
+	// Pyodide is now ready to use...
+	console.log(pyodide.runPython(codigo));
+}
+
+main();
+
 // ----------------------------------------------------------------------------------------------
 //                                         Frame rate
 // ----------------------------------------------------------------------------------------------

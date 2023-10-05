@@ -5,13 +5,12 @@
   "private": true,
   "scripts": {
     "dev": "tsc --watch",
-    "start": "echo Nothing to do with this script, try npm run dev"
+    "start": "echo Nothing to do with this script, try npm run dev && exit 1",
+    "build": "npm i && move /Y ./node_modules/pyodide ./public/js && copy .\\public\\js\\pyodide\\pyodide.d.ts .\\src\\ && rmdir /S /Q node_modules"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^20.4.1",
-    "prettier": "^3.0.0",
-    "typescript": "^5.1.6"
+  "dependencies": {
+    "pyodide": "^0.24.1"
   }
 }
