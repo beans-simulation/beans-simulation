@@ -1,7 +1,3 @@
-import { DNA, Organism, Vegetable } from "../models";
-import { sex, globals } from "../resources";
-import { generate_color, generate_float, generate_integer } from ".";
-
 function generate_organism(x: number, y: number): void {
   // função para poder adicionar mais carnívoros manualmente
   const initial_radius = generate_float(3, 8);
@@ -36,7 +32,7 @@ function random_position(size: number) {
   return Math.random() * (size - 50) + 25;
 }
 
-export function create_entities(n_organisms: number, n_vegetables: number) {
+function create_entities(n_organisms: number, n_vegetables: number) {
   for (let i = 0; i < n_organisms; i++) {
     const x = random_position(globals.universe_width);
     const y = random_position(globals.universe_height);
