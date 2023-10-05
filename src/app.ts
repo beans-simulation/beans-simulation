@@ -2,7 +2,6 @@ const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
 
-
 // var mudarGrafico = false;
 
 // Variáveis para o gráfico (carnívoro)
@@ -30,7 +29,7 @@ var is_paused = false;
 
 // cria mais vegetables ao longo do tempo
 // a função setInterval() permite que ele chame o loop a cada x milisegundos
-let vegetable_generation_interval: NodeJS.Timeout | undefined;
+let vegetable_generation_interval: number;
 
 function add_on_change_event_input(
   input: HTMLInputElement | null,
@@ -312,19 +311,19 @@ function despausa() {
 // }
 
 async function main() {
-	console.log("Carregando Pyodide...");
+  console.log("Carregando Pyodide...");
 
-	let pyodide = await loadPyodide();
+  let pyodide = await loadPyodide();
 
-	console.log("Carregando arquivo .py...");
+  console.log("Carregando arquivo .py...");
 
-	let response = await fetch("/public/python/rede.py");
-	let codigo = await response.text();
+  let response = await fetch("/neural-network-poc/neural-network.py");
+  let codigo = await response.text();
 
-	console.log("Executando arquivo .py...");
+  console.log("Executando arquivo .py...");
 
-	// Pyodide is now ready to use...
-	console.log(pyodide.runPython(codigo));
+  // Pyodide is now ready to use...
+  console.log(pyodide.runPython(codigo));
 }
 
 main();

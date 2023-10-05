@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2017", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "lib": [ "ES2017", "DOM" ],
-    "module": "system",
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "target": "es2017" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "lib": ["ES2017", "DOM"],
     "outFile": "./public/js/main.js",
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
     "strict": true,
@@ -11,10 +9,10 @@
     "sourceMap": true,
     "typeRoots": ["./node_modules/@types"],
     "emitBOM": true,
-    "removeComments": true,
+    "removeComments": true
   },
-	"files": [
-    "src/pyodide.d.ts",
+  "files": [
+    "src/resources/types/pyodide.ts",
     "src/resources/constants/globals.ts",
     "src/resources/constants/page-elements.ts",
     "src/resources/interfaces/color-operation.ts",
@@ -43,6 +41,6 @@
     "src/utils/rgb-to-hex.ts",
     "src/utils/set-input-defaults.ts",
     "src/utils/create-entities.ts",
-		"src/app.ts"
-	]
+    "src/app.ts"
+  ]
 }
