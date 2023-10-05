@@ -1,3 +1,31 @@
+import { global_timer, Organism, Vegetable, Rectangle} from "./models";
+import {
+  animate,
+  create_context,
+  create_entities,
+  drag_screen_element,
+  set_input_defaults,
+} from "./utils";
+import {
+  button_pause_simulation,
+  button_restart_simulation,
+  button_resume_simulation,
+  button_set_default,
+  button_start_simulation,
+  globals,
+  group_extra_buttons,
+  group_extra_panel,
+  input_mutation_magnitude,
+  input_mutation_probability,
+  input_slider_organisms,
+  input_slider_vegetables,
+  input_vegetable_rate,
+  label_mutation_magnitude,
+  label_mutation_probability,
+  label_timer,
+  label_vegetable_rate,
+} from "./resources";
+
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");

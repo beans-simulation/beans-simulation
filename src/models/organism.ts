@@ -1,6 +1,16 @@
+import {
+  Drawable,
+  organism_status,
+  organism_status_type,
+  sex_type,
+  globals,
+} from "../resources";
+import { Circle, DNA, global_timer, QuadTree, Vector } from ".";
+import { generate_float, generate_integer } from "../utils";
+
 const EAT_DISTANCE = 5;
 
-class Organism implements Drawable {
+export class Organism implements Drawable {
   static organisms: Organism[] = [];
   static id = 0;
 

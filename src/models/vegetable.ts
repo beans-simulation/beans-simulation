@@ -1,3 +1,6 @@
+import { Drawable } from "../resources";
+import { Vector } from ".";
+
 class Vegetable implements Drawable {
   static vegetables: Vegetable[] = [];
   static id: number = 0;
@@ -28,3 +31,5 @@ class Vegetable implements Drawable {
     return id === Vegetable.id;
   }
 }
+
+export { Vegetable };

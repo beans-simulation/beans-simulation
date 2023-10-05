@@ -1,4 +1,6 @@
-class ChartHistory {
+import { Info } from "./info";
+
+class History {
   public organisms: Info;
   public seconds: number[];
   public vegetables_per_seconds: number[];
@@ -14,3 +16,5 @@ class ChartHistory {
     this.seconds.length = 0;
   }
 }
+
+export { History };

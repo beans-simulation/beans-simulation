@@ -1,4 +1,4 @@
-const DEFAULT_INPUTS = {
+export const DEFAULT_INPUTS = {
   mutation_magnitude: "5",
   mutation_probability: "10",
   organisms_amount: "10",
@@ -16,4 +16,4 @@ class GlobalPreferences {
 
 }
 
-const globals = new GlobalPreferences();
+export const globals = new GlobalPreferences();

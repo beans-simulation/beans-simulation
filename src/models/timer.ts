@@ -14,7 +14,7 @@ interface ITimer {
   pause: () => void;
 }
 
-class Timer implements ITimer {
+export class Timer implements ITimer {
   private time = 0;
 
   private interval?: NodeJS.Timeout;
@@ -98,4 +98,4 @@ class Timer implements ITimer {
   }
 }
 
-const global_timer = new Timer();
+export const global_timer = new Timer();

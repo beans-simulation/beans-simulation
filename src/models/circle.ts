@@ -1,3 +1,5 @@
+import { Point } from ".";
+
 class Circle {
   public x: number;
   public y: number;
@@ -32,3 +34,5 @@ class Circle {
     );
   }
 }
+
+export { Circle };

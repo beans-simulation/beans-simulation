@@ -8,9 +8,9 @@ var segundoRepetido = -1;
 const chart = document.getElementById("chart");
 const chartSecundario = document.getElementById("chartSecundario");
 
-let history = new ChartHistory();
-let historicoE = new ChartHistory();
-let historicoD = new ChartHistory();
+let history = new History();
+let historicoE = new History();
+let historicoD = new History();
 
 function resetChart() {
   Plotly.purge(chart);

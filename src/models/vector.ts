@@ -1,5 +1,5 @@
 // classe para a construção de vectors
-class Vector {
+export class Vector {
   public x: number;
   public y: number;
 
