@@ -32,7 +32,7 @@ function stop_drag_element() {
   document.onmousemove = null;
 }
 
-function drag_screen_element(element: Element) {
+export function drag_screen_element(element: Element) {
   // se for uma tab
   if (element.classList.contains("tab-info")) {
     // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)

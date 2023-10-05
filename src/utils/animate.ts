@@ -1,3 +1,6 @@
+import { global_timer, Organism, Vegetable, QuadTree, Rectangle, Circle} from "../models";
+import { globals } from "../resources";
+
 function create_background(context: CanvasRenderingContext2D) {
   context.clearRect(0, 0, globals.universe_width, globals.universe_height);
   context.beginPath();
@@ -10,7 +13,7 @@ function create_background(context: CanvasRenderingContext2D) {
   context.stroke();
 }
 
-function animate(context: CanvasRenderingContext2D | null) {
+export function animate(context: CanvasRenderingContext2D | null) {
   if (!global_timer.is_paused && context) {
     // if (is_paused == false) {
     requestAnimationFrame(() => animate(context));

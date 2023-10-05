@@ -1,3 +1,17 @@
+import {
+  DEFAULT_INPUTS,
+  input_mutation_magnitude,
+  input_mutation_probability,
+  input_slider_organisms,
+  input_slider_vegetables,
+  input_vegetable_rate,
+  label_mutation_magnitude,
+  label_mutation_probability,
+  label_organisms_amount,
+  label_vegetable_rate,
+  label_vegetables_amount,
+} from "../resources";
+
 interface InputDefaultRelation {
   input: HTMLInputElement | null;
   label: HTMLElement | null;
@@ -40,7 +54,7 @@ const default_list: InputDefaultRelation[] = [
   },
 ];
 
-function set_input_defaults() {
+export function set_input_defaults() {
   default_list.forEach(({ input, label, value }) => {
     if (input) input.value = value;
     if (label) label.textContent = value;

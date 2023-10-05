@@ -3,7 +3,7 @@ interface ICreateContext {
   context: CanvasRenderingContext2D | null;
 }
 
-function create_context(): ICreateContext {
+export function create_context(): ICreateContext {
   const canvas = document.querySelector("canvas");
 
   if (canvas) {

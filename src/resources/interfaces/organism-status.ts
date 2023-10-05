@@ -7,3 +7,5 @@ const organism_status = {
 
 type organism_status_keys = keyof typeof organism_status;
 type organism_status_type = (typeof organism_status)[organism_status_keys];
+
+export { organism_status, type organism_status_type };
