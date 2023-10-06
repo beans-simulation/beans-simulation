@@ -315,15 +315,24 @@ async function main() {
 
   let pyodide = await loadPyodide();
 
-  console.log("Carregando arquivo .py...");
+  // console.log("Carregando arquivo .py...");
 
-  let response = await fetch("/neural-network-poc/neural-network.py");
-  let codigo = await response.text();
+  // let response = await fetch("/neural-network-poc/neural-network.py");
+  // let codigo = await response.text();
 
-  console.log("Executando arquivo .py...");
+  // console.log("Executando arquivo .py...");
 
   // Pyodide is now ready to use...
-  console.log(pyodide.runPython(codigo));
+  console.log(
+    pyodide.runPython(`
+    #import sys
+    #sys.version
+    a = 9
+    b = 7
+    c = a + b
+    c * 2
+  `)
+  );
 }
 
 main();
