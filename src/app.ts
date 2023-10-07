@@ -108,7 +108,6 @@ document.addEventListener("DOMContentLoaded", (_) => {
 function destroy_objects() {
   Organism.organisms.length = 0;
   Vegetable.vegetables.length = 0;
-  // update_vegetables_apparition_interval(1001);
 }
 
 function criaVegetablesGradativo() {

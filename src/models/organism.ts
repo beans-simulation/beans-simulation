@@ -6,7 +6,7 @@ import {
   globals,
 } from "../resources";
 import { Circle, DNA, global_timer, QuadTree, Vector, Vegetable } from ".";
-import { generate_float, generate_integer, find_nearby_element, remove_from_global_list } from "../utils";
+import { generate_float, generate_integer, find_nearby_element } from "../utils";
 
 const EAT_DISTANCE = 5;
 
@@ -146,6 +146,7 @@ export class Organism implements Drawable {
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
+      //Julia: energia está acabando muito rápido, checar se faz sentido
       this.energy -= this.consumed_energy_rate + this.minimal_consumption;
 
       // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
@@ -153,9 +154,7 @@ export class Organism implements Drawable {
         // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
         // Remover reproducao assexuada
         if (Math.random() <= this.procreation_probability) {
-          // this.procreate();
           // NINHADA
-
           this.litter_size = generate_integer(
             this.litter_interval[0],
             this.litter_interval[1] + 1
@@ -289,7 +288,7 @@ export class Organism implements Drawable {
 
   find_close_organisms(qtree: QuadTree, vision: Circle): [number, Organism[], number] {
     let min_distance = Infinity;
-    let closer_index = -1;
+    let closest_index = -1;
 
     let close_organisms = qtree.find_prey_element(vision, this.id);
 
@@ -300,20 +299,20 @@ export class Organism implements Drawable {
 
         if (d2 <= min_distance) {
             min_distance = d2;
-            closer_index = i;
+            closest_index = i;
         }
     }
-    return [min_distance, close_organisms, closer_index];
+    return [min_distance, close_organisms, closest_index];
   }
 
   detect_predator(qtree: QuadTree, vision: Circle) {
     this.is_running_away = false;
 
-    let [min_distance, close_organisms, closer_index] = find_nearby_element(qtree, vision, this);
+    let [min_distance, close_organisms, closest_index] = find_nearby_element(qtree, vision, this);
 
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
         if (close_organisms.length !== 0) {
-            this.run_away(close_organisms[closer_index] as Organism);
+            this.run_away(close_organisms[closest_index] as Organism);
         }
     }
   }
@@ -351,30 +350,24 @@ export class Organism implements Drawable {
 
 
   search_for_vegetable(qtree: QuadTree, vision: Circle): void {
-    console.log("searching for food")
-
     this.is_eating = false;
     const is_searching_vegetable = true;
-    // let min_distance,closer_index: number;
-    // let nearby_vegetables:Vegetable[];
-    let [min_distance, nearby_vegetables, closer_index] = find_nearby_element(qtree, vision, this, is_searching_vegetable);
-    console.log([min_distance, nearby_vegetables, closer_index])
+    let [min_distance, nearby_vegetables, closest_index] = find_nearby_element(qtree, vision, this, is_searching_vegetable);
+
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
       this.is_eating = true;
       this.is_roaming = false;
       console.log("entrou")
       if (min_distance <= EAT_DISTANCE*EAT_DISTANCE) {
-          this.eat_vegetable(nearby_vegetables[closer_index] as Vegetable);
+          this.eat_vegetable(nearby_vegetables[closest_index] as Vegetable);
       } else if (nearby_vegetables.length !== 0) {
-          this.pursue(nearby_vegetables[closer_index]);
+        this.pursue(nearby_vegetables[closest_index]);
       }
     }
   }
 
   eat_vegetable(vegetable: Vegetable): void {
-    console.log("is going to eat")
-    console.log("vegetables lenght", Vegetable.vegetables.length)
-
+    this.food_eaten++;
     if (this.max_energy - this.energy >= vegetable.energy * 0.1) {
       this.energy += vegetable.energy * 0.1;
     } else {
@@ -384,40 +377,30 @@ export class Organism implements Drawable {
     if (this.energy > this.max_energy) {
       this.energy = this.max_energy;
     }
-    remove_from_global_list(Vegetable.vegetables, vegetable)
-    this.increase_size();
-    this.food_eaten++;
-    console.log("vegetables lenght after", Vegetable.vegetables.length)
 
+    Vegetable.vegetables = Vegetable.vegetables.filter((item) => item !== vegetable);
+    this.increase_size();
   }
 
 
   hunt(qtree: QuadTree, vision: Circle) {
-    console.log("hunting")
     this.is_eating = false;
 
-    // let [min_distance, close_organisms, closer_index] = this.find_close_organisms(qtree, vision);
-    let [min_distance, close_organisms, closer_index] = find_nearby_element(qtree, vision, this);
-    console.log([min_distance, close_organisms, closer_index])
-    console.log("funçao interna:")
-    console.log(this.find_close_organisms(qtree, vision))
+    let [min_distance, close_organisms, closest_index] = find_nearby_element(qtree, vision, this);
 
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
         this.is_eating = true;
         this.is_roaming = false;
 
         if (min_distance <= EAT_DISTANCE*EAT_DISTANCE) {
-            this.eat_organism(close_organisms[closer_index] as Organism);
+            this.eat_organism(close_organisms[closest_index] as Organism);
         } else if (close_organisms.length != 0) {
-          // console.log("sou o ", this.id)
-          // console.log("perseguindo", close_organisms[closer_index])
-            this.pursue(close_organisms[closer_index]);
+          this.pursue(close_organisms[closest_index]);
         }
     }
   }
 
   eat_organism(organism: Organism) {
-    console.log("eating, list of organisms befor", Organism.organisms.length)
 
     if (this.max_energy - this.energy >= organism.max_energy * 0.1) {
         this.energy += organism.max_energy * 0.1;
@@ -430,7 +413,6 @@ export class Organism implements Drawable {
     organism.kill();
     this.increase_size();
     this.food_eaten++;
-    console.log(Organism.organisms.length)
   }
 
   // Método que fará o organism vaguear por aí quando não está is_running_away ou perseguindo
@@ -464,10 +446,10 @@ export class Organism implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    // if (this.is_eating || this.is_running_away) {
-    //   // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
-    //   roaming_force.multiply(0.03);
-    // }
+    if (this.is_eating || this.is_running_away) {
+      // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
+      roaming_force.multiply(0.03);
+    }
     this.apply_force(roaming_force.multiply(0.2));
     // }
   }
@@ -479,12 +461,12 @@ export class Organism implements Drawable {
       target.is_running_away = true;
     }
     // O vector da velocidade desejada é o vector de posição do alvo menos o da própria posição
-    const desired_speed = target.position.subtract_new(this.position); // Um vector apontando da localização dele para o alvo
+    let desired_speed = target.position.subtract_new(this.position); // Um vector apontando da localização dele para o alvo
     // Amplia a velocidade desejada para a velocidade máxima
     desired_speed.set_magnitude(this.max_speed);
 
     // Redirecionamento = velocidade desejada - velocidade
-    const redirection = desired_speed.subtract_new(this.speed);
+    let redirection = desired_speed.subtract_new(this.speed);
     redirection.limit(this.max_force); // Limita o redirectionamento para a força máxima
 
     // Soma a força de redirecionamento à aceleração
@@ -536,7 +518,6 @@ export class Organism implements Drawable {
     return filtered;
   }
   kill() {
-    // remove_from_global_list(Organism.organisms, this)
     Organism.organisms = Organism.organisms.filter((item) => item !== this);
 
   }

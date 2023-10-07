@@ -52,12 +52,11 @@ export function animate(context: CanvasRenderingContext2D | null) {
 
       if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
-        organism.hunt(qtree, vision); // Remover comentário para que ele coma organismos
-        // organism.search_for_vegetable(qtree, vision); // Remover comentário para que ele coma vegetais
+        // organism.hunt(qtree, vision); // Remover comentário para que ele coma organismos
+        organism.search_for_vegetable(qtree, vision); // Remover comentário para que ele coma vegetais
 
       }
       // organism.detect_predator(qtree, vision)
-
     });
 
   }
