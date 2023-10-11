@@ -3,5 +3,6 @@
 package-lock.json
 /.vscode/
 
-/public/js
-/src/pyodide.d.ts
+public/js/pyodide/
+public/js/main.js
+public/js/**.js.map

@@ -325,13 +325,18 @@ async function main() {
   // Pyodide is now ready to use...
   console.log(
     pyodide.runPython(`
-    #import sys
-    #sys.version
-    a = 9
-    b = 7
-    c = a + b
-    c * 2
-  `)
+    from pyodide_importer import register_hook
+    modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
+    register_hook(modules_url)
+
+    import neural_network
+
+    input_values = ${feed_neural_network()}
+
+    js_output = neural_network.feed_forward(input_values)
+    
+    print(js_output)
+    `)
   );
 }
 
