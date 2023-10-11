@@ -43,6 +43,7 @@
     "src/utils/rgb-to-hex.ts",
     "src/utils/set-input-defaults.ts",
     "src/utils/create-entities.ts",
+    "src/utils/find-nearby-element.ts",
     "src/app.ts"
   ]
 }

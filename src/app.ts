@@ -314,6 +314,11 @@ async function main() {
 
   let pyodide = await loadPyodide();
 
+  await pyodide.loadPackage("micropip");
+  const micropip = pyodide.pyimport("micropip");
+
+  await micropip.install("pyodide-importer");
+
   // console.log("Carregando arquivo .py...");
 
   // let response = await fetch("/neural-network-poc/neural-network.py");
@@ -322,17 +327,20 @@ async function main() {
   // console.log("Executando arquivo .py...");
 
   // Pyodide is now ready to use...
+  const values = feed_neural_network();
+  pyodide.registerJsModule("input_values", values);
+
   console.log(
     pyodide.runPython(`
     from pyodide_importer import register_hook
-    modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
+    modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/feature/pgt-106/neural-network-poc/"
     register_hook(modules_url)
 
     import neural_network
+    import input_values
+    import js
 
-    input_values = ${feed_neural_network()}
-
-    js_output = neural_network.feed_forward(input_values)
+    js_output = neural_network.feed_forward(input_values.to_py())
     
     print(js_output)
     `)
