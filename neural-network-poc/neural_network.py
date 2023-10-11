@@ -635,122 +635,122 @@ class NeuralNetwork:
 
 
 
-# -------------------------------------------------------------------------------
-# ---------------------------------- TESTAGEM -----------------------------------
-# -------------------------------------------------------------------------------
+# # -------------------------------------------------------------------------------
+# # ---------------------------------- TESTAGEM -----------------------------------
+# # -------------------------------------------------------------------------------
 
-# Criando uma estrutura básica de rede neural para um organismo capaz de andar em direção a um alimento
-basic_network = NeuralNetwork()
+# # Criando uma estrutura básica de rede neural para um organismo capaz de andar em direção a um alimento
+# basic_network = NeuralNetwork()
 
-# A estrutura básica é essa:
-"""
-INPUT                             HIDDEN                       OUTPUT
-Constant --------------------------------------------------> Accelerate
+# # A estrutura básica é essa:
+# """
+# INPUT                             HIDDEN                       OUTPUT
+# Constant --------------------------------------------------> Accelerate
 
-AngleToClosestFood ----------> PiecewiseConstant ----------> Rotate
-"""
-# Adicionando os neurônios na rede
-basic_network.neurons = [
-    Neuron('Input', 'AngleToClosestFood', 0),
-    Neuron('Input', 'Constant', 1),
-    Neuron('Input', 'Health', 2),
-    Neuron('Input', 'TimeAlive', 3),
-    Neuron('Hidden', 'PiecewiseConstant', 4),
-    Neuron('Hidden', 'Sin', 5),
-    Neuron('Hidden', 'Absolute', 6),
-    Neuron('Output', 'Accelerate', 7),
-    Neuron('Output', 'Rotate', 8),
-    Neuron('Output', 'DesireToEat', 9),
-]
+# AngleToClosestFood ----------> PiecewiseConstant ----------> Rotate
+# """
+# # Adicionando os neurônios na rede
+# basic_network.neurons = [
+#     Neuron('Input', 'AngleToClosestFood', 0),
+#     Neuron('Input', 'Constant', 1),
+#     Neuron('Input', 'Health', 2),
+#     Neuron('Input', 'TimeAlive', 3),
+#     Neuron('Hidden', 'PiecewiseConstant', 4),
+#     Neuron('Hidden', 'Sin', 5),
+#     Neuron('Hidden', 'Absolute', 6),
+#     Neuron('Output', 'Accelerate', 7),
+#     Neuron('Output', 'Rotate', 8),
+#     Neuron('Output', 'DesireToEat', 9),
+# ]
 
-# Criando as conexões entre os neurônios
-basic_network.connections = [
-    Connection(0, 4, 1.0),  # AngleToClosestFood --> PiecewiseConstant
-    Connection(4, 8 , 1.0), # PiecewiseConstant --> Rotate
-    Connection(1, 7, 1.0),   # Constant --> Accelerate
-    Connection(2, 5, 1.0),   # Health --> Sin
-    Connection(5, 9, 1.0),   # Sin --> DesireToEat
-    Connection(3, 6, 1.0),   # TimeAlive --> Absolute
-    Connection(6, 8, 1.0)   # Absolute --> Rotate
-]
-
-
-# Criando os valores de input manualmente. Na simulação, esses valores virão dos sentidos do organismo
-# A maioria desses neurônios não está presente nessa rede, mas caso a mutação introduza esses neurônios,
-# deixaremos esses valores aqui para que a rede mutada possa computar os outputs 
-input_values = { # ESSES VALORES SÃO ARBITRÁRIOS AQUI
-    'EnergyLevel': 25, 
-    'Temperature': 16,
-    'Health': 85,
-    'AngleToClosestFood': -30, # A rede inicial só precisa desse valor, já que não possui os outros neurônios
-    'DistToClosestFood': 56,
-    'NumOfFoodInView': 3,
-    'AngleToClosestOrganism': -77,
-    'DistToClosestOrganism': 172,
-    'NumOfOrganismsInView': 0,
-    'Luminosity': 0.56,
-    'Maturity': 0.83,
-    'TimeAlive': 104
-}
+# # Criando as conexões entre os neurônios
+# basic_network.connections = [
+#     Connection(0, 4, 1.0),  # AngleToClosestFood --> PiecewiseConstant
+#     Connection(4, 8 , 1.0), # PiecewiseConstant --> Rotate
+#     Connection(1, 7, 1.0),   # Constant --> Accelerate
+#     Connection(2, 5, 1.0),   # Health --> Sin
+#     Connection(5, 9, 1.0),   # Sin --> DesireToEat
+#     Connection(3, 6, 1.0),   # TimeAlive --> Absolute
+#     Connection(6, 8, 1.0)   # Absolute --> Rotate
+# ]
 
 
-print("\n--------------------------- Rede Inicial ---------------------------")
-
-update_neural_network(basic_network)
-
-# Imprimindo na tela informações gerais da rede
-basic_network.print_network_info()
-
-# Aqui é para ver quais os valores de saída da rede. São eles que definirão o comportamento do organismo!!
-print("Valores de output:", basic_network.feed_forward(input_values))
-
-
-print("\n------------------------- Rede Após mutação -------------------------")
-
-# Realizando a mutação
-for i in range(1, 5):
-    basic_network.mutate()
-
-
-basic_network.print_network_info()
+# # Criando os valores de input manualmente. Na simulação, esses valores virão dos sentidos do organismo
+# # A maioria desses neurônios não está presente nessa rede, mas caso a mutação introduza esses neurônios,
+# # deixaremos esses valores aqui para que a rede mutada possa computar os outputs 
+# input_values = { # ESSES VALORES SÃO ARBITRÁRIOS AQUI
+#     'EnergyLevel': 25, 
+#     'Temperature': 16,
+#     'Health': 85,
+#     'AngleToClosestFood': -30, # A rede inicial só precisa desse valor, já que não possui os outros neurônios
+#     'DistToClosestFood': 56,
+#     'NumOfFoodInView': 3,
+#     'AngleToClosestOrganism': -77,
+#     'DistToClosestOrganism': 172,
+#     'NumOfOrganismsInView': 0,
+#     'Luminosity': 0.56,
+#     'Maturity': 0.83,
+#     'TimeAlive': 104
+# }
 
 
-print("\nValores de output:", basic_network.feed_forward(input_values))
+# print("\n--------------------------- Rede Inicial ---------------------------")
 
-update_neural_network(basic_network)
+# update_neural_network(basic_network)
 
-print(f"\n\nDNA PAI:\n{basic_network.dna}")
+# # Imprimindo na tela informações gerais da rede
+# basic_network.print_network_info()
 
-
-print("\n--------------------------- Rede Filha ---------------------------")
-
-nn_filha = reconstruct_neural_network_from_dna(basic_network.dna)
-
-# Imprimindo na tela informações gerais da rede
-nn_filha.print_network_info()
-
-print("Valores de output:", nn_filha.feed_forward(input_values))
-
-update_neural_network(nn_filha)
-
-print(f"\n\nDNA FILHA:\n{basic_network.dna}")
+# # Aqui é para ver quais os valores de saída da rede. São eles que definirão o comportamento do organismo!!
+# print("Valores de output:", basic_network.feed_forward(input_values))
 
 
+# print("\n------------------------- Rede Após mutação -------------------------")
 
-# Testando rapidez do método feed_forward (que será chamado 1x por frame por organismo)
+# # Realizando a mutação
+# for i in range(1, 5):
+#     basic_network.mutate()
 
-# number_of_creatures = 2000
-# frames_per_second = 24
 
-# print(f"\nRodando o método feed_forward {number_of_creatures * frames_per_second} vezes ({number_of_creatures} organismos a {frames_per_second} frames por segundo)")
+# basic_network.print_network_info()
 
-# start_time = time.time()
-# for i in range(1, frames_per_second):
-#     for o in range(1, number_of_creatures):
-#         basic_network.feed_forward(input_values)
 
-# end_time = time.time()
+# print("\nValores de output:", basic_network.feed_forward(input_values))
 
-# test_duration = end_time - start_time
+# update_neural_network(basic_network)
 
-# print(f"\nDuração: {test_duration} segundos")
+# print(f"\n\nDNA PAI:\n{basic_network.dna}")
+
+
+# print("\n--------------------------- Rede Filha ---------------------------")
+
+# nn_filha = reconstruct_neural_network_from_dna(basic_network.dna)
+
+# # Imprimindo na tela informações gerais da rede
+# nn_filha.print_network_info()
+
+# print("Valores de output:", nn_filha.feed_forward(input_values))
+
+# update_neural_network(nn_filha)
+
+# print(f"\n\nDNA FILHA:\n{basic_network.dna}")
+
+
+
+# # Testando rapidez do método feed_forward (que será chamado 1x por frame por organismo)
+
+# # number_of_creatures = 2000
+# # frames_per_second = 24
+
+# # print(f"\nRodando o método feed_forward {number_of_creatures * frames_per_second} vezes ({number_of_creatures} organismos a {frames_per_second} frames por segundo)")
+
+# # start_time = time.time()
+# # for i in range(1, frames_per_second):
+# #     for o in range(1, number_of_creatures):
+# #         basic_network.feed_forward(input_values)
+
+# # end_time = time.time()
+
+# # test_duration = end_time - start_time
+
+# # print(f"\nDuração: {test_duration} segundos")
