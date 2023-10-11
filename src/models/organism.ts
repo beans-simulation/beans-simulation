@@ -24,7 +24,7 @@ class Organism implements Drawable {
   public is_eating = false;
   public is_roaming = false; //vagar sem direção
   public is_running_away = false;
-  public lifetime_in_miliseconds = generate_float(200, 300)*1000; // tempo de vida do organism
+  public lifetime_in_miliseconds = generate_float(200, 300) * 1000; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
   public max_energy_consumption_rate: number;
@@ -130,12 +130,14 @@ class Organism implements Drawable {
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
     this.consumed_energy_rate =
-     Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
+      Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
     const achieved_age_limit =
-      (global_timer.total - this.birth_moment_in_milliseconds) > this.lifetime_in_miliseconds;
+      global_timer.total - this.birth_moment_in_milliseconds >
+      this.lifetime_in_miliseconds;
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
+      //Julia: energia está acabando muito rápido, checar se faz sentido
       this.energy -= this.consumed_energy_rate + this.minimal_consumption;
 
       // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
@@ -143,9 +145,7 @@ class Organism implements Drawable {
         // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
         // Remover reproducao assexuada
         if (Math.random() <= this.procreation_probability) {
-          // this.procreate();
           // NINHADA
-
           this.litter_size = generate_integer(
             this.litter_interval[0],
             this.litter_interval[1] + 1
@@ -236,19 +236,23 @@ class Organism implements Drawable {
     return null;
   }
 
-  create_space_delimitation(){
+  create_space_delimitation() {
     this.create_canvas_space_delimitation();
     this.avoid_space_limits();
   }
   // Método para impedir a passagem dos organisms para fora da tela
-  create_canvas_space_delimitation(){
-    if(this.position.x + 2*this.radius > globals.universe_width) // borda direita
+  create_canvas_space_delimitation() {
+    if (this.position.x + 2 * this.radius > globals.universe_width)
+      // borda direita
       this.speed.x = this.speed.x * -1; //inverte a velocidade x se ultrapassa a borda do canvas
-    if(this.position.x - this.radius < 0) // borda esquerda
+    if (this.position.x - this.radius < 0)
+      // borda esquerda
       this.speed.x = this.speed.x * -1;
-    if(this.position.y + this.radius > globals.universe_height) // borda baixo
-      this.speed.y = this.speed.y* -1;
-    if(this.position.y < 0) // borda cima
+    if (this.position.y + this.radius > globals.universe_height)
+      // borda baixo
+      this.speed.y = this.speed.y * -1;
+    if (this.position.y < 0)
+      // borda cima
       this.speed.y = this.speed.y * -1;
   }
 
@@ -277,41 +281,48 @@ class Organism implements Drawable {
     this.acceleration.add(force);
   }
 
-  find_close_organisms(qtree: QuadTree, vision: Circle): [number, Organism[], number] {
+  find_close_organisms(
+    qtree: QuadTree,
+    vision: Circle
+  ): [number, Organism[], number] {
     let min_distance = Infinity;
-    let closer_index = -1;
+    let closest_index = -1;
 
     let close_organisms = qtree.find_prey_element(vision, this.id);
 
     for (let i = close_organisms.length - 1; i >= 0; i--) {
-        let d2 =
-            Math.pow(this.position.x - close_organisms[i].position.x, 2) +
-            Math.pow(this.position.y - close_organisms[i].position.y, 2);
+      let d2 =
+        Math.pow(this.position.x - close_organisms[i].position.x, 2) +
+        Math.pow(this.position.y - close_organisms[i].position.y, 2);
 
-        if (d2 <= min_distance) {
-            min_distance = d2;
-            closer_index = i;
-        }
+      if (d2 <= min_distance) {
+        min_distance = d2;
+        closest_index = i;
+      }
     }
-    return [min_distance, close_organisms, closer_index];
+    return [min_distance, close_organisms, closest_index];
   }
 
   detect_predator(qtree: QuadTree, vision: Circle) {
     this.is_running_away = false;
 
-    let [min_distance, close_organisms, closer_index] = this.find_close_organisms(qtree, vision);
+    let [min_distance, close_organisms, closest_index] = find_nearby_element(
+      qtree,
+      vision,
+      this
+    );
 
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
-        if (close_organisms.length !== 0) {
-            this.run_away(close_organisms[closer_index]);
-        }
+      if (close_organisms.length !== 0) {
+        this.run_away(close_organisms[closest_index] as Organism);
+      }
     }
   }
 
   run_away(target: Organism) {
     let desired_speed = {
-        x: target.position.x - this.position.x,
-        y: target.position.y - this.position.y,
+      x: target.position.x - this.position.x,
+      y: target.position.y - this.position.y,
     };
 
     desired_speed.x = -desired_speed.x;
@@ -323,46 +334,91 @@ class Organism implements Drawable {
     desired_speed.y = (desired_speed.y / magnitude) * this.max_speed;
 
     let redirection = {
-        x: desired_speed.x - this.speed.x,
-        y: desired_speed.y - this.speed.y,
+      x: desired_speed.x - this.speed.x,
+      y: desired_speed.y - this.speed.y,
     };
 
-
-    let redirectionMagnitude = Math.sqrt(redirection.x ** 2 + redirection.y ** 2);
+    let redirectionMagnitude = Math.sqrt(
+      redirection.x ** 2 + redirection.y ** 2
+    );
 
     if (redirectionMagnitude > this.max_force) {
-        redirection.x = (redirection.x / redirectionMagnitude) * this.max_force;
-        redirection.y = (redirection.y / redirectionMagnitude) * this.max_force;
+      redirection.x = (redirection.x / redirectionMagnitude) * this.max_force;
+      redirection.y = (redirection.y / redirectionMagnitude) * this.max_force;
     }
 
     this.apply_force(new Vector(redirection.x, redirection.y));
   }
 
+  search_for_vegetable(qtree: QuadTree, vision: Circle): void {
+    this.is_eating = false;
+    const is_searching_vegetable = true;
+    let [min_distance, nearby_vegetables, closest_index] = find_nearby_element(
+      qtree,
+      vision,
+      this,
+      is_searching_vegetable
+    );
+
+    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+      this.is_eating = true;
+      this.is_roaming = false;
+      console.log("entrou");
+      if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
+        this.eat_vegetable(nearby_vegetables[closest_index] as Vegetable);
+      } else if (nearby_vegetables.length !== 0) {
+        this.pursue(nearby_vegetables[closest_index]);
+      }
+    }
+  }
+
+  eat_vegetable(vegetable: Vegetable): void {
+    this.food_eaten++;
+    if (this.max_energy - this.energy >= vegetable.energy * 0.1) {
+      this.energy += vegetable.energy * 0.1;
+    } else {
+      this.energy = this.max_energy;
+    }
+
+    if (this.energy > this.max_energy) {
+      this.energy = this.max_energy;
+    }
+
+    Vegetable.vegetables = Vegetable.vegetables.filter(
+      (item) => item !== vegetable
+    );
+    this.increase_size();
+  }
+
   hunt(qtree: QuadTree, vision: Circle) {
     this.is_eating = false;
 
-    let [min_distance, close_organisms, closer_index] = this.find_close_organisms(qtree, vision);
+    let [min_distance, close_organisms, closest_index] = find_nearby_element(
+      qtree,
+      vision,
+      this
+    );
 
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
-        this.is_eating = true;
-        this.is_roaming = false;
+      this.is_eating = true;
+      this.is_roaming = false;
 
-        if (min_distance <= EAT_DISTANCE*EAT_DISTANCE) {
-            this.eat_organism(close_organisms[closer_index]);
-        } else if (close_organisms.length !== 0) {
-            this.pursue(close_organisms[closer_index]);
-        }
+      if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
+        this.eat_organism(close_organisms[closest_index] as Organism);
+      } else if (close_organisms.length != 0) {
+        this.pursue(close_organisms[closest_index]);
+      }
     }
   }
 
   eat_organism(organism: Organism) {
     if (this.max_energy - this.energy >= organism.max_energy * 0.1) {
-        this.energy += organism.max_energy * 0.1;
+      this.energy += organism.max_energy * 0.1;
     } else {
-        this.energy = this.max_energy;
+      this.energy = this.max_energy;
     }
     if (this.energy > this.max_energy) {
-        this.energy = this.max_energy;
+      this.energy = this.max_energy;
     }
     organism.kill();
     this.increase_size();
@@ -400,25 +456,27 @@ class Organism implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    // if (this.is_eating || this.is_running_away) {
-    //   // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
-    //   roaming_force.multiply(0.03);
-    // }
+    if (this.is_eating || this.is_running_away) {
+      // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
+      roaming_force.multiply(0.03);
+    }
     this.apply_force(roaming_force.multiply(0.2));
     // }
   }
 
   // Método que calcula a força de redirecionamento em direção a um alvo
   // REDIRECIONAMENTO = VELOCIDADE DESEJADA - VELOCIDADE
-  pursue(target: Organism) {
-    target.is_running_away = true;
+  pursue(target: Organism | Vegetable) {
+    if (target instanceof Organism) {
+      target.is_running_away = true;
+    }
     // O vector da velocidade desejada é o vector de posição do alvo menos o da própria posição
-    const desired_speed = target.position.subtract_new(this.position); // Um vector apontando da localização dele para o alvo
+    let desired_speed = target.position.subtract_new(this.position); // Um vector apontando da localização dele para o alvo
     // Amplia a velocidade desejada para a velocidade máxima
     desired_speed.set_magnitude(this.max_speed);
 
     // Redirecionamento = velocidade desejada - velocidade
-    const redirection = desired_speed.subtract_new(this.speed);
+    let redirection = desired_speed.subtract_new(this.speed);
     redirection.limit(this.max_force); // Limita o redirectionamento para a força máxima
 
     // Soma a força de redirecionamento à aceleração
@@ -470,7 +528,6 @@ class Organism implements Drawable {
     return filtered;
   }
   kill() {
-    // more performatic than reording the list with .slice(), without letting a blank space on the list
     Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }
 
