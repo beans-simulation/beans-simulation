@@ -1,6 +1,4 @@
-import { global_timer, Organism } from "../models";
-
-export function get_input_values_for_neuralnet(organism: Organism) {
+function get_input_values_for_neuralnet(organism: Organism) {
     var input_values: {};
     var distance_food: number;
     var angle_food: number;
