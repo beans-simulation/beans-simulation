@@ -1,6 +1,4 @@
-import { Circle, Point } from ".";
-
-export class Rectangle {
+class Rectangle {
   public x: number;
   public y: number;
   public w: number;

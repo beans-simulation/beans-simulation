@@ -1,6 +1,3 @@
-import { Drawable } from "../resources";
-import { Circle, Organism, Point, Rectangle, Vegetable } from ".";
-
 interface QuadTreeProps {
   rectangle: Rectangle;
   supported_amount_of_point: number;
@@ -15,7 +12,7 @@ interface QuadTreeProps {
   } | null;
 }
 
-export class QuadTree implements QuadTreeProps, Drawable {
+class QuadTree implements QuadTreeProps, Drawable {
   public rectangle: Rectangle;
   public supported_amount_of_point: number; // A partir de quantos points (neste caso, seres vivos) o retângulo se subdivide
   public points: Point[] = [];

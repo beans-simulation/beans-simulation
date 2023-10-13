@@ -1,11 +1,3 @@
-import {
-  color_operation,
-  color_operation_type,
-  globals,
-  sex_type,
-} from "../resources";
-import { generate_integer } from "../utils";
-
 class DNA {
   public readonly initial_radius: number;
   public readonly max_speed: number;
@@ -227,5 +219,3 @@ class DNA {
     );
   }
 }
-
-export { DNA };
