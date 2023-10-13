@@ -1,35 +1,4 @@
-<<<<<<< HEAD
-import { global_timer, Organism, Vegetable, Rectangle} from "./models";
-import {
-  animate,
-  create_context,
-  create_entities,
-  drag_screen_element,
-  set_input_defaults,
-  get_input_values_for_neuralnet,
-} from "./utils";
-import {
-  button_pause_simulation,
-  button_restart_simulation,
-  button_resume_simulation,
-  button_set_default,
-  button_start_simulation,
-  globals,
-  group_extra_buttons,
-  group_extra_panel,
-  input_mutation_magnitude,
-  input_mutation_probability,
-  input_slider_organisms,
-  input_slider_vegetables,
-  input_vegetable_rate,
-  label_mutation_magnitude,
-  label_mutation_probability,
-  label_timer,
-  label_vegetable_rate,
-} from "./resources";
 
-=======
->>>>>>> main
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
@@ -341,8 +310,6 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
-<<<<<<< HEAD
-
 // estrutura geral da função que vai alimentar a rede neural
 // aqui precisa da integração com o pyodide
 function feed_neural_net(organism: Organism) {
@@ -354,7 +321,6 @@ Organism.organisms.forEach((organism) => {
 });
 
 
-=======
 async function main() {
   console.log("Carregando Pyodide...");
   let pyodide = await loadPyodide();
@@ -385,7 +351,6 @@ async function main() {
 }
 
 main();
->>>>>>> main
 
 // ----------------------------------------------------------------------------------------------
 //                                         Frame rate
