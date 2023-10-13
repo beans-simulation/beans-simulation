@@ -4,4 +4,4 @@ package-lock.json
 /.vscode/
 
 /public/js/*
-!/public/js/pyodide.js
+!/public/js/pyodide/pyodide.js
