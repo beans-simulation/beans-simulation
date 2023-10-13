@@ -1,18 +1,15 @@
-import { Drawable } from "../resources";
-import { Vector } from ".";
-
 class Vegetable implements Drawable {
   static vegetables: Vegetable[] = [];
   static id: number = 0;
   public position: Vector;
   public radius: number;
-  public vegetable_energy: number;
+  public energy: number;
 
   constructor(x: number, y: number, radius: number) {
     this.position = new Vector(x, y);
     this.radius = radius;
     // a energia do pedaço de vegetable é proporcinal à sua área
-    this.vegetable_energy = Math.floor(Math.PI * Math.pow(this.radius, 2)) * 15;
+    this.energy = Math.floor(Math.PI * Math.pow(this.radius, 2)) * 15;
 
     Vegetable.vegetables.push(this);
 
@@ -31,5 +28,3 @@ class Vegetable implements Drawable {
     return id === Vegetable.id;
   }
 }
-
-export { Vegetable };

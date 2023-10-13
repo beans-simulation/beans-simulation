@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { global_timer, Organism, Vegetable, Rectangle} from "./models";
 import {
   animate,
@@ -27,10 +28,11 @@ import {
   label_vegetable_rate,
 } from "./resources";
 
+=======
+>>>>>>> main
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
-
 
 // var mudarGrafico = false;
 
@@ -59,7 +61,7 @@ var is_paused = false;
 
 // cria mais vegetables ao longo do tempo
 // a função setInterval() permite que ele chame o loop a cada x milisegundos
-let vegetable_generation_interval: NodeJS.Timeout | undefined;
+let vegetable_generation_interval: number;
 
 function add_on_change_event_input(
   input: HTMLInputElement | null,
@@ -109,7 +111,6 @@ document.addEventListener("DOMContentLoaded", (_) => {
 function destroy_objects() {
   Organism.organisms.length = 0;
   Vegetable.vegetables.length = 0;
-  // update_vegetables_apparition_interval(1001);
 }
 
 function criaVegetablesGradativo() {
@@ -340,6 +341,7 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
+<<<<<<< HEAD
 
 // estrutura geral da função que vai alimentar a rede neural
 // aqui precisa da integração com o pyodide
@@ -352,6 +354,38 @@ Organism.organisms.forEach((organism) => {
 });
 
 
+=======
+async function main() {
+  console.log("Carregando Pyodide...");
+  let pyodide = await loadPyodide();
+  await pyodide.loadPackage("micropip");
+  const micropip = pyodide.pyimport("micropip");
+  await micropip.install("pyodide-importer");
+  const values = feed_neural_network();
+  pyodide.registerJsModule("input_values", values);
+
+  // Rodar fora do loop, para carregar as bibliotecas
+  pyodide.runPython(`
+    from pyodide_importer import register_hook
+    modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
+    register_hook(modules_url)
+
+    import neural_network
+    import js
+  `)
+
+  pyodide.runPython(`
+    # Import das variaveis do js (não é bem uma biblioteca)
+    import input_values
+
+    print("py", input_values.to_py())
+
+    neural_network.teste(input_values.to_py())
+  `);
+}
+
+main();
+>>>>>>> main
 
 // ----------------------------------------------------------------------------------------------
 //                                         Frame rate

@@ -1,6 +1,3 @@
-import { global_timer, Organism, Vegetable, QuadTree, Rectangle, Circle} from "../models";
-import { globals } from "../resources";
-
 function create_background(context: CanvasRenderingContext2D) {
   context.clearRect(0, 0, globals.universe_width, globals.universe_height);
   context.beginPath();
@@ -13,7 +10,7 @@ function create_background(context: CanvasRenderingContext2D) {
   context.stroke();
 }
 
-export function animate(context: CanvasRenderingContext2D | null) {
+function animate(context: CanvasRenderingContext2D | null) {
   if (!global_timer.is_paused && context) {
     // if (is_paused == false) {
     requestAnimationFrame(() => animate(context));
@@ -51,10 +48,12 @@ export function animate(context: CanvasRenderingContext2D | null) {
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
 
       if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
-        organism.hunt(qtree, vision);
+        // TODO: Lógica para definir se vai comer organismo ou vegetal
+        // organism.hunt(qtree, vision); // Remover comentário para que ele coma organismos
+        organism.search_for_vegetable(qtree, vision); // Remover comentário para que ele coma vegetais
+
       }
       // organism.detect_predator(qtree, vision)
-
     });
 
   }
