@@ -1,5 +1,5 @@
 function get_input_values_for_neuralnet(organism: Organism) {
-    var input_values: {};
+    var input_values: { [key: string]: number } = {};
     var distance_food: number;
     var angle_food: number;
     var distance_organism: number;
