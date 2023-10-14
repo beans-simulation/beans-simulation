@@ -35,7 +35,8 @@ function get_input_values_for_neuralnet(organism: Organism) {
 
 function get_distance_and_angle_to_closest_vegetable(organism: Organism) {
     var distance = 56
-    var angle = - 30;
+    // var angle = - 30;
+    var angle = generate_integer(-100,100);
 
     //TODO: Código para encontrar alimento mais próximo (só vegetal por enquanto)
     let distance_and_angle: [number, number] = [distance, angle];

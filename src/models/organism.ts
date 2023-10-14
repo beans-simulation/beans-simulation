@@ -26,7 +26,7 @@ class Organism implements Drawable {
   public is_eating = false;
   public is_roaming = false; //vagar sem direção
   public is_running_away = false;
-  public lifetime_in_miliseconds = generate_float(200, 300) * 1000; // tempo de vida do organism
+  public lifetime_in_miliseconds = generate_integer(200, 300) * 1000; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
   public max_energy_consumption_rate: number;
@@ -139,7 +139,6 @@ class Organism implements Drawable {
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
-      //Julia: energia está acabando muito rápido, checar se faz sentido
       this.energy -= this.consumed_energy_rate + this.minimal_consumption;
 
       // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
@@ -293,27 +292,6 @@ class Organism implements Drawable {
     this.acceleration.add(force);
   }
 
-  find_close_organisms(
-    qtree: QuadTree,
-    vision: Circle
-  ): [number, Organism[], number] {
-    let min_distance = Infinity;
-    let closest_index = -1;
-
-    let close_organisms = qtree.find_prey_element(vision, this.id);
-
-    for (let i = close_organisms.length - 1; i >= 0; i--) {
-      let d2 =
-        Math.pow(this.position.x - close_organisms[i].position.x, 2) +
-        Math.pow(this.position.y - close_organisms[i].position.y, 2);
-
-      if (d2 <= min_distance) {
-        min_distance = d2;
-        closest_index = i;
-      }
-    }
-    return [min_distance, close_organisms, closest_index];
-  }
 
   detect_predator(qtree: QuadTree, vision: Circle) {
     this.is_running_away = false;
@@ -424,7 +402,7 @@ class Organism implements Drawable {
 
   eat_organism(organism: Organism) {
     if (this.max_energy - this.energy >= organism.max_energy * 0.1) {
-      this.energy += organism.max_energy * 0.1;
+      this.energy += organism.max_energy * 0.2;
     } else {
       this.energy = this.max_energy;
     }
@@ -438,9 +416,8 @@ class Organism implements Drawable {
 
   // Método que fará o organism vaguear por aí quando não está is_running_away ou perseguindo
   roam() {
-    // if(!this.is_running_away && !this.is_eating){
     this.change_status(organism_status.roaming);
-    // A ideia é criar uma pequena força a cada frame logo à frente do organism, a uma d dele.
+    this.is_roaming = true;    // A ideia é criar uma pequena força a cada frame logo à frente do organism, a uma d dele.
     // Desenharemos um círculo à frente do organism, e o vector da força de deslocamento partirá do centro
     // do círculo e terá o tamanho de seu radius. Assim, quanto maior o círculo, maior a força.
     // A fim de sabermos qual é a frente do organism, utilizaremos o vector velocidade para nos auxiliar,
@@ -472,7 +449,6 @@ class Organism implements Drawable {
       roaming_force.multiply(0.03);
     }
     this.apply_force(roaming_force.multiply(0.2));
-    // }
   }
 
   // Método que calcula a força de redirecionamento em direção a um alvo
