@@ -375,7 +375,6 @@ class Organism implements Drawable {
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
       this.is_eating = true;
       this.is_roaming = false;
-      console.log("entrou");
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
         this.eat_vegetable(nearby_vegetables[closest_index] as Vegetable);
       } else if (nearby_vegetables.length !== 0) {
