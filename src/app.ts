@@ -1,3 +1,4 @@
+
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
@@ -131,7 +132,7 @@ function update_timer_display(time: number, formattedTime?: string) {
   if (label_timer && formattedTime) label_timer.textContent = formattedTime;
 }
 
-function start_simulation() {
+async function start_simulation() {
   const n_organisms =
     parseInt(input_slider_organisms?.value || "0") * globals.universe_size;
 
@@ -140,12 +141,13 @@ function start_simulation() {
 
   // is_before_play = false;
   destroy_objects();
-  global_timer.pause();
-  global_timer.reset();
-  global_timer.play(update_timer_display);
+
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
   create_entities(n_organisms, n_vegetables);
+  global_timer.pause();
+  global_timer.reset();
+  global_timer.play(update_timer_display);
 
   // input_vegetable_rate = document.getElementById("input_vegetable_rate");
   update_vegetables_apparition_interval(input_vegetable_rate?.value);
@@ -168,7 +170,10 @@ function start_simulation() {
   // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
 
   if (!is_running) {
+    const pyodide = await import_pyodide()
+    main(pyodide);
     animate(context);
+
   }
 
   is_running = true;
@@ -309,73 +314,53 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
-async function main() {
+// estrutura geral da função que vai alimentar a rede neural
+// aqui precisa da integração com o pyodide
+function feed_neural_net(organism: Organism) {
+  var input_values = get_input_values_for_neuralnet(organism)
+  console.log(input_values)
+}
+
+
+function main(pyodide: Pyodide) {
+  if (!global_timer.is_paused && pyodide) {
+    requestAnimationFrame(() => main(pyodide));
+    Organism.organisms.forEach((organism) => {
+      const values = get_input_values_for_neuralnet(organism);
+      // Serialize the values as JSON
+      const valuesJSON = JSON.stringify(values);
+      // console.log(values["AngleToClosestFood"])
+      pyodide.runPython(`
+        import json
+
+        # Deserialize the JSON data
+        values = json.loads('${valuesJSON}')
+
+        # print("py", values["AngleToClosestFood"])
+        nn = neural_network.create_network()
+        print("Output:", nn.feed_forward(values))
+      `);
+    });
+  }
+}
+
+
+async function import_pyodide(){
   console.log("Carregando Pyodide...");
   let pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
   const micropip = pyodide.pyimport("micropip");
   await micropip.install("pyodide-importer");
-  const values = feed_neural_network();
-  pyodide.registerJsModule("input_values", values);
-
-  // Rodar fora do loop, para carregar as bibliotecas
+    // Rodar fora do loop, para carregar as bibliotecas
   pyodide.runPython(`
-    from pyodide_importer import register_hook
-    modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
-    register_hook(modules_url)
+  from pyodide_importer import register_hook
+  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/feature/pgt-87/neural-network-poc/"
+  register_hook(modules_url)
 
-    import neural_network
-    import js
+  import neural_network
+  import js
   `)
-
-  pyodide.runPython(`
-    # Import das variaveis do js (não é bem uma biblioteca)
-    import input_values
-
-    print("py", input_values.to_py())
-
-    neural_network.teste(input_values.to_py())
-  `);
+  // var values = feed_neural_network()
+  // pyodide.registerJsModule("input_values", values);
+  return pyodide
 }
-
-main();
-
-// ----------------------------------------------------------------------------------------------
-//                                         Frame rate
-// ----------------------------------------------------------------------------------------------
-
-// // The higher this value, the less the fps will reflect temporary variations
-// // A value of 1 will only keep the last value
-// var filterforce = 20;
-// var frameTime = 0, lastLoop = new Date, thisLoop;
-
-// function gameLoop(){
-//   // ...
-//   var thisFrameTime = (thisLoop=new Date) - lastLoop;
-//   frameTime+= (thisFrameTime - frameTime) / filterforce;
-//   lastLoop = thisLoop;
-// }
-
-// // Report the fps only every second, to only lightly affect measurements
-// var fpsOut = document.getElementById('framerate');
-// setInterval(function(){
-//   fpsOut.innerHTML = parseFloat((1000/frameTime).toFixed(1)) + " fps";
-// },500);
-
-// // function calculaFrameRate(){
-// //     var fps;
-// //     var thisLoop = new Date();
-// //     fps = 1000/(thisLoop - lastLoop);
-// //     lastLoop = thisLoop;
-
-// //     return fps;
-// //     document.getElementById("framerate").innerHTML = fps;
-// // }
-
-// setInterval(() => {
-//     var thisLoop = new Date();
-//     var fps = 1000/(thisLoop - lastLoop);
-//     lastLoop = thisLoop;
-
-//     document.getElementById("framerate").innerHTML = fps;
-// }, 1000);
