@@ -314,13 +314,6 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
-// estrutura geral da função que vai alimentar a rede neural
-// aqui precisa da integração com o pyodide
-function feed_neural_net(organism: Organism) {
-  var input_values = get_input_values_for_neuralnet(organism)
-  console.log(input_values)
-}
-
 
 function main(pyodide: Pyodide) {
   if (!global_timer.is_paused && pyodide) {
@@ -354,7 +347,7 @@ async function import_pyodide(){
     // Rodar fora do loop, para carregar as bibliotecas
   pyodide.runPython(`
   from pyodide_importer import register_hook
-  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/feature/pgt-87/neural-network-poc/"
+  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
   register_hook(modules_url)
 
   import neural_network
