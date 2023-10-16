@@ -171,8 +171,7 @@ async function start_simulation() {
 
   if (!is_running) {
     const pyodide = await import_pyodide()
-    main(pyodide);
-    animate(context);
+    animate(context, pyodide);
 
   }
 
@@ -314,28 +313,6 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
-
-function main(pyodide: Pyodide) {
-  if (!global_timer.is_paused && pyodide) {
-    requestAnimationFrame(() => main(pyodide));
-    Organism.organisms.forEach((organism) => {
-      const values = get_input_values_for_neuralnet(organism);
-      // Serialize the values as JSON
-      const valuesJSON = JSON.stringify(values);
-      // console.log(values["AngleToClosestFood"])
-      pyodide.runPython(`
-        import json
-
-        # Deserialize the JSON data
-        values = json.loads('${valuesJSON}')
-
-        # print("py", values["AngleToClosestFood"])
-        nn = neural_network.create_network()
-        print("Output:", nn.feed_forward(values))
-      `);
-    });
-  }
-}
 
 
 async function import_pyodide(){
