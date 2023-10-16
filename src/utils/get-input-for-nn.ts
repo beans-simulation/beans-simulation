@@ -1,4 +1,4 @@
-function get_input_values_for_neuralnet(organism: Organism) {
+function get_input_values_for_neuralnet(organism: Organism, qtree: QuadTree, vision: Circle) {
     var input_values: { [key: string]: number } = {};
     var distance_food: number;
     var angle_food: number;
@@ -22,7 +22,7 @@ function get_input_values_for_neuralnet(organism: Organism) {
         'Health': organism.health,
         'AngleToClosestFood': angle_food,
         'DistToClosestFood': distance_food,
-        'NumOfFoodInView': get_amount_of_vegetable_in_view(organism),
+        'NumOfFoodInView': get_amount_of_vegetables_in_view(qtree, vision),
         'AngleToClosestOrganism': angle_organism,
         'DistToClosestOrganism': distance_organism,
         'NumOfOrganismsInView': get_amount_of_organisms_in_view(organism),
@@ -40,15 +40,14 @@ function get_distance_and_angle_to_closest_vegetable(organism: Organism) {
 
     //TODO: Código para encontrar alimento mais próximo (só vegetal por enquanto)
     let distance_and_angle: [number, number] = [distance, angle];
+
+
     return distance_and_angle;
 }
 
-function get_amount_of_vegetable_in_view(organism: Organism) {
-    var food: number = 3;
-    // TODO: calcular a quantidade de alimentos (vegetais só?) no campo de visão
-    // pode se basear na função atual de encontrar organismo, por exemplo a find_prey() para organismos,
-    // que retona os organismos proximos, ou na função da evolve de encontrar alimento
-    return food
+function get_amount_of_vegetables_in_view(qtree: QuadTree, vision: Circle) {
+    const number_of_vegetables_in_view = qtree.search_vegetables(vision).length
+    return number_of_vegetables_in_view
 }
 
 function get_distance_and_angle_to_closest_organism(organism: Organism) {
