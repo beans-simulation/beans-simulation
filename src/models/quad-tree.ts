@@ -79,10 +79,10 @@ class QuadTree implements QuadTreeProps, Drawable {
     scope: Rectangle | Circle,
     list: T[]
   ): T[] {
-    const result: T[] = [];
+    let result: T[] = [];
     if (this.intercepts_by_scope(scope)) {
       for (const point of list) {
-        if (scope.contains_point(point)) {
+        if (scope.contains_point(point) && !result.includes(point)) {
           result.push(point);
         }
       }
@@ -125,9 +125,9 @@ class QuadTree implements QuadTreeProps, Drawable {
     return this.search(detection_circle, prey_organisms);
   }
 
-  // função para a procura de predador
-  find_predator_element(detection_circle: Circle) {
-    return this.search(detection_circle, this.organisms);
+  search_organisms(detection_circle: Circle, organism_id:number) {
+    const organisms_except_current = this.organisms.filter(item => item.id !== organism_id);
+    return this.search(detection_circle, organisms_except_current);
   }
 
   display(context: CanvasRenderingContext2D) {

@@ -34,7 +34,6 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
       qtree.insert_vegetable(vegetable);
     });
 
-
     Organism.organisms.forEach((organism) => {
 
       qtree.insert_organism(organism);
@@ -53,23 +52,37 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
       }
 
       // Pyodide
-      const values = get_input_values_for_neuralnet(organism, qtree, vision);
-      const valuesJSON = JSON.stringify(values);
-      console.log(values["NumOfFoodInView"])
-      pyodide.runPython(`
-        import json
+      // let values = get_input_values_for_neuralnet(organism, qtree, vision);
+      // let valuesJSON = JSON.stringify(values);
+      if(get_amount_of_vegetables_in_view(qtree,vision).length>=Vegetable.vegetables.length){
+        // console.log(values["NumOfFoodInView"],Vegetable.vegetables.length)
+        let lista_Dedup = get_amount_of_vegetables_in_view(qtree,vision).filter((value, index) => get_amount_of_vegetables_in_view(qtree,vision).indexOf(value) === index);
+        console.log("Visao ",get_amount_of_vegetables_in_view(qtree,vision).length)
+        console.log("dedup",lista_Dedup.length)
+        // console.log("vegetais",Vegetable.vegetables.length)
+        // console.log("Organismos ",Organism.organisms.length)
 
-        # Deserialize the JSON data
-        values = json.loads('${valuesJSON}')
+      }
+      // console.log(values["NumOfFoodInView"],Vegetable.vegetables.length)
+      // if(values["NumOfOrganismsInView"]>=Organism.organisms.length){
+      //   console.log(values["NumOfOrganismsInView"],Organism.organisms.length)
 
-        # print("py", values["AngleToClosestFood"])
-        nn = neural_network.create_network()
-        # print("Output:", nn.feed_forward(values))
-      `);
+      // }
+
+
+      // pyodide.runPython(`
+      //   import json
+
+      //   # Deserialize the JSON data
+      //   values = json.loads('${valuesJSON}')
+
+      //   # print("py", values["AngleToClosestFood"])
+      //   # nn = neural_network.create_network()
+      //   # print("Output:", nn.feed_forward(values))
+      // `);
       // organism.detect_predator(qtree, vision)
     });
 
-
-
   }
+
 }
