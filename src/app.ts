@@ -331,7 +331,7 @@ function main(pyodide: Pyodide) {
 
         # print("py", values["AngleToClosestFood"])
         nn = neural_network.create_network()
-        print("Output:", nn.feed_forward(values))
+        # print("Output:", nn.feed_forward(values))
       `);
     });
   }

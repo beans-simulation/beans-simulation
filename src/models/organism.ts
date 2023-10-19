@@ -1,6 +1,6 @@
 const EAT_DISTANCE = 5;
 
-class Organism implements Drawable {
+class Organism extends Point implements Drawable {
   static organisms: Organism[] = [];
   static id = 0;
 
@@ -48,6 +48,7 @@ class Organism implements Drawable {
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, parent_id?: number) {
+    super(x, y);
     this.id = Organism.id++;
     this.position = new Vector(x, y);
     if (parent_id) {
@@ -293,7 +294,7 @@ class Organism implements Drawable {
   }
 
 
-  detect_predator(qtree: QuadTree, vision: Circle) {
+  detect_predator(qtree: OrganismQuadTree, vision: Circle) {
     this.is_running_away = false;
 
     let [min_distance, close_organisms, closest_index] = find_nearby_element(
@@ -340,7 +341,7 @@ class Organism implements Drawable {
     this.apply_force(new Vector(redirection.x, redirection.y));
   }
 
-  search_for_vegetable(qtree: QuadTree, vision: Circle): void {
+  search_for_vegetable(qtree: VegetableQuadTree, vision: Circle): void {
     this.is_eating = false;
     const is_searching_vegetable = true;
     let [min_distance, nearby_vegetables, closest_index] = find_nearby_element(
@@ -379,7 +380,7 @@ class Organism implements Drawable {
     this.increase_size();
   }
 
-  hunt(qtree: QuadTree, vision: Circle) {
+  hunt(qtree: OrganismQuadTree, vision: Circle) {
     this.is_eating = false;
 
     let [min_distance, close_organisms, closest_index] = find_nearby_element(
