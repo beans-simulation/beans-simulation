@@ -27,19 +27,25 @@ function animate(context: CanvasRenderingContext2D | null) {
     );
 
     // Criando a Quadtree
-    const qtree = new QuadTree(canvasRectangle, 10);
+    const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
+    const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 3);
 
     // limitador_de_loop = 0;
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
-      qtree.insert_vegetable(vegetable); // Insere o vegetable na QuadTree
+
+      qtreeVegetables.insert(vegetable); // Insere o vegetable na QuadTree
     });
 
     Organism.organisms.forEach((organism) => {
-     // Insere o organism na QuadTree
+      // Insere o organism na QuadTree
+  
+       qtreeOrganisms.insert(organism);
 
-      qtree.insert_organism(organism);
+    });
+
+    Organism.organisms.forEach((organism) => {
       organism.update(context);
       organism.roam();
 
@@ -49,12 +55,14 @@ function animate(context: CanvasRenderingContext2D | null) {
 
       if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
-        // organism.hunt(qtree, vision); // Remover comentário para que ele coma organismos
-        organism.search_for_vegetable(qtree, vision); // Remover comentário para que ele coma vegetais
+        // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
+        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
 
       }
       // organism.detect_predator(qtree, vision)
     });
+    qtreeOrganisms.display(context)
+    //debugger;
 
   }
 }

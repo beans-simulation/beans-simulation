@@ -33,6 +33,8 @@
     "src/models/vegetable.ts",
     "src/models/organism.ts",
     "src/models/quad-tree.ts",
+    "src/models/vegetable-quad-tree.ts",
+    "src/models/organism-quad-tree.ts",
     "src/utils/animate.ts",
     "src/utils/create-context.ts",
     "src/utils/drag-screen-element.ts",
