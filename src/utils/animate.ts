@@ -61,11 +61,8 @@ function animate(context: CanvasRenderingContext2D | null) {
       }
       // organism.detect_predator(qtree, vision)
     });
-    console.log(qtreeOrganisms.points);
-    
-    
-
-
     qtreeOrganisms.display(context)
+    //debugger;
+
   }
 }

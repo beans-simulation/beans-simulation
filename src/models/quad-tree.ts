@@ -23,13 +23,13 @@ class QuadTree {
         let width = this.boundary.width/2;
         let height = this.boundary.height/2;
 
-        let northeast = new Rectangle(x+width, y+height, width, height);
+        let northeast = new Rectangle(x+width, y-height, width, height);
         this.northeast = new QuadTree(northeast, this.capacity);
-        let northwest = new Rectangle(x-width, y+height, width, height);
+        let northwest = new Rectangle(x-width, y-height, width, height);
         this.northwest = new QuadTree(northwest, this.capacity);
-        let southeast = new Rectangle(x+width, y-height, width, height);
+        let southeast = new Rectangle(x+width, y+height, width, height);
         this.southeast = new QuadTree(southeast, this.capacity);
-        let southwest = new Rectangle(x-width, y-height, width, height);
+        let southwest = new Rectangle(x-width, y+height, width, height);
         this.southwest = new QuadTree(southwest, this.capacity);
         
         this.divided = true;
@@ -37,25 +37,24 @@ class QuadTree {
 
     // insert point
     insert(point: Point): boolean {
-        if(!this.boundary.contains(point)){
+        if (!this.boundary.contains(point)) {
             return false;
         }
-
-        if(this.divided){
-            return (this.northeast.insert(point)||
-            this.northwest.insert(point)  ||
-            this.southeast.insert(point)||
-            this.southwest.insert(point))
-            
-        }
-        
-        if(this.points.length < this.capacity){
+      
+        if (this.points.length < this.capacity && !this.divided) {
             this.points.push(point);
             return true;
+        } 
+    
+        if (!this.divided) {
+            this.subdivide();
+            
+            for(let p of this.points){
+                (this.northeast.insert(p) || this.northwest.insert(p) ||
+                this.southeast.insert(p) || this.southwest.insert(p))
+            }
         }
-
-        this.subdivide();
-        this.points.length = 0
+    
         const inserted: boolean = this.northeast.insert(point)||
             this.northwest.insert(point)  ||
             this.southeast.insert(point)||

@@ -17,10 +17,10 @@ class Rectangle {
 
     // Verifica se o retangulo contém o ponto passado como argumento
     contains(point: Point) {
-        return (point.x >= this.x - this.width &&
-            point.x <= this.x + this.width &&
-            point.y >= this.y - this.height &&
-            point.y <= this.y + this.height)
+        return (point.position.x >= this.x - this.width &&
+            point.position.x <= this.x + this.width &&
+            point.position.y >= this.y - this.height &&
+            point.position.y <= this.y + this.height);
     }
 
     intersects(range: Rectangle){
