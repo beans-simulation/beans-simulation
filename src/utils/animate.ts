@@ -27,62 +27,60 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
     );
 
     // Criando a Quadtree
-    const qtree = new QuadTree(canvasRectangle, 10);
+    const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
+    const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 3);
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
-      qtree.insert_vegetable(vegetable);
+
+      qtreeVegetables.insert(vegetable); // Insere o vegetable na QuadTree
     });
 
     Organism.organisms.forEach((organism) => {
+      // Insere o organism na QuadTree
 
-      qtree.insert_organism(organism);
+      qtreeOrganisms.insert(organism);
+    });
+
+    Organism.organisms.forEach((organism) => {
       organism.update(context);
       organism.roam();
 
-
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-      let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
+      let vision = new Circle(
+        organism.position.x,
+        organism.position.y,
+        organism.detection_radius
+      );
 
-      if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
+      if (
+        organism.energy <=
+        organism.max_energy * globals.percentual_energy_to_eat
+      ) {
+        // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
-        // organism.hunt(qtree, vision); // Remover comentário para que ele coma organismos
-        organism.search_for_vegetable(qtree, vision); // Remover comentário para que ele coma vegetais
-
+        // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
+        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
       }
 
       // Pyodide
-      // let values = get_input_values_for_neuralnet(organism, qtree, vision);
-      // let valuesJSON = JSON.stringify(values);
-      if(get_amount_of_vegetables_in_view(qtree,vision).length>=Vegetable.vegetables.length){
-        // console.log(values["NumOfFoodInView"],Vegetable.vegetables.length)
-        let lista_Dedup = get_amount_of_vegetables_in_view(qtree,vision).filter((value, index) => get_amount_of_vegetables_in_view(qtree,vision).indexOf(value) === index);
-        console.log("Visao ",get_amount_of_vegetables_in_view(qtree,vision).length)
-        console.log("dedup",lista_Dedup.length)
-        // console.log("vegetais",Vegetable.vegetables.length)
-        // console.log("Organismos ",Organism.organisms.length)
+      const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
+      const valuesJSON = JSON.stringify(values);
+      console.log(values["NumOfFoodInView"])
+      console.log(values["NumOfFoodInView"])
+      pyodide.runPython(`
+        import json
+        values = json.loads('${valuesJSON}')
 
-      }
-      // console.log(values["NumOfFoodInView"],Vegetable.vegetables.length)
-      // if(values["NumOfOrganismsInView"]>=Organism.organisms.length){
-      //   console.log(values["NumOfOrganismsInView"],Organism.organisms.length)
+        # print("py", values["NumOfFoodInView"])
 
-      // }
-
-
-      // pyodide.runPython(`
-      //   import json
-
-      //   # Deserialize the JSON data
-      //   values = json.loads('${valuesJSON}')
-
-      //   # print("py", values["AngleToClosestFood"])
-      //   # nn = neural_network.create_network()
-      //   # print("Output:", nn.feed_forward(values))
-      // `);
+        nn = neural_network.create_network()
+        # print("Output:", nn.feed_forward(values))
+      `);
       // organism.detect_predator(qtree, vision)
     });
-
+    qtreeOrganisms.display(context);
+    //debugger;
   }
 
 }

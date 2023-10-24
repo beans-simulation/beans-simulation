@@ -9,9 +9,6 @@ const button_set_default = document.getElementById("button_set_default");
 const button_start_simulation = document.getElementById(
   "button_start_simulation"
 );
-const button_restart_simulation = document.getElementById(
-  "button_restart_simulation"
-);
 
 // inputs iniciais
 const input_vegetable_rate = document.getElementById(
@@ -35,19 +32,15 @@ const input_slider_vegetables = document.getElementById(
 ) as HTMLInputElement | null;
 
 // labels inputs iniciais
-const label_vegetable_rate = document.getElementById(
-  "label_vegetable_rate"
-);
+const label_vegetable_rate = document.getElementById("label_vegetable_rate");
 const label_mutation_probability = document.getElementById(
   "label_mutation_probability"
 );
 const label_mutation_magnitude = document.getElementById(
   "label_mutation_magnitude"
 );
-const label_organisms_amount =
-  document.getElementById("label_organisms");
-const label_vegetables_amount =
-  document.getElementById("label_vegetables");
+const label_organisms_amount = document.getElementById("label_organisms");
+const label_vegetables_amount = document.getElementById("label_vegetables");
 
 // grupos de componentes
 const group_initial_inputs = document.getElementById("initial_inputs");

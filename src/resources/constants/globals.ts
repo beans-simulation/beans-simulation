@@ -13,7 +13,7 @@ class GlobalPreferences {
   public universe_height = 0;
   public universe_size = 1;
   public percentual_energy_to_eat = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
-
+  public pyodide: Pyodide | null = null;
 }
 
 const globals = new GlobalPreferences();
