@@ -166,12 +166,13 @@ class Organism extends Point implements Drawable {
 
     // Alteração do atributo de health
     // TODO: elaborar lógica para alterar saúde (health) do organismo
-    this.health = 85
+    this.health = 85;
 
     // Alteração do atributo de maturity
     // TODO: elaborar lógica para alterar maturidade (maturity) do organismo, baseado no limite "time_to_maturity"
-    if(this.maturity<1){ //dummy
-      this.maturity = 0.83
+    if (this.maturity < 1) {
+      //dummy
+      this.maturity = 0.83;
     }
 
     //Delimitação de bordas
@@ -293,7 +294,6 @@ class Organism extends Point implements Drawable {
     this.acceleration.add(force);
   }
 
-
   detect_predator(qtree: OrganismQuadTree, vision: Circle) {
     this.is_running_away = false;
 
@@ -362,22 +362,29 @@ class Organism extends Point implements Drawable {
     }
   }
 
-  eat_vegetable(vegetable: Vegetable): void {
-    this.food_eaten++;
-    if (this.max_energy - this.energy >= vegetable.energy * 0.1) {
-      this.energy += vegetable.energy * 0.1;
+  absorb_energy(energy_to_absorb: number) {
+    if (this.energy + energy_to_absorb >= this.max_energy) {
+      this.energy = this.max_energy;
     } else {
-      this.energy = this.max_energy;
+      this.energy += energy_to_absorb;
     }
+  }
 
-    if (this.energy > this.max_energy) {
-      this.energy = this.max_energy;
-    }
-
-    Vegetable.vegetables = Vegetable.vegetables.filter(
-      (item) => item !== vegetable
-    );
+  eat(food: Organism | Vegetable, energy_to_absorb: number) {
+    food.kill();
+    this.food_eaten++;
+    this.absorb_energy(energy_to_absorb);
     this.increase_size();
+  }
+
+  eat_vegetable(vegetable: Vegetable): void {
+    const energy_to_absorb = vegetable.energy * 0.1;
+    this.eat(vegetable, energy_to_absorb);
+  }
+
+  eat_organism(organism: Organism): void {
+    const energy_to_absorb = organism.max_energy * 0.2;
+    this.eat(organism, energy_to_absorb);
   }
 
   hunt(qtree: OrganismQuadTree, vision: Circle) {
@@ -401,24 +408,10 @@ class Organism extends Point implements Drawable {
     }
   }
 
-  eat_organism(organism: Organism) {
-    if (this.max_energy - this.energy >= organism.max_energy * 0.1) {
-      this.energy += organism.max_energy * 0.2;
-    } else {
-      this.energy = this.max_energy;
-    }
-    if (this.energy > this.max_energy) {
-      this.energy = this.max_energy;
-    }
-    organism.kill();
-    this.increase_size();
-    this.food_eaten++;
-  }
-
   // Método que fará o organism vaguear por aí quando não está is_running_away ou perseguindo
   roam() {
     this.change_status(organism_status.roaming);
-    this.is_roaming = true;    // A ideia é criar uma pequena força a cada frame logo à frente do organism, a uma d dele.
+    this.is_roaming = true; // A ideia é criar uma pequena força a cada frame logo à frente do organism, a uma d dele.
     // Desenharemos um círculo à frente do organism, e o vector da força de deslocamento partirá do centro
     // do círculo e terá o tamanho de seu radius. Assim, quanto maior o círculo, maior a força.
     // A fim de sabermos qual é a frente do organism, utilizaremos o vector velocidade para nos auxiliar,
@@ -509,14 +502,24 @@ class Organism extends Point implements Drawable {
   }
 
   public static remove(organism_ids: number[]) {
-    const filtered = Organism.organisms.filter(
-      (organism) => !organism_ids.includes(organism.id)
-    );
-    Organism.organisms = filtered;
-    return filtered;
+    organism_ids.forEach((organism_id) => {
+      const index = Organism.organisms.findIndex(
+        (organism) => organism.id === organism_id
+      );
+      const organism_inside_list = index !== -1;
+      if (organism_inside_list) {
+        Organism.organisms[index].kill(index);
+      }
+    });
+    return Organism.organisms;
   }
-  kill() {
-    Organism.organisms = Organism.organisms.filter((item) => item !== this);
+  kill(index_in_list?: number) {
+    const organism_index =
+      index_in_list ||
+      Organism.organisms.findIndex((organism) => organism === this);
+
+    delete Organism.organisms[organism_index];
+    this.energy = 0;
   }
 
   checaId(id: number) {
