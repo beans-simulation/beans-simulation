@@ -1,4 +1,3 @@
-
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
@@ -50,7 +49,6 @@ document.addEventListener("DOMContentLoaded", (_) => {
   // botoes de controle da simulacao
   button_set_default?.addEventListener("click", set_input_defaults);
   button_start_simulation?.addEventListener("click", start_simulation);
-  button_restart_simulation?.addEventListener("click", show_initial_panel);
   button_pause_simulation?.addEventListener("click", pausa);
   button_resume_simulation?.addEventListener("click", despausa);
 
@@ -170,36 +168,19 @@ async function start_simulation() {
   // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
 
   if (!is_running) {
-    const pyodide = await import_pyodide()
+    set_btn_loading(button_start_simulation);
+    const pyodide = await import_pyodide();
     main(pyodide);
     animate(context);
+    unset_btn_loading(button_start_simulation);
 
+    // mudar nome do botao play para restart se for a primeira vez rodando a simulacao
+    if (button_start_simulation) {
+      button_start_simulation.textContent = "Restart";
+    }
   }
 
   is_running = true;
-}
-
-function show_initial_panel() {
-  destroy_objects();
-  global_timer.pause();
-  global_timer.reset();
-  // is_before_play = true;
-  // input_vegetable_rate = document.getElementById("input_vegetable_rate");
-  update_vegetables_apparition_interval(input_vegetable_rate?.value);
-  // input_mutation_probability = document.getElementById(
-  //   "input_mutation_probability"
-  // );
-
-  update_mutation_probability(input_mutation_probability?.value);
-  // input_mutation_magnitude = document.getElementById(
-  //   "input_mutation_magnitude"
-  // );
-
-  update_mutation_magnitude(input_mutation_magnitude?.value);
-  // document.getElementById("initial_inputs").classList.remove("d-none");
-  // document.getElementById("initial_buttons").classList.remove("d-none");
-  // document.getElementById("extra_buttons").classList.add("d-none");
-  // document.getElementById("extra_panel").classList.add("d-none");
 }
 
 // ---------------------------------------------------------------------------------------
@@ -314,6 +295,21 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
+function set_btn_loading(btn: HTMLElement | null) {
+  if (btn) {
+    btn.setAttribute("disabled", "true");
+    const btn_content = btn.textContent || "";
+    btn.innerHTML = `<span class="d-none">${btn_content}</span><div class="loader"></div>`;
+  }
+}
+
+function unset_btn_loading(btn: HTMLElement | null) {
+  if (btn) {
+    btn.removeAttribute("disabled");
+    const btn_content = btn.textContent || "";
+    btn.innerHTML = btn_content;
+  }
+}
 
 function main(pyodide: Pyodide) {
   if (!global_timer.is_paused && pyodide) {
@@ -337,14 +333,13 @@ function main(pyodide: Pyodide) {
   }
 }
 
-
-async function import_pyodide(){
+async function import_pyodide() {
   console.log("Carregando Pyodide...");
   let pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
   const micropip = pyodide.pyimport("micropip");
   await micropip.install("pyodide-importer");
-    // Rodar fora do loop, para carregar as bibliotecas
+  // Rodar fora do loop, para carregar as bibliotecas
   pyodide.runPython(`
   from pyodide_importer import register_hook
   modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
@@ -352,8 +347,8 @@ async function import_pyodide(){
 
   import neural_network
   import js
-  `)
+  `);
   // var values = feed_neural_network()
   // pyodide.registerJsModule("input_values", values);
-  return pyodide
+  return pyodide;
 }
