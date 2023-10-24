@@ -282,6 +282,12 @@ function despausa() {
 
   button_resume_simulation?.classList.add("d-none");
   button_pause_simulation?.classList.remove("d-none");
+
+  // reiniciar processos que param com a pausa
+  if (globals.pyodide) {
+    main(globals.pyodide);
+  }
+  animate(context);
 }
 
 // function acelera() {
@@ -335,7 +341,8 @@ function main(pyodide: Pyodide) {
 
 async function import_pyodide() {
   console.log("Carregando Pyodide...");
-  let pyodide = await loadPyodide();
+  const pyodide = await loadPyodide();
+  globals.pyodide = pyodide;
   await pyodide.loadPackage("micropip");
   const micropip = pyodide.pyimport("micropip");
   await micropip.install("pyodide-importer");
