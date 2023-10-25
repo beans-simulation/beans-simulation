@@ -15,14 +15,14 @@ class Vector {
   }
 
   // retorna o tamanho do vector ao quadrado
-  magnitude_squared() {
+  magnitude_squared():number {
     const x = this.x;
     const y = this.y;
     return x * x + y * y;
   }
 
   // retorna o tamanho do vector
-  magnitude() {
+  magnitude():number {
     return Math.sqrt(this.magnitude_squared());
   }
 
@@ -136,5 +136,13 @@ class Vector {
   // retorna uma cópia deste vector
   copy() {
     return new Vector(this.x, this.y);
+  }
+
+  get_angle_to_another_vector(other_vector: Vector): number{
+    const dot_product = this.x * other_vector.x + this.y * other_vector.y;
+    const cos_theta = dot_product / (this.magnitude() * other_vector.magnitude());
+    const angle_radians = Math.acos(cos_theta);
+    const angle_degrees = angle_radians * (180 / Math.PI);
+    return angle_degrees;
   }
 }
