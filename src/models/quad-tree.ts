@@ -66,7 +66,7 @@ class QuadTree {
     }
 
     // busca
-    search(range: Rectangle | Circle, found?: Point[]) {
+    protected search(range: Rectangle | Circle, found?: Point[]) {
         if(!found){
             found = [];
         }
