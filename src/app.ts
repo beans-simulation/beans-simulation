@@ -143,6 +143,8 @@ async function start_simulation() {
   // history.clear(); //julia:checar se está sendo utilizado
   set_universe(canvas);
   create_entities(n_organisms, n_vegetables);
+
+  const isPaused = global_timer.is_paused;
   global_timer.pause();
   global_timer.reset();
   global_timer.play(update_timer_display);
@@ -178,6 +180,8 @@ async function start_simulation() {
     if (button_start_simulation) {
       button_start_simulation.textContent = "Restart";
     }
+  } else if (isPaused) {
+    despausa();
   }
 
   is_running = true;
@@ -284,6 +288,10 @@ function despausa() {
   button_pause_simulation?.classList.remove("d-none");
 
   // reiniciar processos que param com a pausa
+  reactivateFunctionsStoppedAfterPause();
+}
+
+function reactivateFunctionsStoppedAfterPause() {
   if (globals.pyodide) {
     main(globals.pyodide);
   }
