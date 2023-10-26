@@ -4,16 +4,29 @@ class OrganismQuadTree extends QuadTree {
     }
     
     private is_organism(point: any): point is Organism {
-        return !!point?.organisms;
+        let a = !!point?.dna;
+        return !!point?.dna;
     }
 
     search_elements(vision: Circle, self_id?: number){
         const found = super.search(vision);
+        if(found.length > 1){
+
+            console.log('found:', found);
+        }
         return found.filter(organism => {
             if(this.is_organism(organism)){
                 organism.id !== self_id
+                debugger;
             }
-            return false;
-        })
+        });
+        
+        // Não funciona
+        // .filter(organism => {
+        //     if(this.is_organism(organism)){
+        //         organism.id !== self_id
+        //     }
+        //     // return [];
+        // })
     } 
 }
