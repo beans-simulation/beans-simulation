@@ -248,6 +248,14 @@ class Organism extends Point implements Drawable {
     return null;
   }
 
+  accelerate(value: number){
+    // TOOD: implemetar função aceleração com base no valor de output da rede
+  }
+
+  rotate(value: number){
+    // TOOD: implemetar função aceleração com base no valor de output da rede
+  }
+
   create_space_delimitation() {
     this.create_canvas_space_delimitation();
     this.avoid_space_limits();
