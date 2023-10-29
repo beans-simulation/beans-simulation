@@ -332,6 +332,7 @@ function main(pyodide: Pyodide) {
       const values = get_input_values_for_neuralnet(organism);
       // Serialize the values as JSON
       const valuesJSON = JSON.stringify(values);
+      let output_nn;
       // console.log(values["AngleToClosestFood"])
       pyodide.runPython(`
         import json
@@ -341,8 +342,11 @@ function main(pyodide: Pyodide) {
 
         # print("py", values["AngleToClosestFood"])
         nn = neural_network.create_network()
+        output_nn = nn.feed_forward(values)
         # print("Output:", nn.feed_forward(values))
       `);
+      let a = pyodide.globals.get('output_nn').toJs();
+      console.log(a)
     });
   }
 }
@@ -357,7 +361,7 @@ async function import_pyodide() {
   // Rodar fora do loop, para carregar as bibliotecas
   pyodide.runPython(`
   from pyodide_importer import register_hook
-  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
+  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/feature/pgt-70/neural-network-poc/"
   register_hook(modules_url)
 
   import neural_network

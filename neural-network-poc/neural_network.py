@@ -256,7 +256,7 @@ class NeuralNetwork:
 
         # Extrai e retorna os valores de output dos neurônios da última camada
         output_values = {neuron.name: neuron.output for neuron in self.neurons if neuron.neuron_type == 'Output'}
-
+        print(output_values)
         return output_values # É DAQUI QUE SAIRÃO OS VALORES PARA O COMPORTAMENTO DOS ORGANISMOS!!!
 
 
