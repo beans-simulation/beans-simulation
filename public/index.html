@@ -14,7 +14,7 @@
     />
     <title>beans</title>
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js" charset="utf-8"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -69,7 +69,16 @@
         >
           Simulação
         </button>
-      </div>
+
+        <button
+          type="button"
+          class="btn btn-dark"
+          onclick="$('#tab-graficos').show();"
+        >
+          Dados
+        </button>
+
+      </div>    
 
       <div id="tabs-conteudos">
         <!--------------------- TAB SIMULACAO ---------------------->
@@ -225,6 +234,23 @@
           </div>
         </div>
         <!--------------------- FIM TAB SIMULACAO ------------------>
+        <!--------------------- TAB GRÁFICOS ---------------------->
+        <div
+          id="tab-graficos"
+          class="tab-info w-300px"
+          style="left: 5px; top: calc(50% - 215px)"
+        >
+          <div class="tab-title">
+            Dados
+            <button type="button" class="btn close-btn" onclick=" $(this).closest('.tab-info').hide()">
+                <i class="fal fa-minus"></i>
+            </button>
+          </div>
+          <div class="tab-body" style="width: 100%;">
+            <div id="plotly-graph"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

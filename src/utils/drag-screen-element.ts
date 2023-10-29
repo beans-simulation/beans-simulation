@@ -11,7 +11,7 @@ function element_drag(event: MouseEvent) {
   const element = event.target as HTMLDivElement | null;
   const parent = element?.parentElement;
 
-  if (parent) {
+  if (element && parent) {
     const middleTabX = innerWidth - event.x - parent.clientWidth / 2;
     const middleTabY = event.y - element.clientHeight / 2;
 

@@ -14,6 +14,7 @@
   "files": [
     "src/utils/loadWasmFile.ts",
     "src/utils/feed-neural-network.ts",
+    "src/resources/types/plotly.ts",
     "src/resources/types/pyodide.ts",
     "src/resources/constants/globals.ts",
     "src/resources/constants/page-elements.ts",
@@ -34,6 +35,7 @@
     "src/models/organism.ts",
     "src/models/quad-tree.ts",
     "src/utils/animate.ts",
+    "src/utils/total-org-graph.ts",
     "src/utils/create-context.ts",
     "src/utils/drag-screen-element.ts",
     "src/utils/generate-color.ts",
