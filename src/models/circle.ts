@@ -20,20 +20,20 @@ class Circle {
         // Para verificar se um ponto está dentro de um circulo, é necessário fazer:
         // Checar a distancia euclidiana entre o ponto e o centro do circulo é menor ou igual ao raio do circulo.
         // "A soma dos catetos é igual ao quadrado da hipotenusa"
-        return (((point.x - this.x)*(point.x - this.x)) +((point.y - this.y)*(point.y - this.y)) <= this.radiusSquared)
+        return (((point.position.x - this.x)*(point.position.x - this.x)) +((point.position.y - this.y)*(point.position.y - this.y)) <= this.radiusSquared)
     }
 
     intersects(range: Rectangle){
-        
+
         let x_dist = Math.abs(range.x - this.x); // linha entre o ponto x do circulo e o ponto x do range
-        let y_dist = Math.abs(range.y - this.y); 
+        let y_dist = Math.abs(range.y - this.y);
 
         var radius = this.radius;
 
         var width = range.width;
         var height = range.height;
 
-        // edges é o quadrado dos catetos 
+        // edges é o quadrado dos catetos
         // x_dist - width é representação do ponto das extremidades
         var edges = ((x_dist - width)*(x_dist - width)) + ((y_dist - height)*(x_dist - width));
 
