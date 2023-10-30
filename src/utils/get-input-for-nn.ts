@@ -65,8 +65,9 @@ function get_angle_to_closest_element(organism: Organism, closest_element: Point
     if(closest_element == null){
         return null
     }
-    const distance_x: number = closest_element.position.x * organism.position.x;
-    const distance_y: number = closest_element.position.y * organism.position.y;
+    const distance_x: number = closest_element.position.x - organism.position.x;
+    const distance_y: number = closest_element.position.y - organism.position.y;
+
     const direction: Vector = new Vector(distance_x, distance_y);
     return direction.get_angle_to_another_vector(organism.speed)
 }
