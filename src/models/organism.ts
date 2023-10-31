@@ -128,15 +128,32 @@ class Organism extends Point implements Drawable {
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
     let [min_distance, possible_partners, closest_index] = this.find_close_partners(qtree, vision);
-    console.log(possible_partners)
     let current_organism_genome = this.dna.get_genome();
     if (possible_partners.length >0){
-      let partner_genome = (possible_partners[closest_index] as Organism).dna.get_genome();
+      let partner = possible_partners[closest_index] as Organism;
+      let partner_genome = partner.dna.get_genome();
+      debugger;
 
       if (this.approach_partner(min_distance, possible_partners, closest_index)){
-        const offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
-        console.log(offspring_dna)
-        return this.create_child(offspring_dna);
+        // NINHADA
+        this.litter_size = generate_integer(
+          this.litter_interval[0],
+          this.litter_interval[1] + 1
+          );
+          console.log('ninhada n: ', this.litter_size)
+          for (var i = 0; i < this.litter_size; i++) {
+            if (Math.random() < 0.4) {
+              console.log('filho n:',i)
+              const offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
+              this.create_child(offspring_dna);
+            } 
+          }
+
+        this.energy = (this.energy/2); // Mudar a logica?
+        this.is_reproducing = false;
+        partner.energy = (partner.energy/2);
+        partner.is_reproducing = false;
+
       }
     }
     
@@ -492,13 +509,11 @@ class Organism extends Point implements Drawable {
 
     let min_distance = Infinity;
     let closest_index = -1;
-    let possible_partners: Point[] = qtree.search_elements(vision, this.id);
-    console.log('non filtered pp:', possible_partners);
+    let possible_partners: any[] = qtree.search_elements(vision, this.id);
     possible_partners = possible_partners.filter((partner) => {
       let partner_organism = partner as Organism;
-      partner_organism.maturity >=0.5
+      return partner_organism.maturity >=0.5 && !partner_organism.is_reproducing
     });
-    console.log('filtered pp:', possible_partners);
 
     for (let i = possible_partners.length - 1; i >= 0; i--) {
       const dx = this.position.x - possible_partners[i].position.x;
@@ -508,7 +523,7 @@ class Organism extends Point implements Drawable {
         min_distance = d2;
         closest_index = i;
       }
-    }
+    } 
     return [min_distance, possible_partners, closest_index];
   }
 
@@ -599,9 +614,6 @@ class Organism extends Point implements Drawable {
     return new DNA(...child_genome);
   }
 
-
-  
-
   is_dead(): boolean {
     return this.energy <= 0;
   }
@@ -613,6 +625,7 @@ class Organism extends Point implements Drawable {
     Organism.organisms = filtered;
     return filtered;
   }
+  
   kill() {
     Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }

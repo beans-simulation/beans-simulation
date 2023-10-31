@@ -59,14 +59,12 @@ function animate(context: CanvasRenderingContext2D | null) {
 
       } else {
         if(organism.maturity > 0.6 && organism.sexual_maturity >= 0.5 ){
-          console.log('REPRODUÇÃO!!', organism.id, organism.position)
+          debugger;
           organism.sexually_procreate(qtreeOrganisms, vision)
         }
       }
-      // organism.detect_predator(qtree, vision)
     });
     qtreeOrganisms.display(context)
-    //debugger;
 
     
 
