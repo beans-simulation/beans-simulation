@@ -323,64 +323,6 @@ function unset_btn_loading(btn: HTMLElement | null) {
     btn.innerHTML = btn_content;
   }
 }
-// function accelerate(value: number, organism: Organism) {
-//   organism.accelerate(value)
-// }
-
-// function rotate(value: number, organism: Organism) {
-//   organism.rotate(value)
-// }
-
-// function desireToReproduce(value: number, organism: Organism) {
-//   // TODO: chamar a função reprodução
-//   console.log('Calling DesireToReproduce with value:', value);
-// }
-
-// function desireToEat(value: number, organism: Organism) {
-//   // TODO: chamar a função de comer organismo ou de comer alimento
-//   console.log('Calling desireToEat with value:', value);
-// }
-
-// // Define a mapping between keys and functions
-// const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
-//   'Accelerate': accelerate,
-//   'Rotate': rotate,
-//   'DesireToReproduce': desireToReproduce,
-//   'DesireToEat': desireToEat,
-// };
-
-// function main(pyodide: Pyodide) {
-//   if (!global_timer.is_paused && pyodide) {
-//     requestAnimationFrame(() => main(pyodide));
-//     Organism.organisms.forEach((organism) => {
-//       const values = get_input_values_for_neuralnet(organism);
-//       // const values = {};
-//       // Serialize the values as JSON
-//       const valuesJSON = JSON.stringify(values);
-//       // console.log(values["AngleToClosestFood"])
-//       pyodide.runPython(`
-//         import json
-
-//         # Deserialize the JSON data
-//         values = json.loads('${valuesJSON}')
-//         nn = neural_network.create_network()
-
-//         output_nn = nn.feed_forward(values)
-//         # print("Output:", nn.feed_forward(values))
-//       `);
-//       let output = pyodide.globals.get('output_nn').toJs();
-//       console.log(output)
-
-//       // Chamando as funções com base no output da rede
-//       for (const [key, value] of output) {
-//         if (map_outputs_from_net[key]) {
-//           map_outputs_from_net[key](value,organism);
-//         }
-//       }  
-      
-//     });
-//   }
-// }
 
 async function import_pyodide(){
   console.log("Carregando Pyodide...");
