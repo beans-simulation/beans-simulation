@@ -57,13 +57,16 @@ function get_distance_and_index_of_closest_element(organism: Organism, closests_
             }
         }
     }
+    if(min_distance == Infinity && closest_index == -1){
+        min_distance = 0 // evitar cenários Infinity que quebram a rede
+    }
     let distance_and_index: [number, number] = [min_distance, closest_index];
     return distance_and_index;
 }
 
 function get_angle_to_closest_element(organism: Organism, closest_element: Point){
     if(closest_element == null){
-        return null
+        return 0
     }
     const distance_x: number = closest_element.position.x - organism.position.x;
     const distance_y: number = closest_element.position.y - organism.position.y;
