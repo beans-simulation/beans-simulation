@@ -1,5 +1,5 @@
 function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: OrganismQuadTree, qtreeVegetables:VegetableQuadTree, vision: Circle) {
-    var input_values: { [key: string]: number | null } = {};
+    var input_values: { [key: string]: number } = {};
     var index_closest_food: number;
     var index_closest_organism: number;
     var distance_closest_food: number;

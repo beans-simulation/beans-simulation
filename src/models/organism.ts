@@ -44,6 +44,7 @@ class Organism extends Point implements Drawable {
   public sex: sex_type;
   public sexual_maturity = 0;
   public speed = new Vector(0.0001, 0.0001);
+  public diet: number;
   private status: organism_status_type;
   //   private _status: organism_status_type;
 
@@ -61,6 +62,7 @@ class Organism extends Point implements Drawable {
     this.initial_detection_radius = dna.initial_detection_radius;
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
+    this.diet = dna.diet;
     this.radius = this.initial_radius;
     this.minimal_consumption =
       0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
@@ -500,6 +502,7 @@ class Organism extends Point implements Drawable {
     const detection_radius_source = this.random_parent(partner);
     const litter_source = this.random_parent(partner);
     const sex_source = this.random_parent(partner);
+    const diet_source = this.random_parent(partner);
 
     return new DNA(
       radius_source.dna.initial_radius,
@@ -508,7 +511,8 @@ class Organism extends Point implements Drawable {
       color_source.dna.color,
       detection_radius_source.dna.initial_detection_radius,
       litter_source.dna.litter_interval,
-      sex_source.dna.sex
+      sex_source.dna.sex,
+      diet_source.dna.diet
     );
   }
 
