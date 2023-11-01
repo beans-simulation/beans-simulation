@@ -57,7 +57,7 @@ function get_distance_and_index_of_closest_element(organism: Organism, closests_
             }
         }
     }
-    if(min_distance == Infinity && closest_index == -1){
+    if(min_distance == Infinity){
         min_distance = 0 // evitar cenários Infinity que quebram a rede
     }
     let distance_and_index: [number, number] = [min_distance, closest_index];
