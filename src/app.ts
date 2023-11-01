@@ -172,8 +172,7 @@ async function start_simulation() {
   if (!is_running) {
     set_btn_loading(button_start_simulation);
     const pyodide = await import_pyodide();
-    main(pyodide);
-    animate(context);
+    animate(context, pyodide);
     unset_btn_loading(button_start_simulation);
 
     // mudar nome do botao play para restart se for a primeira vez rodando a simulacao
@@ -293,9 +292,9 @@ function despausa() {
 
 function reactivateFunctionsStoppedAfterPause() {
   if (globals.pyodide) {
-    main(globals.pyodide);
+    animate(context, globals.pyodide);
   }
-  animate(context);
+  // e se nao tiver pyodide?
 }
 
 // function acelera() {
@@ -324,65 +323,8 @@ function unset_btn_loading(btn: HTMLElement | null) {
     btn.innerHTML = btn_content;
   }
 }
-function accelerate(value: number, organism: Organism) {
-  organism.accelerate(value)
-}
 
-function rotate(value: number, organism: Organism) {
-  organism.rotate(value)
-}
-
-function desireToReproduce(value: number, organism: Organism) {
-  // TODO: chamar a função reprodução
-  console.log('Calling DesireToReproduce with value:', value);
-}
-
-function desireToEat(value: number, organism: Organism) {
-  // TODO: chamar a função de comer organismo ou de comer alimento
-  console.log('Calling desireToEat with value:', value);
-}
-
-// Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
-  'Accelerate': accelerate,
-  'Rotate': rotate,
-  'DesireToReproduce': desireToReproduce,
-  'DesireToEat': desireToEat,
-};
-
-function main(pyodide: Pyodide) {
-  if (!global_timer.is_paused && pyodide) {
-    requestAnimationFrame(() => main(pyodide));
-    Organism.organisms.forEach((organism) => {
-      const values = get_input_values_for_neuralnet(organism);
-      // Serialize the values as JSON
-      const valuesJSON = JSON.stringify(values);
-      // console.log(values["AngleToClosestFood"])
-      pyodide.runPython(`
-        import json
-
-        # Deserialize the JSON data
-        values = json.loads('${valuesJSON}')
-        nn = neural_network.create_network()
-
-        output_nn = nn.feed_forward(values)
-        # print("Output:", nn.feed_forward(values))
-      `);
-      let output = pyodide.globals.get('output_nn').toJs();
-      console.log(output)
-
-      // Chamando as funções com base no output da rede
-      for (const [key, value] of output) {
-        if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism);
-        }
-      }  
-      
-    });
-  }
-}
-
-async function import_pyodide() {
+async function import_pyodide(){
   console.log("Carregando Pyodide...");
   const pyodide = await loadPyodide();
   globals.pyodide = pyodide;
@@ -398,7 +340,5 @@ async function import_pyodide() {
   import neural_network
   import js
   `);
-  // var values = feed_neural_network()
-  // pyodide.registerJsModule("input_values", values);
   return pyodide;
 }

@@ -10,9 +10,37 @@ function create_background(context: CanvasRenderingContext2D) {
   context.stroke();
 }
 
-function animate(context: CanvasRenderingContext2D | null) {
-  if (!global_timer.is_paused && context) {
-    requestAnimationFrame(() => animate(context));
+function accelerate(value: number, organism: Organism) {
+  organism.accelerate(value)
+}
+
+function rotate(value: number, organism: Organism) {
+  organism.rotate(value)
+}
+
+function desireToReproduce(value: number, organism: Organism) {
+  // TODO: chamar a função reprodução
+  console.log('Calling DesireToReproduce with value:', value);
+}
+
+function desireToEat(value: number, organism: Organism) {
+  // TODO: chamar a função de comer organismo ou de comer alimento
+  console.log('Calling desireToEat with value:', value);
+}
+
+// Define a mapping between keys and functions
+const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
+  'Accelerate': accelerate,
+  'Rotate': rotate,
+  'DesireToReproduce': desireToReproduce,
+  'DesireToEat': desireToEat,
+};
+
+function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
+  if (!global_timer.is_paused && context && pyodide) {
+    // if (is_paused == false) {
+    requestAnimationFrame(() => animate(context, pyodide));
+    // }
 
     create_background(context);
 
@@ -28,8 +56,6 @@ function animate(context: CanvasRenderingContext2D | null) {
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
     const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 3);
 
-    // limitador_de_loop = 0;
-
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
 
@@ -38,7 +64,6 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     Organism.organisms.forEach((organism) => {
       // Insere o organism na QuadTree
-
       qtreeOrganisms.insert(organism);
     });
 
@@ -59,12 +84,36 @@ function animate(context: CanvasRenderingContext2D | null) {
       ) {
         // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
-        // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
+        organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
+        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
       }
-      // organism.detect_predator(qtree, vision)
+
+      // Pyodide
+      const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
+      const valuesJSON = JSON.stringify(values);
+      pyodide.runPython(`
+        import json
+
+        # Deserialize the JSON data
+        values = json.loads('${valuesJSON}')
+        nn = neural_network.create_network()
+
+        output_nn = nn.feed_forward(values)
+        # print("Output:", nn.feed_forward(values))
+      `);
+      let output = pyodide.globals.get('output_nn').toJs();
+      console.log(output)
+
+      // Chamando as funções com base no output da rede
+      for (const [key, value] of output) {
+        if (map_outputs_from_net[key]) {
+          map_outputs_from_net[key](value,organism);
+        }
+      }  
     });
+    
     qtreeOrganisms.display(context);
     //debugger;
   }
+
 }
