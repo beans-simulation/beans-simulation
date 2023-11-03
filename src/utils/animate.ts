@@ -11,7 +11,8 @@ function create_background(context: CanvasRenderingContext2D) {
 }
 
 function accelerate(value: number, organism: Organism) {
-  organism.accelerate(value)
+  // organism.speed.add(value);
+
 }
 
 function rotate(value: number, organism: Organism) {
@@ -23,13 +24,25 @@ function desireToReproduce(value: number, organism: Organism) {
   console.log('Calling DesireToReproduce with value:', value);
 }
 
-function desireToEat(value: number, organism: Organism) {
+function desireToEat(desire_to_eat: number, organism: Organism, input_values: { [key: string]: number }) {
   // TODO: chamar a função de comer organismo ou de comer alimento
-  console.log('Calling desireToEat with value:', value);
+  if(desire_to_eat <= 0){
+    console.log('Calling desireToEat with value:', desire_to_eat);
+    return
+  }
+
+  if(organism.diet == 0){
+    // herbívoro
+    console.log(input_values["AngleToClosestFood"])
+    console.log('herbivoro');
+
+  }else{
+    console.log('carnivoro');
+  }
 }
 
 // Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
+const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, input_values: { [key: string]: number }) => void } = {
   'Accelerate': accelerate,
   'Rotate': rotate,
   'DesireToReproduce': desireToReproduce,
@@ -89,8 +102,8 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
       }
 
       // Pyodide
-      const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
-      const valuesJSON = JSON.stringify(values);
+      const input_values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
+      const valuesJSON = JSON.stringify(input_values);
       pyodide.runPython(`
         import json
 
@@ -107,11 +120,11 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism);
+          map_outputs_from_net[key](value,organism, input_values);
         }
-      }  
+      }
     });
-    
+
     qtreeOrganisms.display(context);
     //debugger;
   }

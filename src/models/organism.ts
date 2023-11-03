@@ -181,6 +181,8 @@ class Organism extends Point implements Drawable {
 
     //Delimitação de bordas
     this.create_space_delimitation();
+
+    // a aceleração vai acontecer na função de accelerate aqui com o output da rede neural
     // Atualização da velocidade (soma vector velocidade com o vector aceleração)
     this.speed.add(this.acceleration);
     // Limita velocidade
@@ -250,9 +252,6 @@ class Organism extends Point implements Drawable {
     return null;
   }
 
-  accelerate(value: number){
-    // TOOD: implemetar função aceleração com base no valor de output da rede
-  }
 
   rotate(value: number){
     // TOOD: implemetar função aceleração com base no valor de output da rede
