@@ -17,7 +17,7 @@ class Organism extends Point implements Drawable {
   public dna: DNA;
   public energy: number;
   public health: number = 85;
-  public maturity: number = 0.83;
+  public maturity: number = 0;
   public fixed_max_energy: number;
   public food_eaten = 0;
   public id: number;
@@ -45,6 +45,7 @@ class Organism extends Point implements Drawable {
   public sexual_maturity = 0;
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
+  private time_to_maturity_in_seconds: number;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, parent_id?: number) {
@@ -77,6 +78,7 @@ class Organism extends Point implements Drawable {
     this.max_energy = Math.pow(this.radius, 2) * 6;
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
+    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.05/1000; // tempo para maturidade é 5% do tempo de vida
     // NINHADAS
 
     // this.energy = this.max_energy * 0.75
@@ -129,7 +131,10 @@ class Organism extends Point implements Drawable {
     const offspring_dna = this.combine_dnas(partner);
     return this.create_child(offspring_dna);
   }
-
+  get_time_alive_in_seconds() {
+    // TODO: checar se o valor está fazendo sentido
+    return (global_timer.total - this.birth_moment_in_milliseconds) / 1000;
+  }
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
     this.consumed_energy_rate =
@@ -137,6 +142,7 @@ class Organism extends Point implements Drawable {
     const achieved_age_limit =
       global_timer.total - this.birth_moment_in_milliseconds >
       this.lifetime_in_miliseconds;
+    const time_alive = this.get_time_alive_in_seconds();
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
@@ -148,16 +154,19 @@ class Organism extends Point implements Drawable {
         // Remover reproducao assexuada
         if (Math.random() <= this.procreation_probability) {
           // NINHADA
-          this.litter_size = generate_integer(
-            this.litter_interval[0],
-            this.litter_interval[1] + 1
-          );
-          for (var i = 0; i < this.litter_size; i++) {
-            if (Math.random() < 0.2) {
-              // Para espaçar os nascimentos
-              this.assexually_procreate();
+          if(this.maturity == 1){
+            this.litter_size = generate_integer(
+              this.litter_interval[0],
+              this.litter_interval[1] + 1
+            );
+            for (var i = 0; i < this.litter_size; i++) {
+              if (Math.random() < 0.2) {
+                // Para espaçar os nascimentos
+                this.assexually_procreate();
+              }
             }
           }
+
         }
       }
     } else {
@@ -168,14 +177,13 @@ class Organism extends Point implements Drawable {
     // TODO: elaborar lógica para alterar saúde (health) do organismo
     this.health = 85
 
-    // Alteração do atributo de maturity
-    // TODO: elaborar lógica para alterar maturidade (maturity) do organismo, baseado no limite "time_to_maturity"
-    if(this.maturity<1){ //dummy
-      this.maturity = 0.83
-    }
-
     //Delimitação de bordas
     this.avoid_space_limits();
+
+    if(this.maturity < 1){
+      // se o resultado for maior que 1, ele atribui 1
+      this.maturity = time_alive / this.time_to_maturity_in_seconds > 1 ? 1 : time_alive / this.time_to_maturity_in_seconds;
+    }
 
     //Delimitação de bordas
     this.create_space_delimitation();

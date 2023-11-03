@@ -37,7 +37,7 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'NumOfOrganismsInView': organisms_in_view.length,
         'Luminosity': get_luminosity(),
         'Maturity': organism.maturity,
-        'TimeAlive': get_time_alive_in_seconds(organism)
+        'TimeAlive': organism.get_time_alive_in_seconds()
     }
     return input_values
 }
@@ -85,9 +85,4 @@ function get_temperature() {
 function get_luminosity() {
     // TODO: checar como calcular isso e construir o código
     return 0.56;
-}
-
-function get_time_alive_in_seconds(organism: Organism) {
-    // TODO: checar se o valor está fazendo sentido
-    return (global_timer.total - organism.birth_moment_in_milliseconds) / 1000;
 }

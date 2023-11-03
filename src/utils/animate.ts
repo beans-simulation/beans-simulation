@@ -20,12 +20,12 @@ function rotate(value: number, organism: Organism) {
 
 function desireToReproduce(value: number, organism: Organism) {
   // TODO: chamar a função reprodução
-  console.log('Calling DesireToReproduce with value:', value);
+  // console.log('Calling DesireToReproduce with value:', value);
 }
 
 function desireToEat(value: number, organism: Organism) {
   // TODO: chamar a função de comer organismo ou de comer alimento
-  console.log('Calling desireToEat with value:', value);
+  // console.log('Calling desireToEat with value:', value);
 }
 
 // Define a mapping between keys and functions
@@ -84,8 +84,8 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
       ) {
         // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
-        organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
+        // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
+        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
       }
 
       // Pyodide
@@ -102,16 +102,16 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
         # print("Output:", nn.feed_forward(values))
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-      console.log(output)
+      // console.log(output)
 
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
           map_outputs_from_net[key](value,organism);
         }
-      }  
+      }
     });
-    
+
     qtreeOrganisms.display(context);
     //debugger;
   }
