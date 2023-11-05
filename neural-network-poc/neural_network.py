@@ -5,7 +5,6 @@ import time
 import string
 import random
 from random import randint
-import json
 
 # -------------------------------------------------------------------------------
 # ---------------------------------- FUNÇÕES ------------------------------------
