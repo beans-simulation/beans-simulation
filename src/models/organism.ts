@@ -81,7 +81,6 @@ class Organism extends Point implements Drawable {
     this.birth_moment_in_milliseconds = global_timer.total;
     this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.05/1000; // tempo para maturidade é 5% do tempo de vida
     this.neural_network_id = neural_network_id;
-    console.log("id",neural_network_id)
 
 
     // this.energy = this.max_energy * 0.75
