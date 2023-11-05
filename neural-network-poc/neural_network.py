@@ -188,6 +188,8 @@ class Connection:
 
 
 class NeuralNetwork:
+    neural_networks = {}
+    global_id = 0
     def __init__(self):
         self.neurons = []
         self.connections = []
@@ -195,7 +197,13 @@ class NeuralNetwork:
         self.topological_order = [] # Guardará os neurônios em ordem topológica após qualquer alteração na topologia da rede
         self.dna = [] # Guardará um gene (dicionário) para cada conexão
         self.neuron_by_id = {} # Guardará um dicionário dos ids dos neurônios dessa rede
+        self.id = NeuralNetwork.global_id + 1
+        self.register_network()
 
+    def register_network(self):
+        NeuralNetwork.global_id = NeuralNetwork.global_id + 1
+        NeuralNetwork.neural_networks[f"{self.id}"] = self
+        print(NeuralNetwork.neural_networks)
 
     # Função para atualizar a lista de ids dos neurônios dessa rede
     def update_neuron_by_id(self):
