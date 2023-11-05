@@ -103,7 +103,11 @@ function animate(context: CanvasRenderingContext2D | null) {
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-      console.log(output)
+      // console.log("===--------")
+      // console.log("valuesJSON",valuesJSON)
+      // console.log("organismo",organism.id)
+      // console.log("rede",network_id_JSON)
+      // console.log(output)
 
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
