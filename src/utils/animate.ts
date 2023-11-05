@@ -89,7 +89,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
       }
 
-      // globals.pyodide
+      // Pyodide
       const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
       const valuesJSON = JSON.stringify(values);
       const network_id_JSON = JSON.stringify(organism.neural_network_id);
