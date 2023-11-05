@@ -36,10 +36,11 @@ const map_outputs_from_net: { [key: string]: (value: number, organism: Organism)
   'DesireToEat': desireToEat,
 };
 
-function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
-  if (!global_timer.is_paused && context && pyodide) {
+function animate(context: CanvasRenderingContext2D | null) {
+  if (!global_timer.is_paused && context && globals.pyodide) {
+    const pyodide = globals.pyodide;
     // if (is_paused == false) {
-    requestAnimationFrame(() => animate(context, pyodide));
+    requestAnimationFrame(() => animate(context));
     // }
 
     create_background(context);
@@ -88,21 +89,21 @@ function animate(context: CanvasRenderingContext2D | null, pyodide: Pyodide) {
         organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
       }
 
-      // Pyodide
+      // globals.pyodide
       const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
       const valuesJSON = JSON.stringify(values);
+      const network_id_JSON = JSON.stringify(organism.neural_network_id);
       pyodide.runPython(`
         import json
 
-        # Deserialize the JSON data
-        values = json.loads('${valuesJSON}')
-        nn = neural_network.create_network()
+        # Desserializa 'values' para um dicionário
+        input_values = json.loads('${valuesJSON}')
+        network_id = json.loads('${network_id_JSON}')
 
-        output_nn = nn.feed_forward(values)
-        # print("Output:", nn.feed_forward(values))
+        output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-      // console.log(output)
+      console.log(output)
 
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {

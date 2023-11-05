@@ -47,6 +47,7 @@
     "src/utils/create-entities.ts",
     "src/utils/find-nearby-element.ts",
     "src/utils/get-input-for-nn.ts",
-    "src/app.ts"
+    "src/app.ts",
+    "src/utils/create-neural-network.ts"
   ]
 }

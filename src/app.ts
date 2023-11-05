@@ -131,6 +131,12 @@ function update_timer_display(time: number, formattedTime?: string) {
 }
 
 async function start_simulation() {
+  if (button_start_simulation?.textContent != "Restart") {
+    set_btn_loading(button_start_simulation);
+    const pyodide = await import_pyodide();
+    unset_btn_loading(button_start_simulation);
+    globals.pyodide = pyodide
+  }
   const n_organisms =
     parseInt(input_slider_organisms?.value || "0") * globals.universe_size;
 
@@ -170,10 +176,7 @@ async function start_simulation() {
   // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
 
   if (!is_running) {
-    set_btn_loading(button_start_simulation);
-    const pyodide = await import_pyodide();
-    animate(context, pyodide);
-    unset_btn_loading(button_start_simulation);
+    animate(context);
 
     // mudar nome do botao play para restart se for a primeira vez rodando a simulacao
     if (button_start_simulation) {
@@ -291,10 +294,7 @@ function despausa() {
 }
 
 function reactivateFunctionsStoppedAfterPause() {
-  if (globals.pyodide) {
-    animate(context, globals.pyodide);
-  }
-  // e se nao tiver pyodide?
+  animate(context);
 }
 
 // function acelera() {
