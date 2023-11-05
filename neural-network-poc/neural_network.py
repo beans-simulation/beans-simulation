@@ -127,9 +127,6 @@ def breed_neural_networks(nn1, nn2):
     # 3 - Agora ordenaremos o DNA de acordo com as conexões
     unified_dna = sorted(unified_dna, key=lambda x: x['connection_id'])
 
-    # print(f"\n\nDNA UNIFICADO APÓS A ORDENAÇÃO:")
-    # print_dna(unified_dna)
-
     # 4 - Alinhando os genes de cada rede mãe com os da lista unificada
     # Criando duas listas vazias com o tamanho da lista unificada
     genes_1 = [None] * len(unified_dna)
@@ -149,28 +146,20 @@ def breed_neural_networks(nn1, nn2):
         genes_1[i] = gene_1 if gene_1 else None
         genes_2[i] = gene_2 if gene_2 else None
 
-    # print(f"\n\nLISTA DAS DUAS REDES:")
-    # print("\nREDE 1:")
-    # print_dna(genes_1)
-    # print("\nREDE 2:")
-    # print_dna(genes_2)
-
     # 5 - Gerando o DNA da rede filha
     # Escolhendo aleatoriamente entre os genes das redes 1 e 2
     dna_filho = []
     for gene_1, gene_2 in zip(genes_1, genes_2):
         dna_filho.append(random.choice([gene_1, gene_2]))
 
-    # print(f"\n\DNA FILHO:")
-    # print_dna(dna_filho)
-
     # 6 - Recriando a rede filha a partir do DNA dela
     dna_filho = [gene for gene in dna_filho if gene is not None]
 
-    # print(f"\nDNA FILHO SEM NULOS:")
-    # print_dna(dna_filho)
 
     rede_filha = reconstruct_neural_network_from_dna(dna_filho)
+
+    # 7 - Realizando a mutação
+    rede_filha.mutate()
 
     update_neural_network(rede_filha)
 
@@ -188,11 +177,11 @@ CONSTANT_NEURON_VALUE = 1
 
 # MUtação
 ADD_NEURON_MUTATION_RATE = 0.7 # Taxa de mutação para adição de neurônios
-REMOVE_NEURON_MUTATION_RATE = 0 # Taxa de mutação para remoção de neurônios
+REMOVE_NEURON_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de neurônios
 ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
-REMOVE_CONNECTION_MUTATION_RATE = 0 # Taxa de mutação para remoção de conexões
+REMOVE_CONNECTION_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos
-CHANGE_ACTIVE_STATE_MUTATION_RATE = 0 # Taxa de mutação para mudança do estado de ativação de conexões
+CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.2 # Taxa de mutação para mudança do estado de ativação de conexões
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
 MAX_WEIGHT_CHANGE = 0.1
 
@@ -761,59 +750,28 @@ def create_network():
 
 
 
-# print("\n------------------------- Rede Após mutação -------------------------")
-
-# # Realizando a mutação
-# for i in range(1, 5):
-#     basic_network.mutate()
-
-
-# basic_network.print_network_info()
-
-
-# print("\nValores de output:", basic_network.feed_forward(input_values))
-
-# update_neural_network(basic_network)
-
-# print(f"\n\nDNA PAI:\n{basic_network.dna}")
-
-
-# print("\n--------------------------- Rede Filha ---------------------------")
-
-# nn_filha = reconstruct_neural_network_from_dna(basic_network.dna)
-
-# # Imprimindo na tela informações gerais da rede
-# nn_filha.print_network_info()
-
-# print("Valores de output:", nn_filha.feed_forward(input_values))
-
-# update_neural_network(nn_filha)
-
-# print(f"\n\nDNA FILHA:\n{basic_network.dna}")
-
-
 # Testando a reprodução sexuada
 nn1 = create_network()
 nn2 = create_network()
 
 # Mudando um pouco as redes
-for i in range(1, 3):
+for i in range(1, 5):
     nn1.mutate()
     nn2.mutate()
 
 print("\n--------------------------- Rede Pai ---------------------------")
 
 nn1.print_network_info()
-print_dna(nn1.dna)
+# print_dna(nn1.dna)
 
 print("\n--------------------------- Rede Mãe ---------------------------")
 
 nn2.print_network_info()
-print_dna(nn2.dna)
+# print_dna(nn2.dna)
 
 # Cruzando as redes
 print("\n--------------------------- Rede Filha ---------------------------")
 
 nn_filha = breed_neural_networks(nn1, nn2)
 nn_filha.print_network_info()
-print_dna(nn_filha.dna)
+# print_dna(nn_filha.dna)
