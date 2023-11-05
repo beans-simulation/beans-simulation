@@ -46,9 +46,10 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
+  public neural_network_id: number | null;
   //   private _status: organism_status_type;
 
-  constructor(x: number, y: number, dna: DNA, parent_id?: number) {
+  constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
     super(x, y);
     this.id = Organism.id++;
     this.position = new Vector(x, y);
@@ -79,7 +80,8 @@ class Organism extends Point implements Drawable {
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
     this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.05/1000; // tempo para maturidade é 5% do tempo de vida
-    // NINHADAS
+    this.neural_network_id = neural_network_id;
+
 
     // this.energy = this.max_energy * 0.75
     if (parent_id) {
@@ -104,11 +106,16 @@ class Organism extends Point implements Drawable {
   // Método de reprodução (com mutações)
   private create_child(offspring_dna: DNA) {
     this.procreation_count++;
+    let neural_network_id = null;
 
+    if(globals.pyodide){
+      neural_network_id = create_neural_network(globals.pyodide)
+    }
     const offspring = new Organism(
       this.position.x,
       this.position.y,
-      offspring_dna
+      offspring_dna,
+      neural_network_id
     );
 
     this.childrenIds ? this.childrenIds.push(offspring.id) : [offspring.id];

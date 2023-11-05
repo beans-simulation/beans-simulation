@@ -187,6 +187,8 @@ class Connection:
 
 
 class NeuralNetwork:
+    neural_networks = {}
+    global_id = 0
     def __init__(self):
         self.neurons = []
         self.connections = []
@@ -194,7 +196,12 @@ class NeuralNetwork:
         self.topological_order = [] # Guardará os neurônios em ordem topológica após qualquer alteração na topologia da rede
         self.dna = [] # Guardará um gene (dicionário) para cada conexão
         self.neuron_by_id = {} # Guardará um dicionário dos ids dos neurônios dessa rede
+        self.id = NeuralNetwork.global_id
+        self.register_network()
 
+    def register_network(self):
+        NeuralNetwork.global_id = NeuralNetwork.global_id + 1
+        NeuralNetwork.neural_networks[f"{self.id}"] = self
 
     # Função para atualizar a lista de ids dos neurônios dessa rede
     def update_neuron_by_id(self):
@@ -235,6 +242,7 @@ class NeuralNetwork:
     # Função que passa os valores input por todas as camadas para calcular os valores de saída.
     # ESSA É A FUNÇÃO QUE IRÁ RODAR A CADA FRAME!!!
     def feed_forward(self, input_values):
+
         # Inicializando os neurônios de input com valores fornecidos no dicionário input_values
         for neuron in self.neurons:
             if neuron.neuron_type == 'Input':

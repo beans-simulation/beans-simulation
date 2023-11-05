@@ -20,7 +20,11 @@ function generate_organism(x: number, y: number): void {
     o_sex
   );
 
-  new Organism(x, y, dna);
+  let neural_network_id = null;
+  if(globals.pyodide){
+    neural_network_id = create_neural_network(globals.pyodide)
+  }
+  new Organism(x, y, dna, neural_network_id);
 }
 
 function generate_vegetable(x: number, y: number): void {
