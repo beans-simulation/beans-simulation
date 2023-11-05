@@ -203,7 +203,6 @@ class NeuralNetwork:
     def register_network(self):
         NeuralNetwork.global_id = NeuralNetwork.global_id + 1
         NeuralNetwork.neural_networks[f"{self.id}"] = self
-        print(NeuralNetwork.neural_networks)
 
     # Função para atualizar a lista de ids dos neurônios dessa rede
     def update_neuron_by_id(self):
