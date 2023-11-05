@@ -244,12 +244,7 @@ class NeuralNetwork:
     # Função que passa os valores input por todas as camadas para calcular os valores de saída.
     # ESSA É A FUNÇÃO QUE IRÁ RODAR A CADA FRAME!!!
     def feed_forward(self, input_values):
-        input_values = json.dumps(input_values)
-        print(input_values)
 
-        input_values = json.loads(input_values)
-
-        print(input_values)
         # Inicializando os neurônios de input com valores fornecidos no dicionário input_values
         for neuron in self.neurons:
             if neuron.neuron_type == 'Input':
