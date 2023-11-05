@@ -11,11 +11,32 @@ function create_background(context: CanvasRenderingContext2D) {
 }
 
 function accelerate(value: number, organism: Organism) {
+
   organism.accelerate(value)
 }
 
-function rotate(value: number, organism: Organism) {
-  organism.rotate(value)
+function rotate(value: number, organism: Organism, input_values:{ [key: string]: number }) {
+  if(organism.closest_food){
+    // const angle_signal = direction.x * organism.speed.y - direction.y * organism.speed.x
+    console.log("angle_closest_food", organism.angle_closest_food)
+    console.log("distance_closest_food", organism.distance_closest_food)
+    console.log("closest_food", organism.closest_food)
+
+    if (organism.distance_closest_food <= (organism.detection_radius*organism.detection_radius)) {
+      organism.is_eating = true;
+      organism.is_roaming = false;
+      if (organism.distance_closest_food <= EAT_DISTANCE * EAT_DISTANCE) {
+        organism.eat_vegetable(organism.closest_food as Vegetable);
+      }else{
+        organism.speed.rotate_degrees(value)
+      }
+    }
+
+  }else{
+    organism.is_eating = false;
+    organism.is_roaming = true;
+  }
+  organism.roam();
 }
 
 function desireToReproduce(value: number, organism: Organism) {
@@ -29,7 +50,7 @@ function desireToEat(value: number, organism: Organism) {
 }
 
 // Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
+const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, values:{}) => void } = {
   'Accelerate': accelerate,
   'Rotate': rotate,
   'DesireToReproduce': desireToReproduce,
@@ -70,7 +91,7 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     Organism.organisms.forEach((organism) => {
       organism.update(context);
-      organism.roam();
+      // organism.roam();
 
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(
@@ -86,7 +107,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
         // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
+        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
       }
 
       // Pyodide
@@ -103,18 +124,14 @@ function animate(context: CanvasRenderingContext2D | null) {
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-      // console.log("===--------")
-      // console.log("valuesJSON",valuesJSON)
-      // console.log("organismo",organism.id)
-      // console.log("rede",network_id_JSON)
-      // console.log(output)
 
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism);
+          map_outputs_from_net[key](value,organism,values);
         }
       }
+
     });
 
     qtreeOrganisms.display(context);

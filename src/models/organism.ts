@@ -47,6 +47,17 @@ class Organism extends Point implements Drawable {
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
   public neural_network_id: number | null;
+  public index_closest_food: number = -1;
+  public distance_closest_food: number = -1;
+  public angle_target_food: number = -1;
+  public closest_vegetable: Point | null = null;
+  public direction_to_target = new Vector(0, 0); // valor default aleatorio sera substituido
+  public angle_target_signal: number = 0;
+  public angle_closest_food: number = 0;
+  public closest_food: Point | null = null;
+  public angle_closest_organism: number = 0;
+  public distance_closest_organism: number = 0;
+  public closest_organism: Point | null = null;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -267,9 +278,6 @@ class Organism extends Point implements Drawable {
     // TOOD: implemetar função aceleração com base no valor de output da rede
   }
 
-  rotate(value: number){
-    // TOOD: implemetar função aceleração com base no valor de output da rede
-  }
 
   create_space_delimitation() {
     this.create_canvas_space_delimitation();

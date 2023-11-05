@@ -17,12 +17,19 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
     index_closest_food = vegetable_distance_and_index[1]
     angle_closest_food = get_angle_to_closest_element(organism, vegetables_in_view[index_closest_food])
 
+    organism.angle_closest_food = angle_closest_food
+    organism.distance_closest_food = distance_closest_food
+    organism.closest_food = vegetables_in_view[index_closest_food]
+
     organisms_in_view = qtreeOrganisms.search_elements(vision, organism.id);
     organism_distance_and_index = get_distance_and_index_of_closest_element(organism, organisms_in_view)
     distance_closest_organism = organism_distance_and_index[0]
     index_closest_organism = organism_distance_and_index[1]
     angle_closest_organism = get_angle_to_closest_element(organism, organisms_in_view[index_closest_organism])
 
+    organism.angle_closest_organism = angle_closest_organism
+    organism.distance_closest_organism = distance_closest_organism
+    organism.closest_organism = organisms_in_view[index_closest_organism]
 
 
     input_values = {
@@ -62,17 +69,6 @@ function get_distance_and_index_of_closest_element(organism: Organism, closests_
     }
     let distance_and_index: [number, number] = [min_distance, closest_index];
     return distance_and_index;
-}
-
-function get_angle_to_closest_element(organism: Organism, closest_element: Point){
-    if(closest_element == null){
-        return 0
-    }
-    const distance_x: number = closest_element.position.x - organism.position.x;
-    const distance_y: number = closest_element.position.y - organism.position.y;
-
-    const direction: Vector = new Vector(distance_x, distance_y);
-    return direction.get_angle_to_another_vector(organism.speed)
 }
 
 function get_temperature() {
