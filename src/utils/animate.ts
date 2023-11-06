@@ -12,23 +12,24 @@ function create_background(context: CanvasRenderingContext2D) {
 
 function accelerate(value: number, organism: Organism) {
 
-  organism.accelerate(value)
+  // organism.accelerate(value)
 }
 
-function rotate(value: number, organism: Organism, input_values:{ [key: string]: number }) {
+function rotate(value: number, organism: Organism) {
   if(organism.closest_food){
-    // const angle_signal = direction.x * organism.speed.y - direction.y * organism.speed.x
-    console.log("angle_closest_food", organism.angle_closest_food)
-    console.log("distance_closest_food", organism.distance_closest_food)
-    console.log("closest_food", organism.closest_food)
-
+    const angle_signal = get_angle_signal_to_closest_element(organism, organism.closest_food)
     if (organism.distance_closest_food <= (organism.detection_radius*organism.detection_radius)) {
       organism.is_eating = true;
-      organism.is_roaming = false;
       if (organism.distance_closest_food <= EAT_DISTANCE * EAT_DISTANCE) {
         organism.eat_vegetable(organism.closest_food as Vegetable);
       }else{
-        organism.speed.rotate_degrees(value)
+        if(angle_signal>0){
+          console.log("angle_signal", angle_signal)
+          organism.speed.rotate_degrees((-1)*value)
+        }else if(angle_signal<0){
+          organism.speed.rotate_degrees(value)
+
+        }
       }
     }
 
@@ -50,7 +51,7 @@ function desireToEat(value: number, organism: Organism) {
 }
 
 // Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, values:{}) => void } = {
+const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
   'Accelerate': accelerate,
   'Rotate': rotate,
   'DesireToReproduce': desireToReproduce,
@@ -124,11 +125,12 @@ function animate(context: CanvasRenderingContext2D | null) {
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-
+      console.log("----")
+      console.log(output)
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism,values);
+          map_outputs_from_net[key](value,organism);
         }
       }
 
