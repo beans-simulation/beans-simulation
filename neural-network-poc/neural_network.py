@@ -762,7 +762,7 @@ def create_network():
     remove_neuron_probability = 0
     remove_connection_probability = 0
 
-    for _ in range(0, 2):
+    for _ in range(0, 5):
         basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
 
     # Atualizando a ordem topológica da rede e construindo o seu DNA
@@ -802,6 +802,6 @@ def create_network():
 
 
 # Teste da função de criar redes da primeira geração
-for i in range(1, 6):
-    print(f"\n\n-------------- REDE {i} --------------\n")
-    create_network().print_network_info()
+# for i in range(1, 6):
+#     print(f"\n\n-------------- REDE {i} --------------\n")
+#     create_network().print_network_info()
