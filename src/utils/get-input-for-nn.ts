@@ -75,6 +75,8 @@ function get_angle_to_closest_element(organism: Organism, closest_element: Point
     return direction.get_angle_to_another_vector(organism.speed)
 }
 
+let noise = 0
+
 function get_temperature() {
     // Obtendo o valor de luminosidade atual, pois a temperatura estará diretamente relacionada à luminosidade
     const luminosity = get_luminosity();
@@ -82,13 +84,16 @@ function get_temperature() {
     // Calculando a temperatura com base na luminosidade (5 quando a luminosidade for 0, e 30 quando for 1)
     let temperature = 5 + (25 * luminosity);
 
-    // Adicionando ruído à temperatura (pode adicionar de -5 a 5 à temperatura)
-    const noise = (Math.random() * 10) - 5;
+    // Mudando o valor do ruído em pequenos passos para que mude gradualmente a cada frame
+    const noiseChange = (Math.random() * 2 - 1) * 0.5; // Muda o ruído em até ±0.5
+    noise += noiseChange;
+    noise = Math.max(Math.min(noise, 5), -5); // Garante que o ruído permaneça dentro dos limites de -5 a 5
+
+    // Adicionando o ruído à temperatura
     temperature += noise;
 
-    // Garantindo que a temperatura esteja dentro dos limites após adicionar o ruído
-    if (temperature < 0) temperature = 0;
-    if (temperature > 35) temperature = 35;
+    // Garantindo que a temperatura esteja dentro dos limites (0 a 35) após adicionar o ruído
+    temperature = Math.max(Math.min(temperature, 35), 0);
 
     return temperature;
 }
