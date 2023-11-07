@@ -51,7 +51,6 @@ class Organism extends Point implements Drawable {
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
   public angle_target_food: number = -1;
-  public closest_vegetable: Point | null = null;
   public direction_to_target = new Vector(0, 0); // valor default aleatorio sera substituido
   public angle_target_signal: number = 0;
   public angle_closest_food: number = 0;
@@ -414,37 +413,53 @@ class Organism extends Point implements Drawable {
     this.increase_size();
   }
 
-  hunt(qtree: OrganismQuadTree, vision: Circle) {
-    this.is_eating = false;
+  // hunt(qtree: OrganismQuadTree, vision: Circle) {
+  //   this.is_eating = false;
 
-    let [min_distance, close_organisms, closest_index] = find_nearby_element(
-      qtree,
-      vision,
-      this
-    );
+  //   let [min_distance, close_organisms, closest_index] = find_nearby_element(
+  //     qtree,
+  //     vision,
+  //     this
+  //   );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
-      this.is_eating = true;
-      this.is_roaming = false;
+  //   if (min_distance <= Math.pow(this.detection_radius, 2)) {
+  //     this.is_eating = true;
+  //     this.is_roaming = false;
 
-      if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
-        this.eat_organism(close_organisms[closest_index] as Organism);
-      } else if (close_organisms.length != 0) {
-        this.pursue(close_organisms[closest_index]);
-      }
-    }
-  }
+  //     if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
+  //       this.eat_organism(close_organisms[closest_index] as Organism);
+  //     } else if (close_organisms.length != 0) {
+  //       this.pursue(close_organisms[closest_index]);
+  //     }
+  //   }
+  // }
 
-  eat_organism(organism: Organism) {
-    if (this.max_energy - this.energy >= organism.max_energy * 0.1) {
-      this.energy += organism.max_energy * 0.2;
+  // eat_organism(organism: Organism) {
+  //   if (this.max_energy - this.energy >= organism.max_energy * 0.1) {
+  //     this.energy += organism.max_energy * 0.2;
+  //   } else {
+  //     this.energy = this.max_energy;
+  //   }
+  //   if (this.energy > this.max_energy) {
+  //     this.energy = this.max_energy;
+  //   }
+  //   organism.kill();
+  //   this.increase_size();
+  //   this.food_eaten++;
+  // }
+
+  eat(element: Organism | Vegetable){
+    if (this.max_energy - this.energy >= element.energy * 0.1) {
+      this.energy += element.energy * 0.1;
     } else {
       this.energy = this.max_energy;
     }
+
     if (this.energy > this.max_energy) {
       this.energy = this.max_energy;
     }
-    organism.kill();
+    element.kill();
+
     this.increase_size();
     this.food_eaten++;
   }
@@ -561,10 +576,10 @@ class Organism extends Point implements Drawable {
 
   display(context: CanvasRenderingContext2D) {
     context.beginPath();
-    context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    context.fillStyle = this.other_color;
-    context.strokeStyle = this.color;
+    context.ellipse(this.position.x, this.position.y, this.radius * 0.7, this.radius * 1.1, this.speed.heading_radians() - Math.PI/2, 0, Math.PI * 2);
+    context.fillStyle = this.color;
     context.lineWidth = 5;
+    context.strokeStyle = this.color
     context.stroke();
     context.fill();
   }

@@ -19,8 +19,6 @@ function rotate(value: number, organism: Organism, output: {}) {
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
   organism.is_rotating = false;
-  organism.roam();
-
 }
 
 function desireToReproduce(value: number, organism: Organism) {
@@ -29,16 +27,28 @@ function desireToReproduce(value: number, organism: Organism) {
 }
 
 function desireToEat(value: number, organism: Organism) {
-  // TODO: chamar a função de comer organismo ou de comer alimento
-  // console.log('Calling desireToEat with value:', value);
-  if(organism.closest_food){
-    if (organism.distance_closest_food <= (organism.detection_radius*organism.detection_radius)) {
+  if(value == 0){
+    return
+  }
+  var closest_element: Point | null = null;
+  var distance: number = Infinity; //valor default infinito
+
+  if(organism.diet == 0 && organism.closest_food){ //herbívoro
+    closest_element = organism.closest_food;
+    distance = organism.distance_closest_food;
+  }else if(organism.diet == 1 && organism.closest_organism){ // carnívoro
+    closest_element = organism.closest_organism;
+    distance = organism.distance_closest_organism;
+  }
+
+  if(closest_element){
+    if (distance <= (organism.detection_radius*organism.detection_radius) && distance <= EAT_DISTANCE * EAT_DISTANCE) {
       organism.is_eating = true;
-      if (organism.distance_closest_food <= EAT_DISTANCE * EAT_DISTANCE) {
-        organism.eat_vegetable(organism.closest_food as Vegetable);
-      }
+      organism.eat(closest_element as any)
     }
   }
+
+  organism.is_eating = false;
 }
 
 // Define a mapping between keys and functions
@@ -81,8 +91,9 @@ function animate(context: CanvasRenderingContext2D | null) {
       qtreeOrganisms.insert(organism);
     });
 
-    Organism.organisms.forEach((organism) => {
+    Organism.organisms.forEach(( organism) => {
       organism.update(context);
+      organism.roam();
 
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(
@@ -91,15 +102,6 @@ function animate(context: CanvasRenderingContext2D | null) {
         organism.detection_radius
       );
 
-      if (
-        organism.energy <=
-        organism.max_energy * globals.percentual_energy_to_eat
-      ) {
-        // FOME
-        // TODO: Lógica para definir se vai comer organismo ou vegetal
-        // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
-      }
 
       // Pyodide
       const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
@@ -123,12 +125,17 @@ function animate(context: CanvasRenderingContext2D | null) {
       }
       // momentaneamente chamando a funçao de comer só pros bichos nao ficarem rodando em circulo no alimento sem comer
       // será removido quando o valor desireToEat for retornado no output da rede
-      desireToEat(1, organism);
+      if (organism.energy <=organism.max_energy * globals.percentual_energy_to_eat) {
+        desireToEat(1, organism);
+      }
+
+
+      // organism.roam();
 
 
     });
 
-    qtreeOrganisms.display(context);
+    // qtreeOrganisms.display(context);
     //debugger;
   }
 
