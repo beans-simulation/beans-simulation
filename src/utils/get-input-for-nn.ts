@@ -76,13 +76,32 @@ function get_angle_to_closest_element(organism: Organism, closest_element: Point
 }
 
 function get_temperature() {
-    // Baseado na quantidade de elementos vivos, calcula a temperatura do ambiente
-    var temperature: number = 16;
-    // TODO: código para calcular temperatura
-    return temperature
+    // Obtendo o valor de luminosidade atual, pois a temperatura estará diretamente relacionada à luminosidade
+    const luminosity = get_luminosity();
+
+    // Calculando a temperatura com base na luminosidade (5 quando a luminosidade for 0, e 30 quando for 1)
+    let temperature = 5 + (25 * luminosity);
+
+    // Adicionando ruído à temperatura (pode adicionar de -5 a 5 à temperatura)
+    const noise = (Math.random() * 10) - 5;
+    temperature += noise;
+
+    // Garantindo que a temperatura esteja dentro dos limites após adicionar o ruído
+    if (temperature < 0) temperature = 0;
+    if (temperature > 35) temperature = 35;
+
+    return temperature;
 }
 
 function get_luminosity() {
-    // TODO: checar como calcular isso e construir o código
-    return 0.56;
+    // Convertendo o tempo de milissegundos (do global_timer.total) para segundos em um ciclo senoidal
+    const cycle = (2 * Math.PI * global_timer.total / 1000) / globals.luminosity_cycle_time;
+
+    // Calculando o valor senoidal e ajustando o ciclo para começar em 0.5
+    const sinusoidal_value = Math.sin(cycle + Math.PI / 2);
+
+    // Reescalando o valor para variar de 0 a 1 (ao invés de -1 a 1), que são os ranges da luminosidade
+    const luminosity = (sinusoidal_value + 1) / 2;
+
+    return luminosity;
 }
