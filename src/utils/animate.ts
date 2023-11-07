@@ -28,7 +28,7 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     // Criando a Quadtree
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
-    const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 3);
+    const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 10);
 
     // limitador_de_loop = 0;
 
@@ -47,26 +47,25 @@ function animate(context: CanvasRenderingContext2D | null) {
     Organism.organisms.forEach((organism) => {
       organism.update(context);
       organism.roam();
-
-
+      
+      
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
-      vision.display(context)
+      // vision.display(context) // Descomentar para ver o raio de visão dos organismos   
+
       if(organism.energy <= organism.max_energy * globals.percentual_energy_to_eat){ // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
         // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
         organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
 
       } else {
-        if(organism.maturity > 0.6 && organism.sexual_maturity >= 0.5 ){
-          debugger;
+        if(organism.maturity > 0.6 && organism.sexual_maturity >= 0.5 ){ // Requisitos para reprodução
           organism.sexually_procreate(qtreeOrganisms, vision)
         }
       }
     });
-    qtreeOrganisms.display(context)
 
-    
+    qtreeOrganisms.display(context);
 
   }
 }

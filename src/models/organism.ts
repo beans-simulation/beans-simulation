@@ -27,6 +27,7 @@ class Organism extends Point implements Drawable {
   public is_reproducing = false;
   public is_roaming = false; //vagar sem direção
   public is_running_away = false;
+  public is_ready_to_reproduce = false;
   public lifetime_in_miliseconds = generate_integer(200, 300) * 1000; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
@@ -127,37 +128,43 @@ class Organism extends Point implements Drawable {
   }
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
-    let [min_distance, possible_partners, closest_index] = this.find_close_partners(qtree, vision);
+    this.is_ready_to_reproduce = true;
+    // Pega o genoma do organismo atual
     let current_organism_genome = this.dna.get_genome();
-    if (possible_partners.length >0){
-      let partner = possible_partners[closest_index] as Organism;
-      let partner_genome = partner.dna.get_genome();
-      debugger;
-
-      if (this.approach_partner(min_distance, possible_partners, closest_index)){
+    // Procura parceiros e o parceiro mais proximo
+    let [min_distance, possible_partners, closest_index] = this.find_close_partners(qtree, vision);
+    // Se houver parceiros...
+    if (possible_partners.length > 0){
+      let partner = possible_partners[closest_index] as Organism; // Tranforma em tipo Organism
+      let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
+      
+      // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
+      if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
+        this.is_reproducing = true;
+        partner.is_reproducing = true;
         // NINHADA
         this.litter_size = generate_integer(
           this.litter_interval[0],
           this.litter_interval[1] + 1
-          );
-          console.log('ninhada n: ', this.litter_size)
-          for (var i = 0; i < this.litter_size; i++) {
-            if (Math.random() < 0.4) {
-              console.log('filho n:',i)
-              const offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
-              this.create_child(offspring_dna);
-            } 
-          }
+        );
+        for (var i = 0; i < this.litter_size; i++) {
+          if (Math.random() < 1) {
+            let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
+            const offspring_dna_mutated = offspring_dna.mutate();
+            this.create_child(offspring_dna_mutated);
+          } 
+        }
+        // debugger;
 
         this.energy = (this.energy/2); // Mudar a logica?
         this.is_reproducing = false;
+        this.is_ready_to_reproduce = false;
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
+        partner.is_ready_to_reproduce = false;
 
       }
-    }
-    
-
+    } 
   }
 
   // Método para atualizar o estado do organism
@@ -374,8 +381,10 @@ class Organism extends Point implements Drawable {
   }
 
   search_for_vegetable(qtree: VegetableQuadTree, vision: Circle): void {
+    this.is_ready_to_reproduce = false;
     this.is_eating = false;
     const is_searching_vegetable = true;
+
     let [min_distance, nearby_vegetables, closest_index] = find_nearby_element(
       qtree,
       vision,
@@ -477,7 +486,7 @@ class Organism extends Point implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    if (this.is_eating || this.is_running_away || this.is_reproducing) {
+    if (this.is_eating || this.is_running_away || this.is_ready_to_reproduce || this.is_reproducing) {
       // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
       roaming_force.multiply(0.03);
     }
@@ -486,8 +495,8 @@ class Organism extends Point implements Drawable {
 
   // Método que calcula a força de redirecionamento em direção a um alvo
   // REDIRECIONAMENTO = VELOCIDADE DESEJADA - VELOCIDADE
-  pursue(target: Organism | Vegetable) {
-    if (target instanceof Organism) {
+  pursue(target: Organism | Vegetable, to_reproduce: boolean = false) {
+    if (target instanceof Organism && !to_reproduce) {
       target.is_running_away = true;
     }
     // O vector da velocidade desejada é o vector de posição do alvo menos o da própria posição
@@ -512,7 +521,7 @@ class Organism extends Point implements Drawable {
     let possible_partners: any[] = qtree.search_elements(vision, this.id);
     possible_partners = possible_partners.filter((partner) => {
       let partner_organism = partner as Organism;
-      return partner_organism.maturity >=0.5 && !partner_organism.is_reproducing
+      return !partner_organism.is_reproducing && partner_organism.is_ready_to_reproduce
     });
 
     for (let i = possible_partners.length - 1; i >= 0; i--) {
@@ -534,18 +543,16 @@ class Organism extends Point implements Drawable {
     */
 
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
-      this.is_reproducing = true;
       this.is_roaming = false;
       this.is_eating = false;
-
+      
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
         return true
       } else if (close_organisms.length != 0) {
-        this.pursue((close_organisms[closest_index] as Organism));
+        this.pursue((close_organisms[closest_index] as Organism), true);
       }
     }
     return false
-  
   }
 
   private n_points_cut(parent_a: any[], parent_b: any[], n_points: number): number[] {
@@ -575,12 +582,10 @@ class Organism extends Point implements Drawable {
     return { first_parent: parent_b, second_parent: parent_a };
   }
   
-  crossover_dnas(parent_a: any[], parent_b: any[], n_points: number = 3): DNA {
-    // numero maximo de pontos é len(genes_pai)-1
-    // let child_genome = [];
+  crossover_dnas(parent_a: any[], parent_b: any[], n_points: number = 1): DNA {
+    // [!] O numero maximo de pontos é len(genes_pai)-1
   
     const random_indexes = this.n_points_cut(parent_a, parent_b, n_points);
-    console.log("random indexes: ", random_indexes);
   
     const { first_parent, second_parent } = this.get_random_parents(
       parent_a,
