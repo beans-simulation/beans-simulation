@@ -59,6 +59,7 @@ class Organism extends Point implements Drawable {
   public angle_closest_organism: number = 0;
   public distance_closest_organism: number = 0;
   public closest_organism: Point | null = null;
+  public diet: number;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -75,6 +76,7 @@ class Organism extends Point implements Drawable {
     this.initial_detection_radius = dna.initial_detection_radius;
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
+    this.diet = dna.diet;
     this.radius = this.initial_radius;
     this.minimal_consumption =
       0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
@@ -524,6 +526,7 @@ class Organism extends Point implements Drawable {
     const detection_radius_source = this.random_parent(partner);
     const litter_source = this.random_parent(partner);
     const sex_source = this.random_parent(partner);
+    const diet_source = this.random_parent(partner);
 
     return new DNA(
       radius_source.dna.initial_radius,
@@ -532,7 +535,8 @@ class Organism extends Point implements Drawable {
       color_source.dna.color,
       detection_radius_source.dna.initial_detection_radius,
       litter_source.dna.litter_interval,
-      sex_source.dna.sex
+      sex_source.dna.sex,
+      diet_source.dna.diet
     );
   }
 
