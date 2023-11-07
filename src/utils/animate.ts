@@ -15,29 +15,12 @@ function accelerate(value: number, organism: Organism) {
   // organism.accelerate(value)
 }
 
-function rotate(value: number, organism: Organism) {
-  if(organism.closest_food){
-    const angle_signal = get_angle_signal_to_closest_element(organism, organism.closest_food)
-    if (organism.distance_closest_food <= (organism.detection_radius*organism.detection_radius)) {
-      organism.is_eating = true;
-      if (organism.distance_closest_food <= EAT_DISTANCE * EAT_DISTANCE) {
-        organism.eat_vegetable(organism.closest_food as Vegetable);
-      }else{
-        if(angle_signal>0){
-          console.log("angle_signal", angle_signal)
-          organism.speed.rotate_degrees((-1)*value)
-        }else if(angle_signal<0){
-          organism.speed.rotate_degrees(value)
-
-        }
-      }
-    }
-
-  }else{
-    organism.is_eating = false;
-    organism.is_roaming = true;
-  }
+function rotate(value: number, organism: Organism, output: {}) {
+  organism.is_rotating = true;
+  organism.speed.rotate_degrees(value);
+  organism.is_rotating = false;
   organism.roam();
+
 }
 
 function desireToReproduce(value: number, organism: Organism) {
@@ -48,10 +31,18 @@ function desireToReproduce(value: number, organism: Organism) {
 function desireToEat(value: number, organism: Organism) {
   // TODO: chamar a função de comer organismo ou de comer alimento
   // console.log('Calling desireToEat with value:', value);
+  if(organism.closest_food){
+    if (organism.distance_closest_food <= (organism.detection_radius*organism.detection_radius)) {
+      organism.is_eating = true;
+      if (organism.distance_closest_food <= EAT_DISTANCE * EAT_DISTANCE) {
+        organism.eat_vegetable(organism.closest_food as Vegetable);
+      }
+    }
+  }
 }
 
 // Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
+const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, output:{}) => void } = {
   'Accelerate': accelerate,
   'Rotate': rotate,
   'DesireToReproduce': desireToReproduce,
@@ -92,7 +83,6 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     Organism.organisms.forEach((organism) => {
       organism.update(context);
-      // organism.roam();
 
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(
@@ -125,14 +115,16 @@ function animate(context: CanvasRenderingContext2D | null) {
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-      console.log("----")
-      console.log(output)
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism);
+          map_outputs_from_net[key](value,organism,output);
         }
       }
+      // momentaneamente chamando a funçao de comer só pros bichos nao ficarem rodando em circulo no alimento sem comer
+      // será removido quando o valor desireToEat for retornado no output da rede
+      desireToEat(1, organism);
+
 
     });
 

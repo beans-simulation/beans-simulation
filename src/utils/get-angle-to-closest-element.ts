@@ -8,7 +8,12 @@ function get_angle_to_closest_element(organism: Organism, closest_element: Point
         return 0
     }
     const direction = get_direction(organism, closest_element)
-    return direction.get_angle_to_another_vector(organism.speed)
+    const angle_signal = direction.x * organism.speed.y - direction.y * organism.speed.x // talvez o problema do sinal esteja aqui
+    var angle = direction.get_angle_to_another_vector(organism.speed)
+    if(angle_signal>0){
+        angle = angle*(-1) //adiciona sinal negativo
+    }
+    return angle
 }
 function get_angle_signal_to_closest_element(organism: Organism, closest_element: Point){
     if(closest_element == null){

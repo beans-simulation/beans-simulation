@@ -25,6 +25,7 @@ class Organism extends Point implements Drawable {
   public initial_radius: number;
   public is_eating = false;
   public is_roaming = false; //vagar sem direção
+  public is_rotating = false;
   public is_running_away = false;
   public lifetime_in_miliseconds = generate_integer(200, 300) * 1000; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
@@ -476,7 +477,7 @@ class Organism extends Point implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    if (this.is_eating || this.is_running_away) {
+    if (this.is_eating || this.is_running_away || this.is_rotating) {
       // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
       roaming_force.multiply(0.03);
     }
