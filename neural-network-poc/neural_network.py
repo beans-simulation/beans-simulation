@@ -177,9 +177,9 @@ CONSTANT_NEURON_VALUE = 1
 
 # MUtação
 ADD_NEURON_MUTATION_RATE = 0.7 # Taxa de mutação para adição de neurônios
-REMOVE_NEURON_MUTATION_RATE = 0 # Taxa de mutação para remoção de neurônios
+REMOVE_NEURON_MUTATION_RATE = 0.1 # Taxa de mutação para remoção de neurônios
 ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
-REMOVE_CONNECTION_MUTATION_RATE = 0 # Taxa de mutação para remoção de conexões
+REMOVE_CONNECTION_MUTATION_RATE = 0.1 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos
 CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.1 # Taxa de mutação para mudança do estado de ativação de conexões
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
@@ -557,19 +557,19 @@ class NeuralNetwork:
 
 
     # Função responsável por qualquer tipo de mutação
-    def mutate(self):
+    def mutate(self, add_neuron_probability=ADD_NEURON_MUTATION_RATE, add_connection_probability=ADD_CONNECTION_MUTATION_RATE, change_weight_probability=CHANGE_WEIGHT_MUTATION_RATE, change_active_state_probability=CHANGE_ACTIVE_STATE_MUTATION_RATE, remove_neuron_probability=REMOVE_NEURON_MUTATION_RATE, remove_connection_probability=REMOVE_CONNECTION_MUTATION_RATE):
         # Realiza as mutações
-        if random.random() < ADD_NEURON_MUTATION_RATE:
+        if random.random() < add_neuron_probability:
             self.add_neuron()
-        if random.random() < ADD_CONNECTION_MUTATION_RATE:
+        if random.random() < add_connection_probability:
             self.add_connection()
-        if random.random() < CHANGE_WEIGHT_MUTATION_RATE:
+        if random.random() < change_weight_probability:
             self.change_weight()
-        if random.random() < CHANGE_ACTIVE_STATE_MUTATION_RATE:
+        if random.random() < change_active_state_probability:
             self.change_active_state()
-        if random.random() < REMOVE_NEURON_MUTATION_RATE:
+        if random.random() < remove_neuron_probability:
             self.remove_neuron()
-        if random.random() < REMOVE_CONNECTION_MUTATION_RATE:
+        if random.random() < remove_connection_probability:
             self.remove_connection()
 
         # Valida a rede após a mutação
@@ -752,33 +752,56 @@ def create_network():
         Connection(2, 4 , 1.0), # PiecewiseConstant --> Rotate
         Connection(1, 3, 1.0),   # Constant --> Accelerate
     ]
+
+    # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
+    # para que todas as redes possuam a estrutura básica inicial
+    add_neuron_probability = 0.5
+    add_connection_probability = 0.5
+    change_weight_probability = 0.5
+    change_active_state_probability = 0
+    remove_neuron_probability = 0
+    remove_connection_probability = 0
+
+    for _ in range(0, 2):
+        basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
+
+    # Atualizando a ordem topológica da rede e construindo o seu DNA
     update_neural_network(basic_network)
+
     return basic_network
 
 
 
-# Testando a reprodução sexuada
-nn1 = create_network()
-nn2 = create_network()
 
-# Mudando um pouco as redes
-for i in range(1, 5):
-    nn1.mutate()
-    nn2.mutate()
 
-print("\n--------------------------- Rede Pai ---------------------------")
+# # Testando a reprodução sexuada
+# nn1 = create_network()
+# nn2 = create_network()
 
-nn1.print_network_info()
-# print_dna(nn1.dna)
+# # Mudando um pouco mais as redes
+# for i in range(0, 3):
+#     nn1.mutate()
+#     nn2.mutate()
 
-print("\n--------------------------- Rede Mãe ---------------------------")
+# print("\n--------------------------- Rede Pai ---------------------------")
 
-nn2.print_network_info()
-# print_dna(nn2.dna)
+# nn1.print_network_info()
+# # print_dna(nn1.dna)
 
-# Cruzando as redes
-print("\n--------------------------- Rede Filha ---------------------------")
+# print("\n--------------------------- Rede Mãe ---------------------------")
 
-nn_filha = breed_neural_networks(nn1, nn2)
-nn_filha.print_network_info()
-# print_dna(nn_filha.dna)
+# nn2.print_network_info()
+# # print_dna(nn2.dna)
+
+# # Cruzando as redes
+# print("\n--------------------------- Rede Filha ---------------------------")
+
+# nn_filha = breed_neural_networks(nn1, nn2)
+# nn_filha.print_network_info()
+# # print_dna(nn_filha.dna)
+
+
+# Teste da função de criar redes da primeira geração
+for i in range(1, 6):
+    print(f"\n\n-------------- REDE {i} --------------\n")
+    create_network().print_network_info()
