@@ -766,12 +766,12 @@ def create_network():
 
     # Criando as conexões entre os neurônios
     basic_network.connections = [
-        Connection(0, 4, 1.0),  # AngleToClosestFood --> PiecewiseConstant
-        Connection(4, 7 , 1.0), # PiecewiseConstant --> Rotate
-        Connection(1, 6, 1.0),   # Constant --> Accelerate
-        Connection(2, 8, 0.5),   # Maturity --> DesireToReproduce
-        Connection(3, 5, 1.0),   # EnergyLevel --> Cos
-        Connection(5, 9, 1.0),   # Cos --> DesireToEat
+        Connection(0, 4, round(random.random(), MAX_DECIMAL_PLACES)),  # AngleToClosestFood --> PiecewiseConstant
+        Connection(4, 7, round(random.random(), MAX_DECIMAL_PLACES)), # PiecewiseConstant --> Rotate
+        Connection(1, 6, round(random.random(), MAX_DECIMAL_PLACES)),   # Constant --> Accelerate
+        Connection(2, 8, round(random.random(), MAX_DECIMAL_PLACES)),   # Maturity --> DesireToReproduce
+        Connection(3, 5, round(random.random(), MAX_DECIMAL_PLACES)),   # EnergyLevel --> Cos
+        Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES)),   # Cos --> DesireToEat
     ]
 
     # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
