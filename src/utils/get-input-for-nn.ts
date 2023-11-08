@@ -4,11 +4,14 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
     var index_closest_organism: number;
     var distance_closest_food: number;
     var distance_closest_organism: number;
+    var distance_closest_target: number;
     var angle_closest_food: number;
     var angle_closest_organism: number;
+    var angle_closest_target: number;
     var vegetable_distance_and_index: Array<number>;
     var vegetables_in_view: Array<Point>;
     var organisms_in_view: Array<Point>;
+    var targets_in_view: Array<Point>;
     var organism_distance_and_index: Array<number>;
 
     vegetables_in_view = qtreeVegetables.search_elements(vision)
@@ -31,6 +34,15 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
     organism.distance_closest_organism = distance_closest_organism
     organism.closest_organism = organisms_in_view[index_closest_organism]
 
+    if(organism.diet == 1){ // carnívoro
+        distance_closest_target = distance_closest_organism;
+        angle_closest_target = angle_closest_organism;
+        targets_in_view = organisms_in_view;
+    }else{ // herbívoro
+        distance_closest_target = distance_closest_food;
+        angle_closest_target = angle_closest_food;
+        targets_in_view = vegetables_in_view;
+    }
 
     input_values = {
         'EnergyLevel': organism.energy,
@@ -42,10 +54,15 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'AngleToClosestOrganism': angle_closest_organism,
         'DistToClosestOrganism': distance_closest_organism,
         'NumOfOrganismsInView': organisms_in_view.length,
+        'AngleToClosestTarget': angle_closest_target,
+        'DistToClosestTarget': distance_closest_target,
+        'NumOfTargetsInView': targets_in_view.length,
         'Luminosity': get_luminosity(),
         'Maturity': organism.maturity,
         'TimeAlive': organism.get_time_alive_in_seconds()
     }
+    console.log("sou", organism.diet)
+    console.log(input_values)
     return input_values
 }
 

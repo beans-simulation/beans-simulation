@@ -100,20 +100,11 @@ function animate(context: CanvasRenderingContext2D | null) {
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
       // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
-      if (
-        organism.energy <=
-        organism.max_energy * globals.percentual_energy_to_eat
-      ) {
-        // FOME
-        // TODO: Lógica para definir se vai comer organismo ou vegetal
-        // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
-
-      } else {
-        if(organism.maturity > 0.6){ // Requisitos para reprodução
-          organism.sexually_procreate(qtreeOrganisms, vision)
-        }
+      // vai ser substituído pelo output de desireToReproduce da rede neural
+      if(organism.maturity > 0.6){ // Requisitos para reprodução
+        organism.sexually_procreate(qtreeOrganisms, vision)
       }
+
 
       // Pyodide
       const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
@@ -141,7 +132,6 @@ function animate(context: CanvasRenderingContext2D | null) {
     });
 
     // qtreeOrganisms.display(context);
-    //debugger;
   }
 
 }
