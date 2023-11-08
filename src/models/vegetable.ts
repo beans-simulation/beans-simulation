@@ -28,4 +28,8 @@ class Vegetable extends Point implements Drawable {
   checkId(id: number) {
     return id === Vegetable.id;
   }
+  kill() {
+    Vegetable.vegetables = Vegetable.vegetables.filter((item) => item !== this);
+  }
+
 }

@@ -48,6 +48,7 @@
     "src/utils/find-nearby-element.ts",
     "src/utils/get-input-for-nn.ts",
     "src/app.ts",
+    "src/utils/get-angle-to-closest-element.ts",
     "src/utils/create-neural-network.ts"
   ]
 }

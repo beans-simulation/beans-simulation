@@ -11,11 +11,14 @@ function create_background(context: CanvasRenderingContext2D) {
 }
 
 function accelerate(value: number, organism: Organism) {
-  organism.accelerate(value)
+
+  // organism.accelerate(value)
 }
 
-function rotate(value: number, organism: Organism) {
-  organism.rotate(value)
+function rotate(value: number, organism: Organism, output: {}) {
+  organism.is_rotating = true;
+  organism.speed.rotate_degrees(value);
+  organism.is_rotating = false;
 }
 
 function desireToReproduce(value: number, organism: Organism) {
@@ -24,12 +27,32 @@ function desireToReproduce(value: number, organism: Organism) {
 }
 
 function desireToEat(value: number, organism: Organism) {
-  // TODO: chamar a função de comer organismo ou de comer alimento
-  // console.log('Calling desireToEat with value:', value);
+  if(value == 0){ // não deseja comer
+    return
+  }
+  var closest_element: Point | null = null;
+  var distance: number = Infinity; //valor default infinito
+
+  if(organism.diet == 0 && organism.closest_food){ //herbívoro
+    closest_element = organism.closest_food;
+    distance = organism.distance_closest_food;
+  }else if(organism.diet == 1 && organism.closest_organism){ // carnívoro
+    closest_element = organism.closest_organism;
+    distance = organism.distance_closest_organism;
+  }
+
+  if(closest_element){
+    if (distance <= (organism.detection_radius*organism.detection_radius) && distance <= EAT_DISTANCE * EAT_DISTANCE) {
+      organism.is_eating = true;
+      organism.eat(closest_element as any)
+    }
+  }
+
+  organism.is_eating = false;
 }
 
 // Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism) => void } = {
+const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, output:{}) => void } = {
   'Accelerate': accelerate,
   'Rotate': rotate,
   'DesireToReproduce': desireToReproduce,
@@ -68,14 +91,14 @@ function animate(context: CanvasRenderingContext2D | null) {
       qtreeOrganisms.insert(organism);
     });
 
-    Organism.organisms.forEach((organism) => {
+    Organism.organisms.forEach(( organism) => {
       organism.update(context);
-      organism.roam();
-      
-      
+      // organism.roam();
+
+
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
-      // vision.display(context) // Descomentar para ver o raio de visão dos organismos   
+      // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
       if (
         organism.energy <=
@@ -84,7 +107,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
         // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
+        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
 
       } else {
         if(organism.maturity > 0.6){ // Requisitos para reprodução
@@ -106,21 +129,18 @@ function animate(context: CanvasRenderingContext2D | null) {
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
-      // console.log("===--------")
-      // console.log("valuesJSON",valuesJSON)
-      // console.log("organismo",organism.id)
-      // console.log("rede",network_id_JSON)
       // console.log(output)
-
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism);
+          map_outputs_from_net[key](value,organism,output);
         }
       }
+
+      organism.roam();
     });
 
-    qtreeOrganisms.display(context);
+    // qtreeOrganisms.display(context);
     //debugger;
   }
 

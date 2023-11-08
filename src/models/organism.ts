@@ -26,6 +26,7 @@ class Organism extends Point implements Drawable {
   public is_eating = false;
   public is_reproducing = false;
   public is_roaming = false; //vagar sem direção
+  public is_rotating = false;
   public is_running_away = false;
   public is_ready_to_reproduce = false;
   public lifetime_in_miliseconds = generate_integer(200, 300) * 1000; // tempo de vida do organism
@@ -49,6 +50,17 @@ class Organism extends Point implements Drawable {
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
   public neural_network_id: number | null;
+  public index_closest_food: number = -1;
+  public distance_closest_food: number = -1;
+  public angle_target_food: number = -1;
+  public direction_to_target = new Vector(0, 0); // valor default aleatorio sera substituido
+  public angle_target_signal: number = 0;
+  public angle_closest_food: number = 0;
+  public closest_food: Point | null = null;
+  public angle_closest_organism: number = 0;
+  public distance_closest_organism: number = 0;
+  public closest_organism: Point | null = null;
+  public diet: number;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -65,6 +77,7 @@ class Organism extends Point implements Drawable {
     this.initial_detection_radius = dna.initial_detection_radius;
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
+    this.diet = dna.diet;
     this.radius = this.initial_radius;
     this.minimal_consumption =
       0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
@@ -146,7 +159,7 @@ class Organism extends Point implements Drawable {
     if (possible_partners.length > 0){
       let partner = possible_partners[closest_index] as Organism; // Tranforma em tipo Organism
       let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
-      
+
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
       if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
         this.is_reproducing = true;
@@ -162,7 +175,7 @@ class Organism extends Point implements Drawable {
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
             this.create_child(offspring_dna_mutated);
-          } 
+          }
         }
         debugger;
 
@@ -174,7 +187,7 @@ class Organism extends Point implements Drawable {
         partner.is_ready_to_reproduce = false;
 
       }
-    } 
+    }
   }
   get_time_alive_in_seconds() {
     // TODO: checar se o valor está fazendo sentido
@@ -305,9 +318,6 @@ class Organism extends Point implements Drawable {
     // TOOD: implemetar função aceleração com base no valor de output da rede
   }
 
-  rotate(value: number){
-    // TOOD: implemetar função aceleração com base no valor de output da rede
-  }
 
   create_space_delimitation() {
     this.create_canvas_space_delimitation();
@@ -478,6 +488,22 @@ class Organism extends Point implements Drawable {
     this.food_eaten++;
   }
 
+  eat(element: Organism | Vegetable){
+    if (this.max_energy - this.energy >= element.energy * 0.1) {
+      this.energy += element.energy * 0.1;
+    } else {
+      this.energy = this.max_energy;
+    }
+
+    if (this.energy > this.max_energy) {
+      this.energy = this.max_energy;
+    }
+    element.kill();
+
+    this.increase_size();
+    this.food_eaten++;
+  }
+
   // Método que fará o organism vaguear por aí quando não está is_running_away ou perseguindo
   roam() {
     this.change_status(organism_status.roaming);
@@ -508,7 +534,7 @@ class Organism extends Point implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    if (this.is_eating || this.is_running_away || this.is_ready_to_reproduce || this.is_reproducing) {
+    if (this.is_eating || this.is_running_away || this.is_ready_to_reproduce || this.is_reproducing || this.is_rotating) {
       // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
       roaming_force.multiply(0.03);
     }
@@ -554,7 +580,7 @@ class Organism extends Point implements Drawable {
         min_distance = d2;
         closest_index = i;
       }
-    } 
+    }
     return [min_distance, possible_partners, closest_index];
   }
 
@@ -567,7 +593,7 @@ class Organism extends Point implements Drawable {
     if (min_distance <= Math.pow(this.detection_radius, 2)) {
       this.is_roaming = false;
       this.is_eating = false;
-      
+
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
         return true
       } else if (close_organisms.length != 0) {
@@ -583,7 +609,7 @@ class Organism extends Point implements Drawable {
 
     for (let i = 0; i < n_points; i++) {
       /*
-        Sorteia um index para ser cada ponto de corte. 
+        Sorteia um index para ser cada ponto de corte.
         Após o sorteio, exclui o mesmo para não ser sorteado novamente.
         Faz isso n_points vezes e adiciona na lista de random_indexes que será posteriormente utilizada de base para o crossover.
       */
@@ -603,12 +629,12 @@ class Organism extends Point implements Drawable {
     }
     return { first_parent: parent_b, second_parent: parent_a };
   }
-  
+
   crossover_dnas(parent_a: any[], parent_b: any[], n_points: number = 1): DNA {
     // [!] O numero maximo de pontos é len(genes_pai)-1
-  
+
     const random_indexes = this.n_points_cut(parent_a, parent_b, n_points);
-  
+
     const { first_parent, second_parent } = this.get_random_parents(
       parent_a,
       parent_b
@@ -616,27 +642,27 @@ class Organism extends Point implements Drawable {
     const parent_order = Array.from({ length: n_points + 1 }, (_, i) =>
       i % 2 === 0 ? first_parent : second_parent
     );
-  
+
     const genome_aux: any[] = [];
     let last_index = 0;
     for (let i = 0; i <= n_points; i++) {
       const current_parent = parent_order[i];
-  
+
       const end_at: number | undefined = random_indexes[i];
       let cut: any[] = []
       if(i!==0 && i !==n_points){
           cut = current_parent.slice(last_index+1, end_at+1);
         } else if (i===n_points){
             cut = current_parent.slice(last_index+1, current_parent.length);
-      } 
+      }
       else {
           cut = current_parent.slice(last_index, end_at+1);
       }
-  
+
       genome_aux.push(...cut);
       last_index = end_at;
     }
-  
+
     const child_genome = genome_aux as ConstructorParameters<typeof DNA>;
     return new DNA(...child_genome);
   }
@@ -652,7 +678,7 @@ class Organism extends Point implements Drawable {
     Organism.organisms = filtered;
     return filtered;
   }
-  
+
   kill() {
     Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }
@@ -663,10 +689,10 @@ class Organism extends Point implements Drawable {
 
   display(context: CanvasRenderingContext2D) {
     context.beginPath();
-    context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    context.fillStyle = this.other_color;
-    context.strokeStyle = this.color;
-    context.lineWidth = 5;
+    context.ellipse(this.position.x, this.position.y, this.radius * 0.7, this.radius * 1.1, this.speed.heading_radians() - Math.PI/2, 0, Math.PI * 2);
+    context.fillStyle = this.color;
+    context.lineWidth = 2;
+    context.strokeStyle = this.color
     context.stroke();
     context.fill();
   }
