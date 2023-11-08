@@ -195,7 +195,7 @@ class Organism extends Point implements Drawable {
                 partner_nn = neural_network.NeuralNetwork.neural_networks.get(f"{partner_nn_id}")
 
                 # Criando a rede filha
-                child_nn = breed_neural_networks(this_nn, partner_nn)
+                child_nn = neural_network.breed_neural_networks(this_nn, partner_nn)
 
                 child_nn_id = child_nn.id
 
