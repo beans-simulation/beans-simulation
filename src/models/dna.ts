@@ -3,9 +3,10 @@ class DNA {
   public readonly max_speed: number;
   public readonly max_force: number;
   public readonly color: string;
-  public readonly initial_detection_radius: number;
+  public readonly initial_detection_radius: number; 
   public readonly litter_interval: number[];
   public readonly sex: sex_type;
+  private genome: ConstructorParameters<typeof DNA>;
 
   constructor(
     initial_radius: number,
@@ -14,8 +15,7 @@ class DNA {
     color: string,
     initial_detection_radius: number,
     litter_interval: number[],
-    sex: sex_type
-  ) {
+    sex: sex_type  ) {
     this.initial_radius = initial_radius;
     this.max_speed = max_speed;
     this.max_force = max_force;
@@ -23,6 +23,21 @@ class DNA {
     this.initial_detection_radius = initial_detection_radius;
     this.litter_interval = litter_interval;
     this.sex = sex; // string que pode ser XX (fêmea) ou XY (macho)
+    
+    this.genome = [
+      this.initial_radius,
+      this.max_speed,
+      this.max_force,
+      color,
+      initial_detection_radius,
+      litter_interval,
+      sex
+    ]
+  }
+
+
+  public get_genome(): ConstructorParameters<typeof DNA>{
+    return this.genome;
   }
 
   private get_positive_mutation(value: number) {
@@ -218,4 +233,6 @@ class DNA {
       this.sex
     );
   }
+
+  
 }

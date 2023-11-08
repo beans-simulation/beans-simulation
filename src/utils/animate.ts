@@ -55,7 +55,7 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     // Criando a Quadtree
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
-    const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 3);
+    const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 10);
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
@@ -71,13 +71,11 @@ function animate(context: CanvasRenderingContext2D | null) {
     Organism.organisms.forEach((organism) => {
       organism.update(context);
       organism.roam();
-
+      
+      
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-      let vision = new Circle(
-        organism.position.x,
-        organism.position.y,
-        organism.detection_radius
-      );
+      let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
+      // vision.display(context) // Descomentar para ver o raio de visão dos organismos   
 
       if (
         organism.energy <=
@@ -87,6 +85,11 @@ function animate(context: CanvasRenderingContext2D | null) {
         // TODO: Lógica para definir se vai comer organismo ou vegetal
         // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
         organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
+
+      } else {
+        if(organism.maturity > 0.6){ // Requisitos para reprodução
+          organism.sexually_procreate(qtreeOrganisms, vision)
+        }
       }
 
       // Pyodide

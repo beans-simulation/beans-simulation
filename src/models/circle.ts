@@ -47,4 +47,11 @@ class Circle {
         // intersecção acontecendo no limite do circulo
         return edges <= this.radiusSquared;
     }
+
+    display(context: CanvasRenderingContext2D) {
+        context.beginPath();
+        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        context.lineWidth = 5;
+        context.stroke();
+      }
 }
