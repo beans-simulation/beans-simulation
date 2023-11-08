@@ -30,6 +30,9 @@ def absolute(weighted_inputs):
 def sin(weighted_inputs):
     return math.sin(sum(weighted_inputs))
 
+def cos(weighted_inputs):
+    return math.cos(sum(weighted_inputs))
+
 def step_activation(weighted_inputs):
     return 0 if sum(weighted_inputs) <= 0.5 else 1
 
@@ -214,6 +217,7 @@ possible_neurons = [
     ("Hidden", "Absolute"),
     ("Hidden", "PiecewiseConstant"),
     ("Hidden", "Sin"),
+    ("Hidden", "Cos"),
 
     # OUTPUT
     ("Output", "Accelerate"),
@@ -228,6 +232,7 @@ neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
     "InvertSignal": invert_signal,
     "Absolute": absolute,
     "Sin": sin,
+    "Cos": cos,
     "DesireToEat": step_activation,
     "DesireToReproduce": step_activation
 }
@@ -740,21 +745,33 @@ def create_network():
     Constant --------------------------------------------------> Accelerate
 
     AngleToClosestFood ----------> PiecewiseConstant ----------> Rotate
+
+    Maturity --------------------------------------------------> DesireToRepdoduce
+
+    EnergyLevel ---------------------> Cos --------------------> DesireToEat
     """
     # Adicionando os neurônios na rede
     basic_network.neurons = [
         Neuron('Input', 'AngleToClosestFood', 0),
         Neuron('Input', 'Constant', 1),
-        Neuron('Hidden', 'PiecewiseConstant', 2),
-        Neuron('Output', 'Accelerate', 3),
-        Neuron('Output', 'Rotate', 4)
+        Neuron('Input', 'Maturity', 2),
+        Neuron('Input', 'EnergyLevel', 3),
+        Neuron('Hidden', 'PiecewiseConstant', 4),
+        Neuron('Hidden', 'Cos', 5),
+        Neuron('Output', 'Accelerate', 6),
+        Neuron('Output', 'Rotate', 7),
+        Neuron('Output', 'DesireToReproduce', 8),
+        Neuron('Output', 'DesireToEat', 9)
     ]
 
     # Criando as conexões entre os neurônios
     basic_network.connections = [
-        Connection(0, 2, 1.0),  # AngleToClosestFood --> PiecewiseConstant
-        Connection(2, 4 , 1.0), # PiecewiseConstant --> Rotate
-        Connection(1, 3, 1.0)   # Constant --> Accelerate
+        Connection(0, 4, 1.0),  # AngleToClosestFood --> PiecewiseConstant
+        Connection(4, 7 , 1.0), # PiecewiseConstant --> Rotate
+        Connection(1, 6, 1.0),   # Constant --> Accelerate
+        Connection(2, 8, 0.5),   # Maturity --> DesireToReproduce
+        Connection(3, 5, 1.0),   # EnergyLevel --> Cos
+        Connection(5, 9, 1.0),   # Cos --> DesireToEat
     ]
 
     # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
@@ -766,7 +783,7 @@ def create_network():
     remove_neuron_probability = 0
     remove_connection_probability = 0
 
-    for _ in range(0, 5):
+    for _ in range(0, 3):
         basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
 
     # Atualizando a ordem topológica da rede e construindo o seu DNA
