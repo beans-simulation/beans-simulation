@@ -163,7 +163,10 @@ def breed_neural_networks(nn1, nn2):
 
     rede_filha = reconstruct_neural_network_from_dna(dna_filho)
 
-    # 7 - Realizando a mutação
+    # 7 - Limpando a rede caso tenha sobrado neurônios soltos
+    rede_filha.remove_loose_neurons()
+
+    # 8 - Realizando a mutação
     rede_filha.mutate()
 
     update_neural_network(rede_filha)
@@ -823,31 +826,32 @@ def create_network():
 # nn_filha = breed_neural_networks(nn1, nn2)
 # nn_filha.print_network_info()
 # # print_dna(nn_filha.dna)
+# print(nn_filha.id)
 
 
 # Teste da função de criar redes da primeira geração
 
-input_values_test = {
-    'EnergyLevel': 45,
-    'Temperature': 70,
-    'Health': 8,
-    'AngleToClosestFood': 5,
-    'DistToClosestFood': 68,
-    'NumOfFoodInView': 90,
-    'AngleToClosestOrganism': 66,
-    'DistToClosestOrganism': 12,
-    'NumOfOrganismsInView': 4,
-    'AngleToClosestTarget': 66,
-    'DistToClosestTarget': 12,
-    'NumOfTargetsInView': 4,
-    'Luminosity': 0.5,
-    'Maturity': 5,
-    'TimeAlive': 234
-}
+# input_values_test = {
+#     'EnergyLevel': 45,
+#     'Temperature': 70,
+#     'Health': 8,
+#     'AngleToClosestFood': 5,
+#     'DistToClosestFood': 68,
+#     'NumOfFoodInView': 90,
+#     'AngleToClosestOrganism': 66,
+#     'DistToClosestOrganism': 12,
+#     'NumOfOrganismsInView': 4,
+#     'AngleToClosestTarget': 66,
+#     'DistToClosestTarget': 12,
+#     'NumOfTargetsInView': 4,
+#     'Luminosity': 0.5,
+#     'Maturity': 5,
+#     'TimeAlive': 234
+# }
 
-for i in range(0, 3):
-    print(f"\n\n-------------- REDE {i} --------------\n")
-    nn = create_network()
-    nn.print_network_info()
+# for i in range(0, 3):
+#     print(f"\n\n-------------- REDE {i} --------------\n")
+#     nn = create_network()
+#     nn.print_network_info()
 
-    print(nn.feed_forward(input_values_test))
+#     print(nn.feed_forward(input_values_test))
