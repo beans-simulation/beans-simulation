@@ -28,8 +28,10 @@ def absolute(weighted_inputs):
     return abs(sum(weighted_inputs))
 
 def sin(weighted_inputs):
-    summed_input = sum(weighted_inputs)
-    return math.sin(summed_input)
+    return math.sin(sum(weighted_inputs))
+
+def step_activation(weighted_inputs):
+    return 0 if sum(weighted_inputs) <= 0.5 else 1
 
 
 # Funções auxiliares
@@ -225,7 +227,9 @@ neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
     "PiecewiseConstant": PiecewiseConstant,
     "InvertSignal": invert_signal,
     "Absolute": absolute,
-    "Sin": sin
+    "Sin": sin,
+    "DesireToEat": step_activation,
+    "DesireToReproduce": step_activation
 }
 
 # -------------------------------------------------------------------------------
@@ -743,14 +747,14 @@ def create_network():
         Neuron('Input', 'Constant', 1),
         Neuron('Hidden', 'PiecewiseConstant', 2),
         Neuron('Output', 'Accelerate', 3),
-        Neuron('Output', 'Rotate', 4),
+        Neuron('Output', 'Rotate', 4)
     ]
 
     # Criando as conexões entre os neurônios
     basic_network.connections = [
         Connection(0, 2, 1.0),  # AngleToClosestFood --> PiecewiseConstant
         Connection(2, 4 , 1.0), # PiecewiseConstant --> Rotate
-        Connection(1, 3, 1.0),   # Constant --> Accelerate
+        Connection(1, 3, 1.0)   # Constant --> Accelerate
     ]
 
     # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
@@ -802,6 +806,25 @@ def create_network():
 
 
 # Teste da função de criar redes da primeira geração
-# for i in range(1, 6):
-#     print(f"\n\n-------------- REDE {i} --------------\n")
-#     create_network().print_network_info()
+
+input_values_test = {
+    'EnergyLevel': 45,
+    'Temperature': 70,
+    'Health': 8,
+    'AngleToClosestFood': 5,
+    'DistToClosestFood': 68,
+    'NumOfFoodInView': 90,
+    'AngleToClosestOrganism': 66,
+    'DistToClosestOrganism': 12,
+    'NumOfOrganismsInView': 4,
+    'Luminosity': 0.5,
+    'Maturity': 5,
+    'TimeAlive': 234
+}
+
+for i in range(0, 3):
+    print(f"\n\n-------------- REDE {i} --------------\n")
+    nn = create_network()
+    nn.print_network_info()
+
+    print(nn.feed_forward(input_values_test))
