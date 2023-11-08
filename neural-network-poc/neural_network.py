@@ -28,8 +28,13 @@ def absolute(weighted_inputs):
     return abs(sum(weighted_inputs))
 
 def sin(weighted_inputs):
-    summed_input = sum(weighted_inputs)
-    return math.sin(summed_input)
+    return math.sin(sum(weighted_inputs))
+
+def cos(weighted_inputs):
+    return math.cos(sum(weighted_inputs))
+
+def step_activation(weighted_inputs):
+    return 0 if sum(weighted_inputs) <= 0.5 else 1
 
 
 # Funções auxiliares
@@ -202,6 +207,9 @@ possible_neurons = [
     ("Input", "AngleToClosestOrganism"),
     ("Input", "DistToClosestOrganism"),
     ("Input", "NumOfOrganismsInView"),
+    ("Input", "AngleToClosestTarget"),
+    ("Input", "DistToClosestTarget"),
+    ("Input", "NumOfTargetsInView"),
     ("Input", "Constant"),
     ("Input", "Luminosity"),
     ("Input", "Maturity"),
@@ -212,6 +220,7 @@ possible_neurons = [
     ("Hidden", "Absolute"),
     ("Hidden", "PiecewiseConstant"),
     ("Hidden", "Sin"),
+    ("Hidden", "Cos"),
 
     # OUTPUT
     ("Output", "Accelerate"),
@@ -225,7 +234,10 @@ neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
     "PiecewiseConstant": PiecewiseConstant,
     "InvertSignal": invert_signal,
     "Absolute": absolute,
-    "Sin": sin
+    "Sin": sin,
+    "Cos": cos,
+    "DesireToEat": step_activation,
+    "DesireToReproduce": step_activation
 }
 
 # -------------------------------------------------------------------------------
@@ -735,22 +747,34 @@ def create_network():
     INPUT                             HIDDEN                       OUTPUT
     Constant --------------------------------------------------> Accelerate
 
-    AngleToClosestFood ----------> PiecewiseConstant ----------> Rotate
+    AngleToClosestTarget ----------> PiecewiseConstant ----------> Rotate
+
+    Maturity --------------------------------------------------> DesireToRepdoduce
+
+    EnergyLevel ---------------------> Cos --------------------> DesireToEat
     """
     # Adicionando os neurônios na rede
     basic_network.neurons = [
-        Neuron('Input', 'AngleToClosestFood', 0),
+        Neuron('Input', 'AngleToClosestTarget', 0),
         Neuron('Input', 'Constant', 1),
-        Neuron('Hidden', 'PiecewiseConstant', 2),
-        Neuron('Output', 'Accelerate', 3),
-        Neuron('Output', 'Rotate', 4),
+        Neuron('Input', 'Maturity', 2),
+        Neuron('Input', 'EnergyLevel', 3),
+        Neuron('Hidden', 'PiecewiseConstant', 4),
+        Neuron('Hidden', 'Cos', 5),
+        Neuron('Output', 'Accelerate', 6),
+        Neuron('Output', 'Rotate', 7),
+        Neuron('Output', 'DesireToReproduce', 8),
+        Neuron('Output', 'DesireToEat', 9)
     ]
 
     # Criando as conexões entre os neurônios
     basic_network.connections = [
-        Connection(0, 2, 1.0),  # AngleToClosestFood --> PiecewiseConstant
-        Connection(2, 4 , 1.0), # PiecewiseConstant --> Rotate
-        Connection(1, 3, 1.0),   # Constant --> Accelerate
+        Connection(0, 4, round(random.random(), MAX_DECIMAL_PLACES)),  # AngleToClosestTarget --> PiecewiseConstant
+        Connection(4, 7, round(random.random(), MAX_DECIMAL_PLACES)), # PiecewiseConstant --> Rotate
+        Connection(1, 6, round(random.random(), MAX_DECIMAL_PLACES)),   # Constant --> Accelerate
+        Connection(2, 8, round(random.random(), MAX_DECIMAL_PLACES)),   # Maturity --> DesireToReproduce
+        Connection(3, 5, round(random.random(), MAX_DECIMAL_PLACES)),   # EnergyLevel --> Cos
+        Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES)),   # Cos --> DesireToEat
     ]
 
     # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
@@ -762,7 +786,7 @@ def create_network():
     remove_neuron_probability = 0
     remove_connection_probability = 0
 
-    for _ in range(0, 2):
+    for _ in range(0, 3):
         basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
 
     # Atualizando a ordem topológica da rede e construindo o seu DNA
@@ -802,6 +826,28 @@ def create_network():
 
 
 # Teste da função de criar redes da primeira geração
-for i in range(1, 6):
+
+input_values_test = {
+    'EnergyLevel': 45,
+    'Temperature': 70,
+    'Health': 8,
+    'AngleToClosestFood': 5,
+    'DistToClosestFood': 68,
+    'NumOfFoodInView': 90,
+    'AngleToClosestOrganism': 66,
+    'DistToClosestOrganism': 12,
+    'NumOfOrganismsInView': 4,
+    'AngleToClosestTarget': 66,
+    'DistToClosestTarget': 12,
+    'NumOfTargetsInView': 4,
+    'Luminosity': 0.5,
+    'Maturity': 5,
+    'TimeAlive': 234
+}
+
+for i in range(0, 3):
     print(f"\n\n-------------- REDE {i} --------------\n")
-    create_network().print_network_info()
+    nn = create_network()
+    nn.print_network_info()
+
+    print(nn.feed_forward(input_values_test))

@@ -7,6 +7,7 @@ class DNA {
   public readonly litter_interval: number[];
   public readonly sex: sex_type;
   public readonly diet: number;
+  private genome: ConstructorParameters<typeof DNA>;
 
   constructor(
     initial_radius: number,
@@ -26,6 +27,22 @@ class DNA {
     this.litter_interval = litter_interval;
     this.sex = sex; // string que pode ser XX (fêmea) ou XY (macho)
     this.diet = diet; // se for 0 é herbívoro, se for 1 é carnívoro
+
+    this.genome = [
+      this.initial_radius,
+      this.max_speed,
+      this.max_force,
+      color,
+      initial_detection_radius,
+      litter_interval,
+      sex,
+      diet
+    ]
+  }
+
+
+  public get_genome(): ConstructorParameters<typeof DNA>{
+    return this.genome;
   }
 
   private get_positive_mutation(value: number) {
@@ -222,4 +239,6 @@ class DNA {
       this.diet
     );
   }
+
+
 }
