@@ -578,7 +578,7 @@ class Organism extends Point implements Drawable {
     context.beginPath();
     context.ellipse(this.position.x, this.position.y, this.radius * 0.7, this.radius * 1.1, this.speed.heading_radians() - Math.PI/2, 0, Math.PI * 2);
     context.fillStyle = this.color;
-    context.lineWidth = 5;
+    context.lineWidth = 2;
     context.strokeStyle = this.color
     context.stroke();
     context.fill();
