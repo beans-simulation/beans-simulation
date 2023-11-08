@@ -93,7 +93,7 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     Organism.organisms.forEach(( organism) => {
       organism.update(context);
-      organism.roam();
+      // organism.roam();
 
 
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
@@ -107,7 +107,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         // FOME
         // TODO: Lógica para definir se vai comer organismo ou vegetal
         // organism.hunt(qtreeOrganisms, vision); // Remover comentário para que ele coma organismos
-        organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
+        // organism.search_for_vegetable(qtreeVegetables, vision); // Remover comentário para que ele coma vegetais
 
       } else {
         if(organism.maturity > 0.6){ // Requisitos para reprodução
@@ -129,6 +129,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get('output_nn').toJs();
+      // console.log(output)
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
@@ -136,7 +137,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         }
       }
 
-      // organism.roam();
+      organism.roam();
     });
 
     // qtreeOrganisms.display(context);
