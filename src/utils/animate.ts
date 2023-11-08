@@ -30,21 +30,14 @@ function desireToEat(value: number, organism: Organism) {
   if(value == 0){ // não deseja comer
     return
   }
-  var closest_element: Point | null = null;
-  var distance: number = Infinity; //valor default infinito
+  console.log("fome", value)
+  organism.is_eating = true;
 
-  if(organism.diet == 0 && organism.closest_food){ //herbívoro
-    closest_element = organism.closest_food;
-    distance = organism.distance_closest_food;
-  }else if(organism.diet == 1 && organism.closest_organism){ // carnívoro
-    closest_element = organism.closest_organism;
-    distance = organism.distance_closest_organism;
-  }
-
-  if(closest_element){
-    if (distance <= (organism.detection_radius*organism.detection_radius) && distance <= EAT_DISTANCE * EAT_DISTANCE) {
+  if(organism.closest_target){
+    if (organism.distance_closest_target <= (organism.detection_radius*organism.detection_radius) && organism.distance_closest_target <= EAT_DISTANCE * EAT_DISTANCE) {
       organism.is_eating = true;
-      organism.eat(closest_element as any)
+      console.log("comendo", organism.closest_target)
+      organism.eat(organism.closest_target as any)
     }
   }
 
