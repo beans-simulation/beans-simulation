@@ -207,6 +207,9 @@ possible_neurons = [
     ("Input", "AngleToClosestOrganism"),
     ("Input", "DistToClosestOrganism"),
     ("Input", "NumOfOrganismsInView"),
+    ("Input", "AngleToClosestTarget"),
+    ("Input", "DistToClosestTarget"),
+    ("Input", "NumOfTargetsInView"),
     ("Input", "Constant"),
     ("Input", "Luminosity"),
     ("Input", "Maturity"),
@@ -744,7 +747,7 @@ def create_network():
     INPUT                             HIDDEN                       OUTPUT
     Constant --------------------------------------------------> Accelerate
 
-    AngleToClosestFood ----------> PiecewiseConstant ----------> Rotate
+    AngleToClosestTarget ----------> PiecewiseConstant ----------> Rotate
 
     Maturity --------------------------------------------------> DesireToRepdoduce
 
@@ -752,7 +755,7 @@ def create_network():
     """
     # Adicionando os neurônios na rede
     basic_network.neurons = [
-        Neuron('Input', 'AngleToClosestFood', 0),
+        Neuron('Input', 'AngleToClosestTarget', 0),
         Neuron('Input', 'Constant', 1),
         Neuron('Input', 'Maturity', 2),
         Neuron('Input', 'EnergyLevel', 3),
@@ -766,7 +769,7 @@ def create_network():
 
     # Criando as conexões entre os neurônios
     basic_network.connections = [
-        Connection(0, 4, round(random.random(), MAX_DECIMAL_PLACES)),  # AngleToClosestFood --> PiecewiseConstant
+        Connection(0, 4, round(random.random(), MAX_DECIMAL_PLACES)),  # AngleToClosestTarget --> PiecewiseConstant
         Connection(4, 7, round(random.random(), MAX_DECIMAL_PLACES)), # PiecewiseConstant --> Rotate
         Connection(1, 6, round(random.random(), MAX_DECIMAL_PLACES)),   # Constant --> Accelerate
         Connection(2, 8, round(random.random(), MAX_DECIMAL_PLACES)),   # Maturity --> DesireToReproduce
@@ -834,6 +837,9 @@ input_values_test = {
     'AngleToClosestOrganism': 66,
     'DistToClosestOrganism': 12,
     'NumOfOrganismsInView': 4,
+    'AngleToClosestTarget': 66,
+    'DistToClosestTarget': 12,
+    'NumOfTargetsInView': 4,
     'Luminosity': 0.5,
     'Maturity': 5,
     'TimeAlive': 234
