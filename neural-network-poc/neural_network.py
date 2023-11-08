@@ -5,6 +5,7 @@ import time
 import string
 import random
 from random import randint
+import json
 
 # -------------------------------------------------------------------------------
 # ---------------------------------- FUNÇÕES ------------------------------------
@@ -95,6 +96,78 @@ def update_neural_network(nn):
     nn.construct_dna()
 
 
+def print_dna(dna):
+    print(json.dumps(dna, indent=4, sort_keys=False))
+
+
+def breed_neural_networks(nn1, nn2):
+    dna1 = nn1.dna
+    dna2 = nn2.dna
+
+    # 1 - Primeiro, juntamos os dois DNAs em uma lista única
+    unified_dna = dna1 + dna2
+
+    # 2 - Depois, removemos os genes duplicados
+    # Identificando os connection_id únicos juntos com o neural_network_id
+    connection_ids = defaultdict(set)
+    for d in unified_dna:
+        connection_ids[d['connection_id']].add(d['neural_network_id'])
+
+    # Para cada connection_id com mais de um neural_network_id, selecionaremos aleatoriamente um neural_network_id para manter.
+    to_keep = {}
+    for conn_id, nn_ids in connection_ids.items():
+        if len(nn_ids) > 1:
+            to_keep[conn_id] = random.choice(list(nn_ids))
+
+    # Filtrando o DNA
+    unified_dna = [
+        d for d in unified_dna if to_keep.get(d['connection_id'], d['neural_network_id']) == d['neural_network_id']
+    ]
+
+    # 3 - Agora ordenaremos o DNA de acordo com as conexões
+    unified_dna = sorted(unified_dna, key=lambda x: x['connection_id'])
+
+    # 4 - Alinhando os genes de cada rede mãe com os da lista unificada
+    # Criando duas listas vazias com o tamanho da lista unificada
+    genes_1 = [None] * len(unified_dna)
+    genes_2 = [None] * len(unified_dna)
+
+    # Construindo dicionários de consulta rápida para verificar a presença dos genes em cada rede mãe
+    genes_1_dict = {gene['connection_id']: gene for gene in dna1}
+    genes_2_dict = {gene['connection_id']: gene for gene in dna2}
+
+    # Preenchendo as listas com os genes correspondentes ou None
+    for i, unified_gene in enumerate(unified_dna):
+        connection_id = unified_gene['connection_id']
+        
+        gene_1 = genes_1_dict.get(connection_id)
+        gene_2 = genes_2_dict.get(connection_id)
+
+        genes_1[i] = gene_1 if gene_1 else None
+        genes_2[i] = gene_2 if gene_2 else None
+
+    # 5 - Gerando o DNA da rede filha
+    # Escolhendo aleatoriamente entre os genes das redes 1 e 2
+    dna_filho = []
+    for gene_1, gene_2 in zip(genes_1, genes_2):
+        dna_filho.append(random.choice([gene_1, gene_2]))
+
+    # 6 - Recriando a rede filha a partir do DNA dela
+    dna_filho = [gene for gene in dna_filho if gene is not None]
+
+
+    rede_filha = reconstruct_neural_network_from_dna(dna_filho)
+
+    # 7 - Realizando a mutação
+    rede_filha.mutate()
+
+    update_neural_network(rede_filha)
+
+    return rede_filha
+ 
+
+
+
 # -------------------------------------------------------------------------------
 # ------------------------- VARIÁVEIS E LISTAS GLOBAIS --------------------------
 # -------------------------------------------------------------------------------
@@ -104,11 +177,11 @@ CONSTANT_NEURON_VALUE = 1
 
 # MUtação
 ADD_NEURON_MUTATION_RATE = 0.7 # Taxa de mutação para adição de neurônios
-REMOVE_NEURON_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de neurônios
+REMOVE_NEURON_MUTATION_RATE = 0.1 # Taxa de mutação para remoção de neurônios
 ADD_CONNECTION_MUTATION_RATE = 0.5 # Taxa de mutação para adição de conexões
-REMOVE_CONNECTION_MUTATION_RATE = 0.2 # Taxa de mutação para remoção de conexões
+REMOVE_CONNECTION_MUTATION_RATE = 0.1 # Taxa de mutação para remoção de conexões
 CHANGE_WEIGHT_MUTATION_RATE = 0.5 # Taxa de mutação para mudança de pesos
-CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.2 # Taxa de mutação para mudança do estado de ativação de conexões
+CHANGE_ACTIVE_STATE_MUTATION_RATE = 0.1 # Taxa de mutação para mudança do estado de ativação de conexões
 # Máximo que o peso de uma mutação pode mudar (de -MAX_WEIGHT_CHANGE até +MAX_WEIGHT_CHANGE)
 MAX_WEIGHT_CHANGE = 0.1
 
@@ -484,19 +557,19 @@ class NeuralNetwork:
 
 
     # Função responsável por qualquer tipo de mutação
-    def mutate(self):
+    def mutate(self, add_neuron_probability=ADD_NEURON_MUTATION_RATE, add_connection_probability=ADD_CONNECTION_MUTATION_RATE, change_weight_probability=CHANGE_WEIGHT_MUTATION_RATE, change_active_state_probability=CHANGE_ACTIVE_STATE_MUTATION_RATE, remove_neuron_probability=REMOVE_NEURON_MUTATION_RATE, remove_connection_probability=REMOVE_CONNECTION_MUTATION_RATE):
         # Realiza as mutações
-        if random.random() < ADD_NEURON_MUTATION_RATE:
+        if random.random() < add_neuron_probability:
             self.add_neuron()
-        if random.random() < ADD_CONNECTION_MUTATION_RATE:
+        if random.random() < add_connection_probability:
             self.add_connection()
-        if random.random() < CHANGE_WEIGHT_MUTATION_RATE:
+        if random.random() < change_weight_probability:
             self.change_weight()
-        if random.random() < CHANGE_ACTIVE_STATE_MUTATION_RATE:
+        if random.random() < change_active_state_probability:
             self.change_active_state()
-        if random.random() < REMOVE_NEURON_MUTATION_RATE:
+        if random.random() < remove_neuron_probability:
             self.remove_neuron()
-        if random.random() < REMOVE_CONNECTION_MUTATION_RATE:
+        if random.random() < remove_connection_probability:
             self.remove_connection()
 
         # Valida a rede após a mutação
@@ -508,6 +581,9 @@ class NeuralNetwork:
 
         # Atualiza a topologia da rede
         self.update_topological_order()
+
+        # Atualiza o dna da rede
+        self.construct_dna()
 
 
     # Função para validar a rede neural e checar se ela está seguindo as regras
@@ -583,19 +659,23 @@ class NeuralNetwork:
 
         dna = []
         for c in self.connections:
-            connection_id = str(c.from_neuron) + "-" + str(c.to_neuron)
+            exclusive_connection_id = str(c.from_neuron) + "-" + str(c.to_neuron)
 
             from_neuron = self.neuron_by_id.get(c.from_neuron)
             to_neuron = self.neuron_by_id.get(c.to_neuron)
 
+            connection_id = from_neuron.name + "-" + to_neuron.name
+
             gene = {
+                'neural_network_id': self.id,
                 'from_neuron_id': from_neuron.id,
                 'from_neuron_name': from_neuron.name,
                 'to_neuron_id': to_neuron.id,
                 'to_neuron_name': to_neuron.name,
                 'weight': c.weight,
                 'active_state': c.activated,
-                'connection_id': connection_id
+                'connection_id': connection_id,
+                'exclusive_connection_id': exclusive_connection_id
             }
 
             dna.append(gene)
@@ -661,77 +741,67 @@ def create_network():
     basic_network.neurons = [
         Neuron('Input', 'AngleToClosestFood', 0),
         Neuron('Input', 'Constant', 1),
-        Neuron('Input', 'Health', 2),
-        Neuron('Input', 'TimeAlive', 3),
-        Neuron('Hidden', 'PiecewiseConstant', 4),
-        Neuron('Hidden', 'Sin', 5),
-        Neuron('Hidden', 'Absolute', 6),
-        Neuron('Output', 'Accelerate', 7),
-        Neuron('Output', 'Rotate', 8),
-        Neuron('Output', 'DesireToEat', 9),
+        Neuron('Hidden', 'PiecewiseConstant', 2),
+        Neuron('Output', 'Accelerate', 3),
+        Neuron('Output', 'Rotate', 4),
     ]
 
     # Criando as conexões entre os neurônios
     basic_network.connections = [
-        Connection(0, 4, 1.0),  # AngleToClosestFood --> PiecewiseConstant
-        Connection(4, 8 , 1.0), # PiecewiseConstant --> Rotate
-        Connection(1, 7, 1.0),   # Constant --> Accelerate
-        Connection(2, 5, 1.0),   # Health --> Sin
-        Connection(5, 9, 1.0),   # Sin --> DesireToEat
-        Connection(3, 6, 1.0),   # TimeAlive --> Absolute
-        Connection(6, 8, 1.0)   # Absolute --> Rotate
+        Connection(0, 2, 1.0),  # AngleToClosestFood --> PiecewiseConstant
+        Connection(2, 4 , 1.0), # PiecewiseConstant --> Rotate
+        Connection(1, 3, 1.0),   # Constant --> Accelerate
     ]
+
+    # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
+    # para que todas as redes possuam a estrutura básica inicial
+    add_neuron_probability = 0.5
+    add_connection_probability = 0.5
+    change_weight_probability = 0.5
+    change_active_state_probability = 0
+    remove_neuron_probability = 0
+    remove_connection_probability = 0
+
+    for _ in range(0, 2):
+        basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
+
+    # Atualizando a ordem topológica da rede e construindo o seu DNA
     update_neural_network(basic_network)
+
     return basic_network
 
 
 
-# print("\n------------------------- Rede Após mutação -------------------------")
-
-# # Realizando a mutação
-# for i in range(1, 5):
-#     basic_network.mutate()
 
 
-# basic_network.print_network_info()
+# # Testando a reprodução sexuada
+# nn1 = create_network()
+# nn2 = create_network()
 
+# # Mudando um pouco mais as redes
+# for i in range(0, 3):
+#     nn1.mutate()
+#     nn2.mutate()
 
-# print("\nValores de output:", basic_network.feed_forward(input_values))
+# print("\n--------------------------- Rede Pai ---------------------------")
 
-# update_neural_network(basic_network)
+# nn1.print_network_info()
+# # print_dna(nn1.dna)
 
-# print(f"\n\nDNA PAI:\n{basic_network.dna}")
+# print("\n--------------------------- Rede Mãe ---------------------------")
 
+# nn2.print_network_info()
+# # print_dna(nn2.dna)
 
+# # Cruzando as redes
 # print("\n--------------------------- Rede Filha ---------------------------")
 
-# nn_filha = reconstruct_neural_network_from_dna(basic_network.dna)
-
-# # Imprimindo na tela informações gerais da rede
+# nn_filha = breed_neural_networks(nn1, nn2)
 # nn_filha.print_network_info()
-
-# print("Valores de output:", nn_filha.feed_forward(input_values))
-
-# update_neural_network(nn_filha)
-
-# print(f"\n\nDNA FILHA:\n{basic_network.dna}")
+# # print_dna(nn_filha.dna)
 
 
-
-# Testando rapidez do método feed_forward (que será chamado 1x por frame por organismo)
-
-# number_of_creatures = 2000
-# frames_per_second = 24
-
-# print(f"\nRodando o método feed_forward {number_of_creatures * frames_per_second} vezes ({number_of_creatures} organismos a {frames_per_second} frames por segundo)")
-
-# start_time = time.time()
-# for i in range(1, frames_per_second):
-#     for o in range(1, number_of_creatures):
-#         basic_network.feed_forward(input_values)
-
-# end_time = time.time()
-
-# test_duration = end_time - start_time
-
-# print(f"\nDuração: {test_duration} segundos")
+# Teste da função de criar redes da primeira geração
+for i in range(1, 6):
+    print(f"\n\n-------------- REDE {i} --------------\n")
+    create_network().print_network_info()

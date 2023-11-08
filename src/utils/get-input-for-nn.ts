@@ -71,14 +71,38 @@ function get_distance_and_index_of_closest_element(organism: Organism, closests_
     return distance_and_index;
 }
 
+let noise = 0
+
 function get_temperature() {
-    // Baseado na quantidade de elementos vivos, calcula a temperatura do ambiente
-    var temperature: number = 16;
-    // TODO: código para calcular temperatura
-    return temperature
+    // Obtendo o valor de luminosidade atual, pois a temperatura estará diretamente relacionada à luminosidade
+    const luminosity = get_luminosity();
+
+    // Calculando a temperatura com base na luminosidade (5 quando a luminosidade for 0, e 30 quando for 1)
+    let temperature = 5 + (25 * luminosity);
+
+    // Mudando o valor do ruído em pequenos passos para que mude gradualmente a cada frame
+    const noiseChange = (Math.random() * 2 - 1) * 0.5; // Muda o ruído em até ±0.5
+    noise += noiseChange;
+    noise = Math.max(Math.min(noise, 5), -5); // Garante que o ruído permaneça dentro dos limites de -5 a 5
+
+    // Adicionando o ruído à temperatura
+    temperature += noise;
+
+    // Garantindo que a temperatura esteja dentro dos limites (0 a 35) após adicionar o ruído
+    temperature = Math.max(Math.min(temperature, 35), 0);
+
+    return temperature;
 }
 
 function get_luminosity() {
-    // TODO: checar como calcular isso e construir o código
-    return 0.56;
+    // Convertendo o tempo de milissegundos (do global_timer.total) para segundos em um ciclo senoidal
+    const cycle = (2 * Math.PI * global_timer.total / 1000) / globals.luminosity_cycle_time;
+
+    // Calculando o valor senoidal e ajustando o ciclo para começar em 0.5
+    const sinusoidal_value = Math.sin(cycle + Math.PI / 2);
+
+    // Reescalando o valor para variar de 0 a 1 (ao invés de -1 a 1), que são os ranges da luminosidade
+    const luminosity = (sinusoidal_value + 1) / 2;
+
+    return luminosity;
 }
