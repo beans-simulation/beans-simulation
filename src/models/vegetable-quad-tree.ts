@@ -9,12 +9,6 @@ class VegetableQuadTree extends QuadTree {
 
     search_elements(vision: Circle){
         const found = super.search(vision);
-        // return found.filter(vegetable => {
-        //     if(is_vegetable(vegetable)){
-        //         return true
-        //     }
-        //     return false;
-        // })
         return found;
     }
 }

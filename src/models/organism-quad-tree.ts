@@ -1,6 +1,6 @@
 class OrganismQuadTree extends QuadTree {
     constructor(boundary: Rectangle, capacity: number){
-        super(boundary, capacity);        
+        super(boundary, capacity);
     }
 
     search_elements(vision: Circle, self_id?: number){

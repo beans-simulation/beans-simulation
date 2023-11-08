@@ -17,7 +17,7 @@ class Organism extends Point implements Drawable {
   public dna: DNA;
   public energy: number;
   public health: number = 85;
-  public maturity: number = 0.83;
+  public maturity: number = 0;
   public fixed_max_energy: number;
   public food_eaten = 0;
   public id: number;
@@ -47,9 +47,11 @@ class Organism extends Point implements Drawable {
   public sexual_maturity = 0;
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
+  private time_to_maturity_in_seconds: number;
+  public neural_network_id: number | null;
   //   private _status: organism_status_type;
 
-  constructor(x: number, y: number, dna: DNA, parent_id?: number) {
+  constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
     super(x, y);
     this.id = Organism.id++;
     this.position = new Vector(x, y);
@@ -79,7 +81,9 @@ class Organism extends Point implements Drawable {
     this.max_energy = Math.pow(this.radius, 2) * 6;
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
-    // NINHADAS
+    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.05/1000; // tempo para maturidade é 5% do tempo de vida
+    this.neural_network_id = neural_network_id;
+
 
     // this.energy = this.max_energy * 0.75
     if (parent_id) {
@@ -104,11 +108,16 @@ class Organism extends Point implements Drawable {
   // Método de reprodução (com mutações)
   private create_child(offspring_dna: DNA) {
     this.procreation_count++;
+    let neural_network_id = null;
 
+    if(globals.pyodide){
+      neural_network_id = create_neural_network(globals.pyodide)
+    }
     const offspring = new Organism(
       this.position.x,
       this.position.y,
-      offspring_dna
+      offspring_dna,
+      neural_network_id
     );
 
     this.childrenIds ? this.childrenIds.push(offspring.id) : [offspring.id];
@@ -149,12 +158,13 @@ class Organism extends Point implements Drawable {
         );
         for (var i = 0; i < this.litter_size; i++) {
           if (Math.random() < 1) {
+            console.log(i)
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
             this.create_child(offspring_dna_mutated);
           } 
         }
-        // debugger;
+        debugger;
 
         this.energy = (this.energy/2); // Mudar a logica?
         this.is_reproducing = false;
@@ -166,7 +176,10 @@ class Organism extends Point implements Drawable {
       }
     } 
   }
-
+  get_time_alive_in_seconds() {
+    // TODO: checar se o valor está fazendo sentido
+    return (global_timer.total - this.birth_moment_in_milliseconds) / 1000;
+  }
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
     this.consumed_energy_rate =
@@ -174,6 +187,7 @@ class Organism extends Point implements Drawable {
     const achieved_age_limit =
       global_timer.total - this.birth_moment_in_milliseconds >
       this.lifetime_in_miliseconds;
+    const time_alive = this.get_time_alive_in_seconds();
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
@@ -185,17 +199,19 @@ class Organism extends Point implements Drawable {
         // Remover reproducao assexuada
         if (Math.random() <= this.procreation_probability) {
           // NINHADA
-          this.litter_size = generate_integer(
-            this.litter_interval[0],
-            this.litter_interval[1] + 1
-          );
-          for (var i = 0; i < this.litter_size; i++) {
-            if (Math.random() < 0.2) {
-              // Para espaçar os nascimentos
-              //this.assexually_procreate();
-              
+          if(this.maturity == 1){
+            this.litter_size = generate_integer(
+              this.litter_interval[0],
+              this.litter_interval[1] + 1
+            );
+            for (var i = 0; i < this.litter_size; i++) {
+              if (Math.random() < 0.2) {
+                // Para espaçar os nascimentos
+                // this.assexually_procreate();
+              }
             }
           }
+
         }
       }
     } else {
@@ -206,15 +222,13 @@ class Organism extends Point implements Drawable {
     // TODO: elaborar lógica para alterar saúde (health) do organismo
     this.health = 85
 
-    // Alteração do atributo de maturity
-    // TODO: elaborar lógica para alterar maturidade (maturity) do organismo, baseado no limite "time_to_maturity"
-    if(this.maturity<1){ //dummy
-      this.maturity = 0.83
-      this.sexual_maturity = 0.6
-    }
-
     //Delimitação de bordas
     this.avoid_space_limits();
+
+    if(this.maturity < 1){
+      // se o resultado for maior que 1, ele atribui 1
+      this.maturity = time_alive / this.time_to_maturity_in_seconds > 1 ? 1 : time_alive / this.time_to_maturity_in_seconds;
+    }
 
     //Delimitação de bordas
     this.create_space_delimitation();
@@ -285,6 +299,14 @@ class Organism extends Point implements Drawable {
     }
 
     return null;
+  }
+
+  accelerate(value: number){
+    // TOOD: implemetar função aceleração com base no valor de output da rede
+  }
+
+  rotate(value: number){
+    // TOOD: implemetar função aceleração com base no valor de output da rede
   }
 
   create_space_delimitation() {

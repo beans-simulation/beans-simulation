@@ -12,7 +12,7 @@ class QuadTree {
     constructor(boundary: Rectangle, capacity: number){
         this.boundary = boundary;
         this.capacity = capacity;
-        this.points = []; 
+        this.points = [];
         this.divided = false;
     }
 
@@ -31,7 +31,7 @@ class QuadTree {
         this.southeast = new QuadTree(southeast, this.capacity);
         let southwest = new Rectangle(x-width, y+height, width, height);
         this.southwest = new QuadTree(southwest, this.capacity);
-        
+
         this.divided = true;
     }
 
@@ -40,21 +40,21 @@ class QuadTree {
         if (!this.boundary.contains(point)) {
             return false;
         }
-      
+
         if (this.points.length < this.capacity && !this.divided) {
             this.points.push(point);
             return true;
-        } 
-    
+        }
+
         if (!this.divided) {
             this.subdivide();
-            
+
             for(let p of this.points){
                 (this.northeast.insert(p) || this.northwest.insert(p) ||
                 this.southeast.insert(p) || this.southwest.insert(p))
             }
         }
-    
+
         const inserted: boolean = this.northeast.insert(point)||
             this.northwest.insert(point)  ||
             this.southeast.insert(point)||
@@ -66,7 +66,7 @@ class QuadTree {
     }
 
     // busca
-    search(range: Rectangle | Circle, found?: Point[]) {
+    protected search(range: Rectangle | Circle, found?: Point[]) {
         if(!found){
             found = [];
         }
@@ -81,20 +81,15 @@ class QuadTree {
                 found.push(point);
             }
         }
-        // SE esse Rectangle estiver dividido, é necessario checar seus outros quatro quadrantes 
+        // SE esse Rectangle estiver dividido, é necessario checar seus outros quatro quadrantes
         if (this.divided) {
             this.northwest.search(range, found);
-            this.northeast.search(range, found);   
-            this.southwest.search(range, found);   
-            this.southeast.search(range, found);   
+            this.northeast.search(range, found);
+            this.southwest.search(range, found);
+            this.southeast.search(range, found);
         }
 
         return found;
-
-        // remove duplicates
-        // found = found.filter(function(item, index) {
-        //     return found.indexOf(item) >= index;
-        // });
     }
 
     display(context: CanvasRenderingContext2D) {
