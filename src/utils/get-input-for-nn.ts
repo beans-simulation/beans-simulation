@@ -61,8 +61,7 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'Maturity': organism.maturity,
         'TimeAlive': organism.get_time_alive_in_seconds()
     }
-    console.log("sou", organism.diet)
-    console.log(input_values)
+
     return input_values
 }
 
