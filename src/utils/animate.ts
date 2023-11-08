@@ -27,7 +27,7 @@ function desireToReproduce(value: number, organism: Organism) {
 }
 
 function desireToEat(value: number, organism: Organism) {
-  if(value == 0){
+  if(value == 0){ // não deseja comer
     return
   }
   var closest_element: Point | null = null;
@@ -125,9 +125,9 @@ function animate(context: CanvasRenderingContext2D | null) {
       }
       // momentaneamente chamando a funçao de comer só pros bichos nao ficarem rodando em circulo no alimento sem comer
       // será removido quando o valor desireToEat for retornado no output da rede
-      if (organism.energy <=organism.max_energy * globals.percentual_energy_to_eat) {
-        desireToEat(1, organism);
-      }
+      // if (organism.energy <=organism.max_energy * globals.percentual_energy_to_eat) {
+      //   desireToEat(1, organism);
+      // }
 
 
       // organism.roam();
