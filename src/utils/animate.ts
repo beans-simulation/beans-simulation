@@ -46,7 +46,8 @@ function desireToEat(value: number, organism: Organism) {
   }else{
     // ALIMENTAÇÃO EMERGENCIAL
     // caso nao exista target, ele esteja morrendo de fome e existir outra opção de alimento
-    if(organism.energy<20){
+
+    if(organism.energy<(organism.max_energy*0.1)){
       if(organism.closest_food){
         if (is_close_to_target(organism, organism.distance_closest_food)) {
           organism.eat(organism.closest_food as any)
