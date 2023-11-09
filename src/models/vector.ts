@@ -140,9 +140,23 @@ class Vector {
 
   get_angle_to_another_vector(other_vector: Vector): number{
     const dot_product = this.x * other_vector.x + this.y * other_vector.y;
-    const cos_theta = dot_product / (this.magnitude() * other_vector.magnitude());
+    const this_magnitude = this.magnitude()
+    const other_magnitude = other_vector.magnitude()
+    if (this_magnitude === 0 || other_magnitude === 0) {
+      // Handle the case where one of the vectors has zero magnitude
+      return 0; // You can set the angle to zero degrees in this case
+    }
+    
+    var cos_theta = dot_product / (this_magnitude * other_magnitude);
+    if (cos_theta < -1) {
+      cos_theta = -1;
+    } else if (cos_theta > 1) {
+      cos_theta = 1;
+    }
+  
     const angle_radians = Math.acos(cos_theta);
     const angle_degrees = angle_radians * (180 / Math.PI);
+   
     return angle_degrees;
   }
 }

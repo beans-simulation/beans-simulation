@@ -34,14 +34,18 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
     organism.distance_closest_organism = distance_closest_organism
     organism.closest_organism = organisms_in_view[index_closest_organism]
 
-    if(organism.diet == 1){ // carnívoro
-        distance_closest_target = distance_closest_organism;
-        angle_closest_target = angle_closest_organism;
-        targets_in_view = organisms_in_view;
-    }else{ // herbívoro
+    if(organism.diet_variant >= organism.diet){ // come vegetal
+        organism.closest_target = vegetables_in_view[index_closest_food]
         distance_closest_target = distance_closest_food;
+        organism.distance_closest_target = distance_closest_food;
         angle_closest_target = angle_closest_food;
         targets_in_view = vegetables_in_view;
+    }else{
+        organism.closest_target = organisms_in_view[index_closest_organism]
+        distance_closest_target = distance_closest_organism;
+        organism.distance_closest_target = distance_closest_organism;
+        angle_closest_target = angle_closest_organism;
+        targets_in_view = organisms_in_view;
     }
 
     input_values = {

@@ -9,6 +9,11 @@ function create_background(context: CanvasRenderingContext2D) {
   context.strokeStyle = "white";
   context.stroke();
 }
+function is_close_to_target(organism: Organism, distance_closest_target:number){
+  const detection_radius_squared = organism.detection_radius ** 2;
+  const eat_distance_squared = EAT_DISTANCE ** 2;
+
+  return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
 
 function accelerate(value: number, organism: Organism) {
 
@@ -30,21 +35,29 @@ function desireToEat(value: number, organism: Organism) {
   if(value == 0){ // não deseja comer
     return
   }
-  var closest_element: Point | null = null;
-  var distance: number = Infinity; //valor default infinito
+  // console.log("fome", value)
+  organism.is_eating = true;
 
-  if(organism.diet == 0 && organism.closest_food){ //herbívoro
-    closest_element = organism.closest_food;
-    distance = organism.distance_closest_food;
-  }else if(organism.diet == 1 && organism.closest_organism){ // carnívoro
-    closest_element = organism.closest_organism;
-    distance = organism.distance_closest_organism;
-  }
+  if(organism.closest_target){
+    if (is_close_to_target(organism, organism.distance_closest_target)) {
+      // console.log("comendo", organism.closest_target)
+      organism.eat(organism.closest_target as any)
+    }
+  }else{
+    // ALIMENTAÇÃO EMERGENCIAL
+    // caso nao exista target, ele esteja morrendo de fome e existir outra opção de alimento
 
-  if(closest_element){
-    if (distance <= (organism.detection_radius*organism.detection_radius) && distance <= EAT_DISTANCE * EAT_DISTANCE) {
-      organism.is_eating = true;
-      organism.eat(closest_element as any)
+    if(organism.energy<(organism.max_energy*0.1)){
+      if(organism.closest_food){
+        if (is_close_to_target(organism, organism.distance_closest_food)) {
+          organism.eat(organism.closest_food as any)
+        }
+      }else if(organism.closest_organism){
+        if (is_close_to_target(organism, organism.distance_closest_organism)) {
+          organism.eat(organism.closest_organism as any)
+        }
+      }
+
     }
   }
 

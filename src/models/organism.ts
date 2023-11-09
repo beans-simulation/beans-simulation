@@ -53,7 +53,8 @@ class Organism extends Point implements Drawable {
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
   public angle_target_food: number = -1;
-  public direction_to_target = new Vector(0, 0); // valor default aleatorio sera substituido
+  public closest_target: Point | null = null;
+  public distance_closest_target: number = -1;
   public angle_target_signal: number = 0;
   public angle_closest_food: number = 0;
   public closest_food: Point | null = null;
@@ -61,6 +62,7 @@ class Organism extends Point implements Drawable {
   public distance_closest_organism: number = 0;
   public closest_organism: Point | null = null;
   public diet: number;
+  public diet_variant: number;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -78,6 +80,7 @@ class Organism extends Point implements Drawable {
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
     this.diet = dna.diet;
+    this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
     this.minimal_consumption =
       0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
@@ -171,13 +174,11 @@ class Organism extends Point implements Drawable {
         );
         for (var i = 0; i < this.litter_size; i++) {
           if (Math.random() < 1) {
-            console.log(i)
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
             this.create_child(offspring_dna_mutated);
           }
         }
-        debugger;
 
         this.energy = (this.energy/2); // Mudar a logica?
         this.is_reproducing = false;
@@ -502,6 +503,7 @@ class Organism extends Point implements Drawable {
 
     this.increase_size();
     this.food_eaten++;
+    this.diet_variant = generate_float(0,1);
   }
 
   // Método que fará o organism vaguear por aí quando não está is_running_away ou perseguindo
