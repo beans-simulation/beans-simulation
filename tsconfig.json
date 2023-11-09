@@ -13,7 +13,6 @@
   },
   "files": [
     "src/utils/loadWasmFile.ts",
-    "src/utils/feed-neural-network.ts",
     "src/resources/types/pyodide.ts",
     "src/resources/constants/globals.ts",
     "src/resources/constants/page-elements.ts",
