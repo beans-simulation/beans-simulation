@@ -9,6 +9,11 @@ function create_background(context: CanvasRenderingContext2D) {
   context.strokeStyle = "white";
   context.stroke();
 }
+function is_close_to_target(organism: Organism, distance_closest_target:number){
+  const detectionRadiusSquared = organism.detection_radius ** 2;
+  const eatDistanceSquared = EAT_DISTANCE ** 2;
+
+  return distance_closest_target <= (detectionRadiusSquared < eatDistanceSquared ? detectionRadiusSquared : eatDistanceSquared);}
 
 function accelerate(value: number, organism: Organism) {
 
@@ -30,14 +35,32 @@ function desireToEat(value: number, organism: Organism) {
   if(value == 0){ // não deseja comer
     return
   }
-  console.log("fome", value)
+  // console.log("fome", value)
   organism.is_eating = true;
 
   if(organism.closest_target){
-    if (organism.distance_closest_target <= (organism.detection_radius*organism.detection_radius) && organism.distance_closest_target <= EAT_DISTANCE * EAT_DISTANCE) {
-      organism.is_eating = true;
-      console.log("comendo", organism.closest_target)
+    if (is_close_to_target(organism, organism.distance_closest_target)) {
+      // console.log("comendo", organism.closest_target)
       organism.eat(organism.closest_target as any)
+    }
+  }else{
+    // ALIMENTAÇÃO EMERGENCIAL
+    // caso nao exista target, ele esteja morrendo de fome e existir outra opção de alimento
+    if(organism.energy<20){
+      if(organism.closest_food){
+        if (is_close_to_target(organism, organism.distance_closest_food)) {
+          console.log("energy", organism.energy)
+          console.log("comendo emergencial", organism.closest_food)
+          organism.eat(organism.closest_food as any)
+        }
+      }else if(organism.closest_organism){
+        if (is_close_to_target(organism, organism.distance_closest_organism)) {
+          console.log("energy", organism.energy)
+          console.log("comendo emergencial", organism.closest_organism)
+          organism.eat(organism.closest_organism as any)
+        }
+      }
+
     }
   }
 

@@ -33,21 +33,14 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
     organism.angle_closest_organism = angle_closest_organism
     organism.distance_closest_organism = distance_closest_organism
     organism.closest_organism = organisms_in_view[index_closest_organism]
-    console.log("----")
-    console.log("diet_variavel", organism.diet_variant)
-    console.log("dieta", organism.diet)
 
     if(organism.diet_variant >= organism.diet){ // come vegetal
-        console.log("vegetal")
         organism.closest_target = vegetables_in_view[index_closest_food]
-        console.log("closest", organism.closest_target)
-
         distance_closest_target = distance_closest_food;
         organism.distance_closest_target = distance_closest_food;
         angle_closest_target = angle_closest_food;
         targets_in_view = vegetables_in_view;
     }else{
-        console.log("organismo")
         organism.closest_target = organisms_in_view[index_closest_organism]
         distance_closest_target = distance_closest_organism;
         organism.distance_closest_target = distance_closest_organism;

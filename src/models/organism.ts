@@ -174,7 +174,6 @@ class Organism extends Point implements Drawable {
         );
         for (var i = 0; i < this.litter_size; i++) {
           if (Math.random() < 1) {
-            console.log(i)
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
             this.create_child(offspring_dna_mutated);
