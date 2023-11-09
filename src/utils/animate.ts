@@ -49,14 +49,10 @@ function desireToEat(value: number, organism: Organism) {
     if(organism.energy<20){
       if(organism.closest_food){
         if (is_close_to_target(organism, organism.distance_closest_food)) {
-          // console.log("energy", organism.energy)
-          // console.log("comendo emergencial", organism.closest_food)
           organism.eat(organism.closest_food as any)
         }
       }else if(organism.closest_organism){
         if (is_close_to_target(organism, organism.distance_closest_organism)) {
-          // console.log("energy", organism.energy)
-          // console.log("comendo emergencial", organism.closest_organism)
           organism.eat(organism.closest_organism as any)
         }
       }
