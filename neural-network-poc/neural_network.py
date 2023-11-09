@@ -150,21 +150,38 @@ def breed_neural_networks(nn1, nn2):
 
         genes_1[i] = gene_1 if gene_1 else None
         genes_2[i] = gene_2 if gene_2 else None
+  
+ 
+    max_trials = 10  # Número máximo de tentativas para criar uma rede funcional
+    trials = 0
 
-    # 5 - Gerando o DNA da rede filha
-    # Escolhendo aleatoriamente entre os genes das redes 1 e 2
-    dna_filho = []
-    for gene_1, gene_2 in zip(genes_1, genes_2):
-        dna_filho.append(random.choice([gene_1, gene_2]))
+    # Tenta adicionar uma conexão válida até max_trials vezes ou até conseguir
+    while trials < max_trials:
 
-    # 6 - Recriando a rede filha a partir do DNA dela
-    dna_filho = [gene for gene in dna_filho if gene is not None]
+        # 5 - Gerando o DNA da rede filha
+        # Escolhendo aleatoriamente entre os genes das redes 1 e 2
+        dna_filho = []
 
+        for gene_1, gene_2 in zip(genes_1, genes_2):
+            dna_filho.append(random.choice([gene_1, gene_2]))
 
-    rede_filha = reconstruct_neural_network_from_dna(dna_filho)
+        # Retirando os espaços nulos do DNA
+        dna_filho = [gene for gene in dna_filho if gene is not None]
 
-    # 7 - Limpando a rede caso tenha sobrado neurônios soltos
-    rede_filha.remove_loose_neurons()
+        # 6 - Recriando a rede filha a partir do DNA dela
+        rede_filha = reconstruct_neural_network_from_dna(dna_filho)
+
+        # 7 - Limpando a rede caso tenha sobrado neurônios soltos
+        rede_filha.remove_loose_neurons()
+
+        # Valida a rede neural depois que o neurônio foi adicionado
+        if rede_filha.validate_network():
+            break
+        
+        trials += 1
+
+    if trials >= max_trials:
+        print("O número máximo de tentativas para criar a rede neural do organismo filho foi alcançado, e ela pôde ser criada...")
 
     # 8 - Realizando a mutação
     rede_filha.mutate()
