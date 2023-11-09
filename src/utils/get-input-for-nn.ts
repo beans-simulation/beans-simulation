@@ -50,7 +50,7 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
 
     input_values = {
         'EnergyLevel': organism.energy,
-        'Temperature': get_temperature(),
+        'Temperature': globals.temperature,
         'Health': organism.health,
         'AngleToClosestFood': angle_closest_food,
         'DistToClosestFood': distance_closest_food,
@@ -61,7 +61,7 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'AngleToClosestTarget': angle_closest_target,
         'DistToClosestTarget': distance_closest_target,
         'NumOfTargetsInView': targets_in_view.length,
-        'Luminosity': get_luminosity(),
+        'Luminosity': globals.luminosity,
         'Maturity': organism.maturity,
         'TimeAlive': organism.get_time_alive_in_seconds()
     }
@@ -91,30 +91,30 @@ function get_distance_and_index_of_closest_element(organism: Organism, closests_
     return distance_and_index;
 }
 
-let noise = 0
 
-function get_temperature() {
+
+function set_temperature() {
     // Obtendo o valor de luminosidade atual, pois a temperatura estará diretamente relacionada à luminosidade
-    const luminosity = get_luminosity();
+    const luminosity = globals.luminosity;
 
     // Calculando a temperatura com base na luminosidade (5 quando a luminosidade for 0, e 30 quando for 1)
     let temperature = 5 + (25 * luminosity);
 
     // Mudando o valor do ruído em pequenos passos para que mude gradualmente a cada frame
     const noiseChange = (Math.random() * 2 - 1) * 0.5; // Muda o ruído em até ±0.5
-    noise += noiseChange;
-    noise = Math.max(Math.min(noise, 5), -5); // Garante que o ruído permaneça dentro dos limites de -5 a 5
+    globals.noise += noiseChange;
+    globals.noise = Math.max(Math.min(globals.noise, 5), -5); // Garante que o ruído permaneça dentro dos limites de -5 a 5
 
     // Adicionando o ruído à temperatura
-    temperature += noise;
+    temperature += globals.noise;
 
     // Garantindo que a temperatura esteja dentro dos limites (0 a 35) após adicionar o ruído
     temperature = Math.max(Math.min(temperature, 35), 0);
 
-    return temperature;
+    globals.temperature = temperature;
 }
 
-function get_luminosity() {
+function set_luminosity() {
     // Convertendo o tempo de milissegundos (do global_timer.total) para segundos em um ciclo senoidal
     const cycle = (2 * Math.PI * global_timer.total / 1000) / globals.luminosity_cycle_time;
 
@@ -124,5 +124,5 @@ function get_luminosity() {
     // Reescalando o valor para variar de 0 a 1 (ao invés de -1 a 1), que são os ranges da luminosidade
     const luminosity = (sinusoidal_value + 1) / 2;
 
-    return luminosity;
+    globals.luminosity = luminosity; // setando na variável global
 }

@@ -267,10 +267,20 @@ class Organism extends Point implements Drawable {
     //Delimitação de bordas
     this.avoid_space_limits();
 
-    if(this.maturity < 1){
-      // se o resultado for maior que 1, ele atribui 1
-      this.maturity = time_alive / this.time_to_maturity_in_seconds > 1 ? 1 : time_alive / this.time_to_maturity_in_seconds;
+    if (this.maturity < 1) {
+      // Calcula o valor da maturidade
+      const maturity = time_alive / this.time_to_maturity_in_seconds;
+
+      // o valor tem que estar entre zero e 1
+      if (maturity > 1) {
+        this.maturity = 1;
+      } else if (maturity < 0) {
+        this.maturity = 0;
+      } else {
+        this.maturity = maturity;
+      }
     }
+
 
     //Delimitação de bordas
     this.create_space_delimitation();
