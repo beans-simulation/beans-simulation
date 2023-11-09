@@ -64,6 +64,8 @@ class Organism extends Point implements Drawable {
   public diet: number;
   public diet_variant: number;
   public deathSound : HTMLAudioElement;
+  public sexSound : HTMLAudioElement;
+  public soundChoice: number;
     //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -92,7 +94,20 @@ class Organism extends Point implements Drawable {
         0.00012;
     this.status = organism_status.roaming;
 
-    this.deathSound = new Audio('public/roblox-death-sound.mp3');
+    this.deathSound = new Audio('/public/roblox-death-sound.mp3');
+  
+    this.soundChoice = Math.random();
+
+    if(this.soundChoice < 0.4) {
+      this.deathSound = new Audio('/public/bruh.mp3'); 
+    } else if (this.soundChoice < 0.8){
+      this.deathSound = new Audio('/public/roblox-death-sound.mp3');
+    } else {
+      this.deathSound = new Audio('/public/mmm-whatcha-say.mp3');
+    }
+
+    
+    this.sexSound = new Audio('/public/ai-que-delicia-mickey.mp3');
 
     this.dna = dna;
     this.other_color = this.get_other_color(this.color);
@@ -568,6 +583,8 @@ class Organism extends Point implements Drawable {
   // Método de comportamento reprodutivo sexuado para procurar parceiros próximos
   find_close_partners(qtree: OrganismQuadTree, vision: Circle): [number, Point[], number] {
     this.is_eating = false;
+    this.sexSound.currentTime = 0;
+    this.sexSound.play().catch(e => console.error("Error playing sound.", e));
 
     let min_distance = Infinity;
     let closest_index = -1;
@@ -685,9 +702,9 @@ class Organism extends Point implements Drawable {
   }
 
   kill() {
-    Organism.organisms = Organism.organisms.filter((item) => item !== this);
     this.deathSound.currentTime = 0;
-    this.deathSound.play().catch(e => console.error("Error playing sound.", e))
+    this.deathSound.play().catch(e => console.error("Error playing sound.", e));
+    Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }
 
   checaId(id: number) {
