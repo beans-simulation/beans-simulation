@@ -144,7 +144,7 @@ def breed_neural_networks(nn1, nn2):
     # Preenchendo as listas com os genes correspondentes ou None
     for i, unified_gene in enumerate(unified_dna):
         connection_id = unified_gene['connection_id']
-        
+
         gene_1 = genes_1_dict.get(connection_id)
         gene_2 = genes_2_dict.get(connection_id)
 
@@ -169,7 +169,7 @@ def breed_neural_networks(nn1, nn2):
     update_neural_network(rede_filha)
 
     return rede_filha
- 
+
 
 
 
@@ -777,7 +777,7 @@ def create_network():
         Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES)),   # Cos --> DesireToEat
     ]
 
-    # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
+    # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas)
     # para que todas as redes possuam a estrutura básica inicial
     add_neuron_probability = 0.5
     add_connection_probability = 0.5
@@ -786,8 +786,8 @@ def create_network():
     remove_neuron_probability = 0
     remove_connection_probability = 0
 
-    for _ in range(0, 3):
-        basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
+    # for _ in range(0, 3):
+    #     basic_network.mutate(add_neuron_probability, add_connection_probability, change_weight_probability, change_active_state_probability, remove_neuron_probability, remove_connection_probability)
 
     # Atualizando a ordem topológica da rede e construindo o seu DNA
     update_neural_network(basic_network)
@@ -827,27 +827,27 @@ def create_network():
 
 # Teste da função de criar redes da primeira geração
 
-input_values_test = {
-    'EnergyLevel': 45,
-    'Temperature': 70,
-    'Health': 8,
-    'AngleToClosestFood': 5,
-    'DistToClosestFood': 68,
-    'NumOfFoodInView': 90,
-    'AngleToClosestOrganism': 66,
-    'DistToClosestOrganism': 12,
-    'NumOfOrganismsInView': 4,
-    'AngleToClosestTarget': 66,
-    'DistToClosestTarget': 12,
-    'NumOfTargetsInView': 4,
-    'Luminosity': 0.5,
-    'Maturity': 5,
-    'TimeAlive': 234
-}
+# input_values_test = {
+#     'EnergyLevel': 45,
+#     'Temperature': 70,
+#     'Health': 8,
+#     'AngleToClosestFood': 5,
+#     'DistToClosestFood': 68,
+#     'NumOfFoodInView': 90,
+#     'AngleToClosestOrganism': 66,
+#     'DistToClosestOrganism': 12,
+#     'NumOfOrganismsInView': 4,
+#     'AngleToClosestTarget': 66,
+#     'DistToClosestTarget': 12,
+#     'NumOfTargetsInView': 4,
+#     'Luminosity': 0.5,
+#     'Maturity': 5,
+#     'TimeAlive': 234
+# }
 
-for i in range(0, 3):
-    print(f"\n\n-------------- REDE {i} --------------\n")
-    nn = create_network()
-    nn.print_network_info()
+# for i in range(0, 3):
+#     print(f"\n\n-------------- REDE {i} --------------\n")
+#     nn = create_network()
+#     nn.print_network_info()
 
-    print(nn.feed_forward(input_values_test))
+#     print(nn.feed_forward(input_values_test))
