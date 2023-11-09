@@ -9,7 +9,7 @@ function generate_organism(x: number, y: number): void {
   const ninhada_max = ninhada_min + generate_integer(1, 8);
   const litter_interval = [ninhada_min, ninhada_max];
   const o_sex = Math.random() < 0.5 ? sex.female : sex.male;
-  const diet = Math.floor(Math.random() * 2);
+  const diet = generate_float(0, 1);
 
   var dna = new DNA(
     initial_radius,
