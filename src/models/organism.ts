@@ -62,12 +62,9 @@ class Organism extends Point implements Drawable {
   public distance_closest_organism: number = 0;
   public closest_organism: Point | null = null;
   public diet: number;
-<<<<<<< Updated upstream
   public diet_variant: number;
-=======
   public deathSound : HTMLAudioElement;
->>>>>>> Stashed changes
-  //   private _status: organism_status_type;
+    //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
     super(x, y);
@@ -95,7 +92,7 @@ class Organism extends Point implements Drawable {
         0.00012;
     this.status = organism_status.roaming;
 
-    this.deathSound = new Audio('src/models/roblox-death-sound.mp3');
+    this.deathSound = new Audio('public/roblox-death-sound.mp3');
 
     this.dna = dna;
     this.other_color = this.get_other_color(this.color);
