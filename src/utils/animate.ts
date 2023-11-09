@@ -10,10 +10,10 @@ function create_background(context: CanvasRenderingContext2D) {
   context.stroke();
 }
 function is_close_to_target(organism: Organism, distance_closest_target:number){
-  const detectionRadiusSquared = organism.detection_radius ** 2;
-  const eatDistanceSquared = EAT_DISTANCE ** 2;
+  const detection_radius_squared = organism.detection_radius ** 2;
+  const eat_distance_squared = EAT_DISTANCE ** 2;
 
-  return distance_closest_target <= (detectionRadiusSquared < eatDistanceSquared ? detectionRadiusSquared : eatDistanceSquared);}
+  return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
 
 function accelerate(value: number, organism: Organism) {
 
