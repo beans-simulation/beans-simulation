@@ -35,12 +35,11 @@ function desireToEat(value: number, organism: Organism) {
   if(value == 0){ // não deseja comer
     return
   }
-  // console.log("fome", value)
   organism.is_eating = true;
 
   if(organism.closest_target){
     if (is_close_to_target(organism, organism.distance_closest_target)) {
-      // console.log("comendo", organism.closest_target)
+      console.log("comendo", organism.closest_target)
       organism.eat(organism.closest_target as any)
     }
   }else{
@@ -68,8 +67,8 @@ function desireToEat(value: number, organism: Organism) {
 const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, output:{}) => void } = {
   'Accelerate': accelerate,
   'Rotate': rotate,
-  'DesireToReproduce': desireToReproduce,
-  'DesireToEat': desireToEat,
+  // 'DesireToReproduce': desireToReproduce,
+  // 'DesireToEat': desireToEat,
 };
 
 function animate(context: CanvasRenderingContext2D | null) {
@@ -117,8 +116,8 @@ function animate(context: CanvasRenderingContext2D | null) {
       // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
       // vai ser substituído pelo output de desireToReproduce da rede neural
-      if(organism.maturity > 0.6){ // Requisitos para reprodução
-        organism.sexually_procreate(qtreeOrganisms, vision)
+      if(organism.maturity == 1){ // Requisitos para reprodução
+        // organism.sexually_procreate(qtreeOrganisms, vision)
       }
 
 
@@ -142,6 +141,33 @@ function animate(context: CanvasRenderingContext2D | null) {
         if (map_outputs_from_net[key]) {
           map_outputs_from_net[key](value,organism,output);
         }
+      }
+      const desire_to_reproduce = output.get("DesireToReproduce");
+      const desire_to_eat = output.get("DesireToEat");
+      // console.log(desire_to_reproduce)
+      // console.log(desire_to_eat)
+
+      if(desire_to_reproduce == 1){
+        if((organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total)){
+          // console.log("tempo pra unlock", organism.time_to_unlock_next_reproduction_miliseconds)
+          // console.log("timer total", global_timer.total)
+          if(organism.energy > organism.max_energy*0.2){ // se tiver a energia acima de 20% do máximo
+            if(organism.maturity > 0.6){ // está maduro
+              console.log("chamada da função de reprodução")
+              organism.sexually_procreate(qtreeOrganisms, vision)
+              // console.log("tempo next unlock", organism.time_to_unlock_next_reproduction_miliseconds)
+            }else{
+              console.log("vou comer")
+              desireToEat(desire_to_eat, organism)
+            }
+          }
+        }else{
+          console.log("vou comer")
+          desireToEat(desire_to_eat, organism)
+        }
+      } else{
+        console.log("vou comer")
+        desireToEat(desire_to_eat, organism)
       }
 
       organism.roam();

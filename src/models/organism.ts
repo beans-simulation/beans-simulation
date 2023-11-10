@@ -49,6 +49,7 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
+  public time_to_unlock_next_reproduction_miliseconds: number=0;
   public neural_network_id: number | null;
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
@@ -214,7 +215,7 @@ class Organism extends Point implements Drawable {
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
         partner.is_ready_to_reproduce = false;
-
+        this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+3) * 1000
       }
     }
   }
@@ -256,6 +257,7 @@ class Organism extends Point implements Drawable {
 
         }
       }
+      // console.log(this.energy)
     } else {
       this.kill();
     }
