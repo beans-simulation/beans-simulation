@@ -775,7 +775,7 @@ def create_network():
     """
     # Adicionando os neurônios na rede
     basic_network.neurons = [
-        Neuron('Input', 'Health', 0),
+        Neuron('Input', 'AngleToClosestTarget', 0),
         Neuron('Input', 'Constant', 1),
         Neuron('Input', 'Maturity', 2),
         Neuron('Input', 'EnergyLevel', 3),
