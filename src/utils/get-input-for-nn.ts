@@ -1,38 +1,22 @@
 function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: OrganismQuadTree, qtreeVegetables:VegetableQuadTree, vision: Circle) {
     var input_values: { [key: string]: number } = {};
-    var index_closest_food: number | null;
-    var index_closest_organism: number | null;
-    var distance_closest_food: number | null;
-    var distance_closest_organism: number | null;
+    var index_closest_food: number | null = null;
+    var index_closest_organism: number | null = null;
+    var distance_closest_food: null | number = 0;
+    var distance_closest_organism: null | number = 0;
     var distance_closest_target: number | null;
-    var angle_closest_food: number | null;
-    var angle_closest_organism: number | null;
+    var angle_closest_food: null | number = 0;
+    var angle_closest_organism: null | number = 0;
     var angle_closest_target: number | null;
-    var vegetable_distance_and_index: Array<number> | null;
-    var vegetables_in_view: Array<Point> | null;
-    var organisms_in_view: Array<Point> | null;
+    var vegetable_distance_and_index: Array<number> | null = null;
+    var vegetables_in_view: Array<Point> | null = null;
+    var organisms_in_view: Array<Point> | null = null;
     var targets_in_view: Array<Point> | null;
-    var organism_distance_and_index: Array<number> | null;
-    var num_of_food_in_view: number;
-    var num_of_organisms_in_view: number;
-    var num_of_targets_in_view: number;
+    var organism_distance_and_index: Array<number> | null = null;
+    var num_of_food_in_view: number = 0;
+    var num_of_organisms_in_view: number = 0;
+    var num_of_targets_in_view: number = 0;
 
-
-    vegetables_in_view = null;
-    vegetable_distance_and_index = null;
-    distance_closest_food = 0;
-    index_closest_food = null;
-    angle_closest_food = 0;
-
-    organisms_in_view = null;
-    organism_distance_and_index = null;
-    distance_closest_organism = 0;
-    index_closest_organism = null;
-    angle_closest_organism = 0;
-
-    num_of_food_in_view = 0
-    num_of_organisms_in_view = 0
-    num_of_targets_in_view = 0
 
     // Só faz os cálculos se o organismo tiver algum desses neurônios de enxergar alvos
     if(["NumOfTargetsInView", "DistToClosestTarget", "AngleToClosestTarget"].some(str => organism.input_neurons_list?.includes(str))){
