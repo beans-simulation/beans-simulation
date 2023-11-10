@@ -96,8 +96,9 @@ function animate(context: CanvasRenderingContext2D | null) {
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
     const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 10);
 
-    set_luminosity(); // setando a variavel global
-    set_temperature(); // setando a variavel global
+    // Setando as variáveis globais do ambiente
+    set_luminosity();
+    set_temperature();
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
@@ -112,10 +113,8 @@ function animate(context: CanvasRenderingContext2D | null) {
 
     Organism.organisms.forEach(( organism) => {
       organism.update(context);
-      // organism.roam();
 
-
-      // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
+      // Transforma o raio de detecção em um objeto círculo para podermos manipulá-lo
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
       // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
