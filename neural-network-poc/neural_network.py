@@ -150,20 +150,40 @@ def breed_neural_networks(nn1, nn2):
 
         genes_1[i] = gene_1 if gene_1 else None
         genes_2[i] = gene_2 if gene_2 else None
+  
+ 
+    max_trials = 10  # Número máximo de tentativas para criar uma rede funcional
+    trials = 0
 
-    # 5 - Gerando o DNA da rede filha
-    # Escolhendo aleatoriamente entre os genes das redes 1 e 2
-    dna_filho = []
-    for gene_1, gene_2 in zip(genes_1, genes_2):
-        dna_filho.append(random.choice([gene_1, gene_2]))
+    # Tenta adicionar uma conexão válida até max_trials vezes ou até conseguir
+    while trials < max_trials:
 
-    # 6 - Recriando a rede filha a partir do DNA dela
-    dna_filho = [gene for gene in dna_filho if gene is not None]
+        # 5 - Gerando o DNA da rede filha
+        # Escolhendo aleatoriamente entre os genes das redes 1 e 2
+        dna_filho = []
 
+        for gene_1, gene_2 in zip(genes_1, genes_2):
+            dna_filho.append(random.choice([gene_1, gene_2]))
 
-    rede_filha = reconstruct_neural_network_from_dna(dna_filho)
+        # Retirando os espaços nulos do DNA
+        dna_filho = [gene for gene in dna_filho if gene is not None]
 
-    # 7 - Realizando a mutação
+        # 6 - Recriando a rede filha a partir do DNA dela
+        rede_filha = reconstruct_neural_network_from_dna(dna_filho)
+
+        # 7 - Limpando a rede caso tenha sobrado neurônios soltos
+        rede_filha.remove_loose_neurons()
+
+        # Valida a rede neural depois que o neurônio foi adicionado
+        if rede_filha.validate_network():
+            break
+        
+        trials += 1
+
+    if trials >= max_trials:
+        print("O número máximo de tentativas para criar a rede neural do organismo filho foi alcançado, e ela pôde ser criada...")
+
+    # 8 - Realizando a mutação
     rede_filha.mutate()
 
     update_neural_network(rede_filha)
@@ -823,31 +843,32 @@ def create_network():
 # nn_filha = breed_neural_networks(nn1, nn2)
 # nn_filha.print_network_info()
 # # print_dna(nn_filha.dna)
+# print(nn_filha.id)
 
 
 # Teste da função de criar redes da primeira geração
 
-input_values_test = {
-    'EnergyLevel': 45,
-    'Temperature': 70,
-    'Health': 8,
-    'AngleToClosestFood': 5,
-    'DistToClosestFood': 68,
-    'NumOfFoodInView': 90,
-    'AngleToClosestOrganism': 66,
-    'DistToClosestOrganism': 12,
-    'NumOfOrganismsInView': 4,
-    'AngleToClosestTarget': 66,
-    'DistToClosestTarget': 12,
-    'NumOfTargetsInView': 4,
-    'Luminosity': 0.5,
-    'Maturity': 5,
-    'TimeAlive': 234
-}
+# input_values_test = {
+#     'EnergyLevel': 45,
+#     'Temperature': 70,
+#     'Health': 8,
+#     'AngleToClosestFood': 5,
+#     'DistToClosestFood': 68,
+#     'NumOfFoodInView': 90,
+#     'AngleToClosestOrganism': 66,
+#     'DistToClosestOrganism': 12,
+#     'NumOfOrganismsInView': 4,
+#     'AngleToClosestTarget': 66,
+#     'DistToClosestTarget': 12,
+#     'NumOfTargetsInView': 4,
+#     'Luminosity': 0.5,
+#     'Maturity': 5,
+#     'TimeAlive': 234
+# }
 
-for i in range(0, 3):
-    print(f"\n\n-------------- REDE {i} --------------\n")
-    nn = create_network()
-    nn.print_network_info()
+# for i in range(0, 3):
+#     print(f"\n\n-------------- REDE {i} --------------\n")
+#     nn = create_network()
+#     nn.print_network_info()
 
-    print(nn.feed_forward(input_values_test))
+#     print(nn.feed_forward(input_values_test))

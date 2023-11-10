@@ -126,9 +126,9 @@ class Organism extends Point implements Drawable {
     this.procreation_count++;
     let neural_network_id = null;
 
-    if(globals.pyodide){
-      neural_network_id = create_neural_network(globals.pyodide)
-    }
+    // if(globals.pyodide){
+    //   neural_network_id = create_neural_network(globals.pyodide)
+    // }
     const offspring = new Organism(
       this.position.x,
       this.position.y,
@@ -176,7 +176,35 @@ class Organism extends Point implements Drawable {
           if (Math.random() < 1) {
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
-            this.create_child(offspring_dna_mutated);
+            const child = this.create_child(offspring_dna_mutated);
+
+            // REPRODUÇÃO DAS REDES
+            const this_nn_id = this.neural_network_id;
+            const partner_nn_id = partner.neural_network_id;
+
+            const this_nn_id_JSON = JSON.stringify(this_nn_id);
+            const partner_nn_id_JSON = JSON.stringify(partner_nn_id);
+
+            if (globals.pyodide){
+              globals.pyodide.runPython(`
+                import json
+
+                this_nn_id = json.loads('${this_nn_id_JSON}')
+                partner_nn_id = json.loads('${partner_nn_id_JSON}')
+
+                # Pegando as redes através de seus IDs
+                this_nn = neural_network.NeuralNetwork.neural_networks.get(f"{this_nn_id}")
+                partner_nn = neural_network.NeuralNetwork.neural_networks.get(f"{partner_nn_id}")
+
+                # Criando a rede filha
+                child_nn = neural_network.breed_neural_networks(this_nn, partner_nn)
+
+                child_nn_id = child_nn.id
+
+              `);
+
+              child.neural_network_id = globals.pyodide.globals.get('child_nn_id');
+            }
           }
         }
 
