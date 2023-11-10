@@ -16,8 +16,11 @@ function is_close_to_target(organism: Organism, distance_closest_target:number){
   return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
 
 function accelerate(value: number, organism: Organism) {
+  let speed_copy = organism.speed.copy(); // Copiando para não alterar o vetor original no meio do cálculo
 
-  // organism.accelerate(value)
+  speed_copy = speed_copy.normalize().multiply(value);
+
+  organism.speed = organism.speed.add(speed_copy);
 }
 
 function rotate(value: number, organism: Organism, output: {}) {
@@ -144,7 +147,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         }
       }
 
-      organism.roam();
+      // organism.roam();
     });
 
     // qtreeOrganisms.display(context);
