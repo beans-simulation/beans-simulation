@@ -1,52 +1,120 @@
 function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: OrganismQuadTree, qtreeVegetables:VegetableQuadTree, vision: Circle) {
     var input_values: { [key: string]: number } = {};
-    var index_closest_food: number;
-    var index_closest_organism: number;
-    var distance_closest_food: number;
-    var distance_closest_organism: number;
-    var distance_closest_target: number;
-    var angle_closest_food: number;
-    var angle_closest_organism: number;
-    var angle_closest_target: number;
-    var vegetable_distance_and_index: Array<number>;
-    var vegetables_in_view: Array<Point>;
-    var organisms_in_view: Array<Point>;
-    var targets_in_view: Array<Point>;
-    var organism_distance_and_index: Array<number>;
+    var index_closest_food: number | null = null;
+    var index_closest_organism: number | null = null;
+    var distance_closest_food: null | number = 0;
+    var distance_closest_organism: null | number = 0;
+    var distance_closest_target: number | null;
+    var angle_closest_food: null | number = 0;
+    var angle_closest_organism: null | number = 0;
+    var angle_closest_target: number | null;
+    var vegetable_distance_and_index: Array<number> | null = null;
+    var vegetables_in_view: Array<Point> | null = null;
+    var organisms_in_view: Array<Point> | null = null;
+    var targets_in_view: Array<Point> | null;
+    var organism_distance_and_index: Array<number> | null = null;
+    var num_of_food_in_view: number = 0;
+    var num_of_organisms_in_view: number = 0;
+    var num_of_targets_in_view: number = 0;
 
-    vegetables_in_view = qtreeVegetables.search_elements(vision)
-    vegetable_distance_and_index = get_distance_and_index_of_closest_element(organism, vegetables_in_view)
-    distance_closest_food = vegetable_distance_and_index[0]
-    index_closest_food = vegetable_distance_and_index[1]
-    angle_closest_food = get_angle_to_closest_element(organism, vegetables_in_view[index_closest_food])
 
-    organism.angle_closest_food = angle_closest_food
-    organism.distance_closest_food = distance_closest_food
-    organism.closest_food = vegetables_in_view[index_closest_food]
+    // Só faz os cálculos se o organismo tiver algum desses neurônios de enxergar alvos
+    if(["NumOfTargetsInView", "DistToClosestTarget", "AngleToClosestTarget"].some(str => organism.input_neurons_list?.includes(str))){
+        vegetables_in_view = qtreeVegetables.search_elements(vision);
+        organisms_in_view = qtreeOrganisms.search_elements(vision, organism.id);
 
-    organisms_in_view = qtreeOrganisms.search_elements(vision, organism.id);
-    organism_distance_and_index = get_distance_and_index_of_closest_element(organism, organisms_in_view)
-    distance_closest_organism = organism_distance_and_index[0]
-    index_closest_organism = organism_distance_and_index[1]
-    angle_closest_organism = get_angle_to_closest_element(organism, organisms_in_view[index_closest_organism])
 
-    organism.angle_closest_organism = angle_closest_organism
-    organism.distance_closest_organism = distance_closest_organism
-    organism.closest_organism = organisms_in_view[index_closest_organism]
 
-    if(organism.diet_variant >= organism.diet){ // come vegetal
-        organism.closest_target = vegetables_in_view[index_closest_food]
+        // Se o organismo não tiver nenhum desses dois neurônios abaixo, não faz sentido calcular esses valores
+        if(["DistToClosestTarget", "AngleToClosestTarget"].some(str => organism.input_neurons_list?.includes(str))){
+            
+            // VEGETAIS
+            vegetable_distance_and_index = get_distance_and_index_of_closest_element(organism, vegetables_in_view);
+            distance_closest_food = vegetable_distance_and_index[0];
+            index_closest_food = vegetable_distance_and_index[1];
+            angle_closest_food = get_angle_to_closest_element(organism, vegetables_in_view[index_closest_food]);
+
+            organism.closest_food = vegetables_in_view[index_closest_food]
+            organism.angle_closest_food = angle_closest_food
+            organism.distance_closest_food = distance_closest_food
+
+            // ORGANISMOS
+            organism_distance_and_index = get_distance_and_index_of_closest_element(organism, organisms_in_view)
+            distance_closest_organism = organism_distance_and_index[0]
+            index_closest_organism = organism_distance_and_index[1]
+            angle_closest_organism = get_angle_to_closest_element(organism, organisms_in_view[index_closest_organism])
+
+            organism.angle_closest_organism = angle_closest_organism
+            organism.distance_closest_organism = distance_closest_organism
+            organism.closest_organism = organisms_in_view[index_closest_organism]
+        }
+
+        // Se não tem nenhum neurônio de Target, vemos se tem algum dos especializados (Food / Organism)
+    } else {
+        // Só faz os cálculos se o organismo tiver algum desses neurônios de enxergar alimento
+        if(["NumOfFoodInView", "DistToClosestFood", "AngleToClosestFood"].some(str => organism.input_neurons_list?.includes(str))){
+            vegetables_in_view = qtreeVegetables.search_elements(vision);
+
+            // Se o organismo não tiver nenhum desses dois neurônios abaixo, não faz sentido calcular esses valores
+            if(["DistToClosestFood", "AngleToClosestFood"].some(str => organism.input_neurons_list?.includes(str))){
+                vegetable_distance_and_index = get_distance_and_index_of_closest_element(organism, vegetables_in_view);
+                distance_closest_food = vegetable_distance_and_index[0];
+                index_closest_food = vegetable_distance_and_index[1];
+                angle_closest_food = get_angle_to_closest_element(organism, vegetables_in_view[index_closest_food]);
+
+                organism.closest_food = vegetables_in_view[index_closest_food]
+                organism.angle_closest_food = angle_closest_food
+                organism.distance_closest_food = distance_closest_food
+            }
+        }
+
+        // Só faz os cálculos se o organismo tiver algum desses neurônios de enxergar organismo
+        if(["NumOfOrganismsInView", "DistToClosestOrganism", "AngleToClosestOrganism"].some(str => organism.input_neurons_list?.includes(str))){
+            organisms_in_view = qtreeOrganisms.search_elements(vision, organism.id);
+
+            // Se o organismo não tiver nenhum desses dois neurônios abaixo, não faz sentido calcular esses valores
+            if(["DistToClosestOrganism", "AngleToClosestOrganism"].some(str => organism.input_neurons_list?.includes(str))){
+                organism_distance_and_index = get_distance_and_index_of_closest_element(organism, organisms_in_view)
+                distance_closest_organism = organism_distance_and_index[0]
+                index_closest_organism = organism_distance_and_index[1]
+                angle_closest_organism = get_angle_to_closest_element(organism, organisms_in_view[index_closest_organism])
+
+                organism.angle_closest_organism = angle_closest_organism
+                organism.distance_closest_organism = distance_closest_organism
+                organism.closest_organism = organisms_in_view[index_closest_organism]
+            }
+        }
+    } 
+
+
+
+    
+    if(organism.diet_variant >= organism.diet){ // Come vegetal
+        if(vegetables_in_view != null && index_closest_food != null){
+            organism.closest_target = vegetables_in_view[index_closest_food]
+        }else{
+            organism.closest_target = null
+        }
+        
         distance_closest_target = distance_closest_food;
         organism.distance_closest_target = distance_closest_food;
         angle_closest_target = angle_closest_food;
-        targets_in_view = vegetables_in_view;
-    }else{
-        organism.closest_target = organisms_in_view[index_closest_organism]
+        num_of_targets_in_view = num_of_food_in_view;
+    }else{ // Come outro organismo
+        if(organisms_in_view != null && index_closest_organism != null){
+            organism.closest_target = organisms_in_view[index_closest_organism]
+        }else{
+            organism.closest_target = null
+        }
+        
         distance_closest_target = distance_closest_organism;
         organism.distance_closest_target = distance_closest_organism;
         angle_closest_target = angle_closest_organism;
-        targets_in_view = organisms_in_view;
+        num_of_targets_in_view = num_of_organisms_in_view;
     }
+    
+
+    
 
     input_values = {
         'EnergyLevel': organism.energy,
@@ -54,13 +122,13 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'Health': organism.health,
         'AngleToClosestFood': angle_closest_food,
         'DistToClosestFood': distance_closest_food,
-        'NumOfFoodInView': vegetables_in_view.length,
+        'NumOfFoodInView': num_of_food_in_view,
         'AngleToClosestOrganism': angle_closest_organism,
         'DistToClosestOrganism': distance_closest_organism,
-        'NumOfOrganismsInView': organisms_in_view.length,
+        'NumOfOrganismsInView': num_of_organisms_in_view,
         'AngleToClosestTarget': angle_closest_target,
         'DistToClosestTarget': distance_closest_target,
-        'NumOfTargetsInView': targets_in_view.length,
+        'NumOfTargetsInView': num_of_targets_in_view,
         'Luminosity': globals.luminosity,
         'Maturity': organism.maturity,
         'TimeAlive': organism.get_time_alive_in_seconds()
