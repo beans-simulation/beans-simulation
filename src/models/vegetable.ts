@@ -1,4 +1,4 @@
-class Vegetable implements Drawable {
+class Vegetable extends Point implements Drawable {
   static vegetables: Vegetable[] = [];
   static id: number = 0;
   public position: Vector;
@@ -6,6 +6,7 @@ class Vegetable implements Drawable {
   public energy: number;
 
   constructor(x: number, y: number, radius: number) {
+    super(x, y);
     this.position = new Vector(x, y);
     this.radius = radius;
     // a energia do pedaço de vegetable é proporcinal à sua área
@@ -27,4 +28,8 @@ class Vegetable implements Drawable {
   checkId(id: number) {
     return id === Vegetable.id;
   }
+  kill() {
+    Vegetable.vegetables = Vegetable.vegetables.filter((item) => item !== this);
+  }
+
 }

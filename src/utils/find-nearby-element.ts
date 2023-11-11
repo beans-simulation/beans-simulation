@@ -1,5 +1,5 @@
 function find_nearby_element<T extends Organism | Vegetable>(
-  qtree: QuadTree,
+  qtree: VegetableQuadTree | OrganismQuadTree,
   vision: Circle,
   organism: Organism,
   is_eating_vegetable: boolean = false
@@ -8,9 +8,9 @@ function find_nearby_element<T extends Organism | Vegetable>(
   let closest_index = -1;
   let closest_elements: T[] = [];
   if (is_eating_vegetable) {
-    closest_elements = qtree.search_vegetables(vision) as T[];
+    closest_elements = qtree.search_elements(vision) as T[];
   } else {
-    closest_elements = qtree.find_prey_element(vision, organism.id) as T[];
+    closest_elements = qtree.search_elements(vision, organism.id) as T[];
   }
 
   for (let i = closest_elements.length - 1; i >= 0; i--) {

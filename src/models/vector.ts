@@ -15,14 +15,14 @@ class Vector {
   }
 
   // retorna o tamanho do vector ao quadrado
-  magnitude_squared() {
+  magnitude_squared():number {
     const x = this.x;
     const y = this.y;
     return x * x + y * y;
   }
 
   // retorna o tamanho do vector
-  magnitude() {
+  magnitude():number {
     return Math.sqrt(this.magnitude_squared());
   }
 
@@ -33,7 +33,7 @@ class Vector {
     return this;
   }
 
-  // subtracttrai um vector especificado do atual e retorna o próprio vector (atualizado), e não um novo
+  // subtratrai um vector especificado do atual e retorna o próprio vector (atualizado), e não um novo
   subtract(vector: Vector) {
     this.x -= vector.x;
     this.y -= vector.y;
@@ -136,5 +136,27 @@ class Vector {
   // retorna uma cópia deste vector
   copy() {
     return new Vector(this.x, this.y);
+  }
+
+  get_angle_to_another_vector(other_vector: Vector): number{
+    const dot_product = this.x * other_vector.x + this.y * other_vector.y;
+    const this_magnitude = this.magnitude()
+    const other_magnitude = other_vector.magnitude()
+    if (this_magnitude === 0 || other_magnitude === 0) {
+      // Handle the case where one of the vectors has zero magnitude
+      return 0; // You can set the angle to zero degrees in this case
+    }
+    
+    var cos_theta = dot_product / (this_magnitude * other_magnitude);
+    if (cos_theta < -1) {
+      cos_theta = -1;
+    } else if (cos_theta > 1) {
+      cos_theta = 1;
+    }
+  
+    const angle_radians = Math.acos(cos_theta);
+    const angle_degrees = angle_radians * (180 / Math.PI);
+   
+    return angle_degrees;
   }
 }

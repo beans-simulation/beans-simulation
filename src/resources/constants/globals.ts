@@ -13,7 +13,11 @@ class GlobalPreferences {
   public universe_height = 0;
   public universe_size = 1;
   public percentual_energy_to_eat = 0.8; // porcentagem da energia máxima acima da qual eles não comerão
-
+  public pyodide: Pyodide | null = null;
+  public luminosity_cycle_time = 180; // Tempo em segundos do ciclo dia-noite
+  public luminosity: number = 0;
+  public temperature: number = 0;
+  public noise:number = 0;
 }
 
 const globals = new GlobalPreferences();

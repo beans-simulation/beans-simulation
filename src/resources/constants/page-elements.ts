@@ -9,9 +9,6 @@ const button_set_default = document.getElementById("button_set_default");
 const button_start_simulation = document.getElementById(
   "button_start_simulation"
 );
-const button_restart_simulation = document.getElementById(
-  "button_restart_simulation"
-);
 
 // inputs iniciais
 const input_vegetable_rate = document.getElementById(

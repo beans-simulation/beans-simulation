@@ -35,6 +35,8 @@
     "src/models/vegetable.ts",
     "src/models/organism.ts",
     "src/models/quad-tree.ts",
+    "src/models/vegetable-quad-tree.ts",
+    "src/models/organism-quad-tree.ts",
     "src/utils/animate.ts",
     "src/utils/total-org-graph.ts",
     "src/utils/create-context.ts",
@@ -48,6 +50,8 @@
     "src/utils/create-entities.ts",
     "src/utils/find-nearby-element.ts",
     "src/utils/get-input-for-nn.ts",
-    "src/app.ts"
+    "src/app.ts",
+    "src/utils/get-angle-to-closest-element.ts",
+    "src/utils/create-neural-network.ts"
   ]
 }

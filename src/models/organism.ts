@@ -1,6 +1,6 @@
 const EAT_DISTANCE = 5;
 
-class Organism implements Drawable {
+class Organism extends Point implements Drawable {
   static organisms: Organism[] = [];
   static id = 0;
 
@@ -17,15 +17,18 @@ class Organism implements Drawable {
   public dna: DNA;
   public energy: number;
   public health: number = 85;
-  public maturity: number = 0.83;
+  public maturity: number = 0;
   public fixed_max_energy: number;
   public food_eaten = 0;
   public id: number;
   public initial_detection_radius: number;
   public initial_radius: number;
   public is_eating = false;
+  public is_reproducing = false;
   public is_roaming = false; //vagar sem direção
+  public is_rotating = false;
   public is_running_away = false;
+  public is_ready_to_reproduce = false;
   public lifetime_in_miliseconds = generate_integer(200, 300) * 1000; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
@@ -45,9 +48,26 @@ class Organism implements Drawable {
   public sexual_maturity = 0;
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
+  private time_to_maturity_in_seconds: number;
+  public neural_network_id: number | null;
+  public index_closest_food: number = -1;
+  public distance_closest_food: number = -1;
+  public angle_target_food: number = -1;
+  public closest_target: Point | null = null;
+  public distance_closest_target: number = -1;
+  public angle_target_signal: number = 0;
+  public angle_closest_food: number = 0;
+  public closest_food: Point | null = null;
+  public angle_closest_organism: number = 0;
+  public distance_closest_organism: number = 0;
+  public closest_organism: Point | null = null;
+  public diet: number;
+  public diet_variant: number;
+  public input_neurons_list: string[] | null;
   //   private _status: organism_status_type;
 
-  constructor(x: number, y: number, dna: DNA, parent_id?: number) {
+  constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
+    super(x, y);
     this.id = Organism.id++;
     this.position = new Vector(x, y);
     if (parent_id) {
@@ -60,6 +80,8 @@ class Organism implements Drawable {
     this.initial_detection_radius = dna.initial_detection_radius;
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
+    this.diet = dna.diet;
+    this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
     this.minimal_consumption =
       0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
@@ -76,7 +98,26 @@ class Organism implements Drawable {
     this.max_energy = Math.pow(this.radius, 2) * 6;
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
-    // NINHADAS
+    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.05/1000; // tempo para maturidade é 5% do tempo de vida
+    this.neural_network_id = neural_network_id;
+    this.input_neurons_list = [];
+
+    // Pegando os neurônios do organismo com base no ID da rede
+    if (globals.pyodide){
+      globals.pyodide.runPython(`
+        import json
+
+        this_nn_id = json.loads('${JSON.stringify(this.neural_network_id)}')
+
+        # Pegando a redes através do ID
+        this_nn = neural_network.NeuralNetwork.neural_networks.get(f"{this_nn_id}")
+        input_neurons = [neuron.name for neuron in this_nn.neurons if neuron.neuron_type == "Input"]
+
+      `);
+
+      this.input_neurons_list = globals.pyodide.globals.get('input_neurons');
+    }
+    
 
     // this.energy = this.max_energy * 0.75
     if (parent_id) {
@@ -99,13 +140,14 @@ class Organism implements Drawable {
   }
 
   // Método de reprodução (com mutações)
-  private create_child(offspring_dna: DNA) {
+  private create_child(offspring_dna: DNA, neural_network_id: number | null) {
     this.procreation_count++;
 
     const offspring = new Organism(
       this.position.x,
       this.position.y,
-      offspring_dna
+      offspring_dna,
+      neural_network_id
     );
 
     this.childrenIds ? this.childrenIds.push(offspring.id) : [offspring.id];
@@ -121,14 +163,79 @@ class Organism implements Drawable {
 
   assexually_procreate() {
     const offspring_dna = this.dna.mutate();
-    return this.create_child(offspring_dna);
+    return this.create_child(offspring_dna, null);
   }
 
-  sexually_procreate(partner: Organism) {
-    const offspring_dna = this.combine_dnas(partner);
-    return this.create_child(offspring_dna);
-  }
+  sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
+    this.is_ready_to_reproduce = true;
+    // Pega o genoma do organismo atual
+    let current_organism_genome = this.dna.get_genome();
+    // Procura parceiros e o parceiro mais proximo
+    let [min_distance, possible_partners, closest_index] = this.find_close_partners(qtree, vision);
+    // Se houver parceiros...
+    if (possible_partners.length > 0){
+      let partner = possible_partners[closest_index] as Organism; // Tranforma em tipo Organism
+      let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
 
+      // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
+      if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
+        this.is_reproducing = true;
+        partner.is_reproducing = true;
+        // NINHADA
+        this.litter_size = generate_integer(
+          this.litter_interval[0],
+          this.litter_interval[1] + 1
+        );
+        for (var i = 0; i < this.litter_size; i++) {
+          if (Math.random() < 1) {
+            let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
+            const offspring_dna_mutated = offspring_dna.mutate();
+            
+
+            // REPRODUÇÃO DAS REDES
+            const this_nn_id = this.neural_network_id;
+            const partner_nn_id = partner.neural_network_id;
+
+            const this_nn_id_JSON = JSON.stringify(this_nn_id);
+            const partner_nn_id_JSON = JSON.stringify(partner_nn_id);
+
+            if (globals.pyodide){
+              globals.pyodide.runPython(`
+                import json
+
+                this_nn_id = json.loads('${this_nn_id_JSON}')
+                partner_nn_id = json.loads('${partner_nn_id_JSON}')
+
+                # Pegando as redes através de seus IDs
+                this_nn = neural_network.NeuralNetwork.neural_networks.get(f"{this_nn_id}")
+                partner_nn = neural_network.NeuralNetwork.neural_networks.get(f"{partner_nn_id}")
+
+                # Criando a rede filha
+                child_nn = neural_network.breed_neural_networks(this_nn, partner_nn)
+
+                child_nn_id = child_nn.id
+
+              `);
+
+              this.create_child(offspring_dna_mutated, globals.pyodide.globals.get('child_nn_id'));
+            }
+          }
+        }
+
+        this.energy = (this.energy/2); // Mudar a logica?
+        this.is_reproducing = false;
+        this.is_ready_to_reproduce = false;
+        partner.energy = (partner.energy/2);
+        partner.is_reproducing = false;
+        partner.is_ready_to_reproduce = false;
+
+      }
+    }
+  }
+  get_time_alive_in_seconds() {
+    // TODO: checar se o valor está fazendo sentido
+    return (global_timer.total - this.birth_moment_in_milliseconds) / 1000;
+  }
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
     this.consumed_energy_rate =
@@ -136,29 +243,35 @@ class Organism implements Drawable {
     const achieved_age_limit =
       global_timer.total - this.birth_moment_in_milliseconds >
       this.lifetime_in_miliseconds;
+    const time_alive = this.get_time_alive_in_seconds();
 
-    // Taxa de diminuição de energy
-    if (this.energy > 0 && !achieved_age_limit) {
-      this.energy -= this.consumed_energy_rate + this.minimal_consumption;
+    
+    if (this.energy > 0 && !achieved_age_limit) { // Condições para estar vivo
+      this.energy -= this.consumed_energy_rate + this.minimal_consumption; // Taxa de diminuição de energia
 
+      // TODO:  -------------- REVER SE ESSA PARTE DO CÓDIGO É NECESSÁRIA ------------------
       // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
       if (Math.random() < (0.0005 * this.food_eaten) / 10) {
         // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
         // Remover reproducao assexuada
         if (Math.random() <= this.procreation_probability) {
           // NINHADA
-          this.litter_size = generate_integer(
-            this.litter_interval[0],
-            this.litter_interval[1] + 1
-          );
-          for (var i = 0; i < this.litter_size; i++) {
-            if (Math.random() < 0.2) {
-              // Para espaçar os nascimentos
-              this.assexually_procreate();
+          if(this.maturity == 1){
+            this.litter_size = generate_integer(
+              this.litter_interval[0],
+              this.litter_interval[1] + 1
+            );
+            for (var i = 0; i < this.litter_size; i++) {
+              if (Math.random() < 0.2) {
+                // Para espaçar os nascimentos
+                // this.assexually_procreate();
+              }
             }
           }
+
         }
       }
+      // -------------------------------------------------------------------------------------
     } else {
       this.kill();
     }
@@ -167,16 +280,25 @@ class Organism implements Drawable {
     // TODO: elaborar lógica para alterar saúde (health) do organismo
     this.health = 85
 
-    // Alteração do atributo de maturity
-    // TODO: elaborar lógica para alterar maturidade (maturity) do organismo, baseado no limite "time_to_maturity"
-    if(this.maturity<1){ //dummy
-      this.maturity = 0.83
-    }
-
-    //Delimitação de bordas
+    // Delimitação de bordas
     this.avoid_space_limits();
 
-    //Delimitação de bordas
+    if (this.maturity < 1) {
+      // Calcula o valor da maturidade
+      const maturity = time_alive / this.time_to_maturity_in_seconds;
+
+      // o valor tem que estar entre zero e 1
+      if (maturity > 1) {
+        this.maturity = 1;
+      } else if (maturity < 0) {
+        this.maturity = 0;
+      } else {
+        this.maturity = maturity;
+      }
+    }
+
+
+    // Delimitação de bordas
     this.create_space_delimitation();
     // Atualização da velocidade (soma vector velocidade com o vector aceleração)
     this.speed.add(this.acceleration);
@@ -247,6 +369,11 @@ class Organism implements Drawable {
     return null;
   }
 
+  accelerate(value: number){
+    // TOOD: implemetar função aceleração com base no valor de output da rede
+  }
+
+
   create_space_delimitation() {
     this.create_canvas_space_delimitation();
     this.avoid_space_limits();
@@ -293,7 +420,7 @@ class Organism implements Drawable {
   }
 
 
-  detect_predator(qtree: QuadTree, vision: Circle) {
+  detect_predator(qtree: OrganismQuadTree, vision: Circle) {
     this.is_running_away = false;
 
     let [min_distance, close_organisms, closest_index] = find_nearby_element(
@@ -340,9 +467,11 @@ class Organism implements Drawable {
     this.apply_force(new Vector(redirection.x, redirection.y));
   }
 
-  search_for_vegetable(qtree: QuadTree, vision: Circle): void {
+  search_for_vegetable(qtree: VegetableQuadTree, vision: Circle): void {
+    this.is_ready_to_reproduce = false;
     this.is_eating = false;
     const is_searching_vegetable = true;
+
     let [min_distance, nearby_vegetables, closest_index] = find_nearby_element(
       qtree,
       vision,
@@ -379,7 +508,7 @@ class Organism implements Drawable {
     this.increase_size();
   }
 
-  hunt(qtree: QuadTree, vision: Circle) {
+  hunt(qtree: OrganismQuadTree, vision: Circle) {
     this.is_eating = false;
 
     let [min_distance, close_organisms, closest_index] = find_nearby_element(
@@ -414,6 +543,23 @@ class Organism implements Drawable {
     this.food_eaten++;
   }
 
+  eat(element: Organism | Vegetable){
+    if (this.max_energy - this.energy >= element.energy * 0.1) {
+      this.energy += element.energy * 0.1;
+    } else {
+      this.energy = this.max_energy;
+    }
+
+    if (this.energy > this.max_energy) {
+      this.energy = this.max_energy;
+    }
+    element.kill();
+
+    this.increase_size();
+    this.food_eaten++;
+    this.diet_variant = generate_float(0,1);
+  }
+
   // Método que fará o organism vaguear por aí quando não está is_running_away ou perseguindo
   roam() {
     this.change_status(organism_status.roaming);
@@ -444,7 +590,7 @@ class Organism implements Drawable {
     // para criar a força de vagueio
     const roaming_force = circle_center.add(movement);
 
-    if (this.is_eating || this.is_running_away) {
+    if (this.is_eating || this.is_running_away || this.is_ready_to_reproduce || this.is_reproducing || this.is_rotating) {
       // Diminui a força de vagueio quando vai comer ou fugir para dar prioridade a estas tarefas
       roaming_force.multiply(0.03);
     }
@@ -453,8 +599,8 @@ class Organism implements Drawable {
 
   // Método que calcula a força de redirecionamento em direção a um alvo
   // REDIRECIONAMENTO = VELOCIDADE DESEJADA - VELOCIDADE
-  pursue(target: Organism | Vegetable) {
-    if (target instanceof Organism) {
+  pursue(target: Organism | Vegetable, to_reproduce: boolean = false) {
+    if (target instanceof Organism && !to_reproduce) {
       target.is_running_away = true;
     }
     // O vector da velocidade desejada é o vector de posição do alvo menos o da própria posição
@@ -471,36 +617,110 @@ class Organism implements Drawable {
   }
 
   // Método de comportamento reprodutivo sexuado para procurar parceiros próximos
-  find_close_partners() {}
+  find_close_partners(qtree: OrganismQuadTree, vision: Circle): [number, Point[], number] {
+    this.is_eating = false;
+
+    let min_distance = Infinity;
+    let closest_index = -1;
+    let possible_partners: any[] = qtree.search_elements(vision, this.id);
+    possible_partners = possible_partners.filter((partner) => {
+      let partner_organism = partner as Organism;
+      return !partner_organism.is_reproducing && partner_organism.is_ready_to_reproduce
+    });
+
+    for (let i = possible_partners.length - 1; i >= 0; i--) {
+      const dx = this.position.x - possible_partners[i].position.x;
+      const dy = this.position.y - possible_partners[i].position.y;
+      let d2 = (dx * dx) + (dy * dy);
+      if (d2 <= min_distance) {
+        min_distance = d2;
+        closest_index = i;
+      }
+    }
+    return [min_distance, possible_partners, closest_index];
+  }
 
   // Método de comportamento reprodutivo sexuado para se aproximar do partner encontrado
-  approach_partner() {
-    // CHAMAR AQUI DENTRO O MÉTODO combine_dnas()
+  approach_partner(min_distance: number, close_organisms: Point[], closest_index: number) {
+    /*
+    Se aproxima do parceiro e faz o crossover
+    */
+
+    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+      this.is_roaming = false;
+      this.is_eating = false;
+
+      if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
+        return true
+      } else if (close_organisms.length != 0) {
+        this.pursue((close_organisms[closest_index] as Organism), true);
+      }
+    }
+    return false
   }
 
-  private random_parent(partner: Organism) {
-    return Math.random() < 0.5 ? this : partner;
+  private n_points_cut(parent_a: any[], parent_b: any[], n_points: number): number[] {
+    let parents_indexes = Array.from({ length: parent_a.length -1}, (_, i) => i);
+    let random_indexes: number[] = [];
+
+    for (let i = 0; i < n_points; i++) {
+      /*
+        Sorteia um index para ser cada ponto de corte.
+        Após o sorteio, exclui o mesmo para não ser sorteado novamente.
+        Faz isso n_points vezes e adiciona na lista de random_indexes que será posteriormente utilizada de base para o crossover.
+      */
+
+      let random_chosen_index = Math.floor(Math.random() * parents_indexes.length);
+      random_indexes.push(parents_indexes[random_chosen_index]);
+      parents_indexes.splice(random_chosen_index, 1);
+    }
+    random_indexes.sort();
+
+    return random_indexes;
   }
 
-  // Método de comportamento reprodutivo sexuado para randomicamente escolher genes do pai e da mãe
-  combine_dnas(partner: Organism): DNA {
-    const radius_source = this.random_parent(partner);
-    const speed_source = this.random_parent(partner);
-    const force_source = this.random_parent(partner);
-    const color_source = this.random_parent(partner);
-    const detection_radius_source = this.random_parent(partner);
-    const litter_source = this.random_parent(partner);
-    const sex_source = this.random_parent(partner);
+  private get_random_parents(parent_a: any[], parent_b: any[]) {
+    if (Math.random() < 0.5) {
+      return { first_parent: parent_a, second_parent: parent_b };
+    }
+    return { first_parent: parent_b, second_parent: parent_a };
+  }
 
-    return new DNA(
-      radius_source.dna.initial_radius,
-      speed_source.dna.max_speed,
-      force_source.dna.max_force,
-      color_source.dna.color,
-      detection_radius_source.dna.initial_detection_radius,
-      litter_source.dna.litter_interval,
-      sex_source.dna.sex
+  crossover_dnas(parent_a: any[], parent_b: any[], n_points: number = 1): DNA {
+    // [!] O numero maximo de pontos é len(genes_pai)-1
+
+    const random_indexes = this.n_points_cut(parent_a, parent_b, n_points);
+
+    const { first_parent, second_parent } = this.get_random_parents(
+      parent_a,
+      parent_b
     );
+    const parent_order = Array.from({ length: n_points + 1 }, (_, i) =>
+      i % 2 === 0 ? first_parent : second_parent
+    );
+
+    const genome_aux: any[] = [];
+    let last_index = 0;
+    for (let i = 0; i <= n_points; i++) {
+      const current_parent = parent_order[i];
+
+      const end_at: number | undefined = random_indexes[i];
+      let cut: any[] = []
+      if(i!==0 && i !==n_points){
+          cut = current_parent.slice(last_index+1, end_at+1);
+        } else if (i===n_points){
+            cut = current_parent.slice(last_index+1, current_parent.length);
+      }
+      else {
+          cut = current_parent.slice(last_index, end_at+1);
+      }
+
+      genome_aux.push(...cut);
+      last_index = end_at;
+    }
+
+    const child_genome = genome_aux as ConstructorParameters<typeof DNA>;
+    return new DNA(...child_genome);
   }
 
   is_dead(): boolean {
@@ -514,6 +734,7 @@ class Organism implements Drawable {
     Organism.organisms = filtered;
     return filtered;
   }
+
   kill() {
     Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }
@@ -524,10 +745,10 @@ class Organism implements Drawable {
 
   display(context: CanvasRenderingContext2D) {
     context.beginPath();
-    context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    context.fillStyle = this.other_color;
-    context.strokeStyle = this.color;
-    context.lineWidth = 5;
+    context.ellipse(this.position.x, this.position.y, this.radius * 0.7, this.radius * 1.1, this.speed.heading_radians() - Math.PI/2, 0, Math.PI * 2);
+    context.fillStyle = this.color;
+    context.lineWidth = 2;
+    context.strokeStyle = this.color
     context.stroke();
     context.fill();
   }

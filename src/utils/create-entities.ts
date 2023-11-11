@@ -9,6 +9,7 @@ function generate_organism(x: number, y: number): void {
   const ninhada_max = ninhada_min + generate_integer(1, 8);
   const litter_interval = [ninhada_min, ninhada_max];
   const o_sex = Math.random() < 0.5 ? sex.female : sex.male;
+  const diet = generate_float(0, 1);
 
   var dna = new DNA(
     initial_radius,
@@ -17,10 +18,15 @@ function generate_organism(x: number, y: number): void {
     color,
     initial_detection_radius,
     litter_interval,
-    o_sex
+    o_sex,
+    diet
   );
 
-  new Organism(x, y, dna);
+  let neural_network_id = null;
+  if(globals.pyodide){
+    neural_network_id = create_neural_network(globals.pyodide)
+  }
+  new Organism(x, y, dna, neural_network_id);
 }
 
 function generate_vegetable(x: number, y: number): void {

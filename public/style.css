@@ -424,3 +424,28 @@ opacity: 0.5
 opacity: 0.9;
 
 }
+
+.loader {
+  display: inline-block;
+  height: 21px;
+  width: 21px;
+}
+.loader:after {
+  content: " ";
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  border-color: #fff #fff #fff transparent;
+  animation: loader 1.2s linear infinite;
+}
+
+@keyframes loader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

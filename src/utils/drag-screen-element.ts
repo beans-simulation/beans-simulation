@@ -13,7 +13,7 @@ function element_drag(event: MouseEvent) {
 
   if (element && parent) {
     const middleTabX = innerWidth - event.x - parent.clientWidth / 2;
-    const middleTabY = event.y - element.clientHeight / 2;
+    const middleTabY = event.y - element!.clientHeight / 2;
 
     const minX = 5;
     const maxY = innerHeight - parent.scrollHeight;
