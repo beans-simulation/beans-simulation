@@ -33,6 +33,35 @@ def sin(weighted_inputs):
 def cos(weighted_inputs):
     return math.cos(sum(weighted_inputs))
 
+def tanh(weighted_inputs):
+    return math.tanh(sum(weighted_inputs))
+
+def logarithmic(weighted_inputs):
+    summed_input = sum(weighted_inputs)
+    return math.log(summed_input) if summed_input > 0 else 0  # Para evitar erro de log(0)
+
+def sigmoid(weighted_inputs):
+    return 1 / (1 + math.exp(-sum(weighted_inputs)))
+
+def relu(weighted_inputs):
+    return max(0, sum(weighted_inputs))
+
+def gaussian(weighted_inputs, mean=0, variance=1):
+    x = sum(weighted_inputs)
+    return math.exp(-((x - mean) ** 2) / (2 * variance))
+
+def step_function(weighted_inputs, threshold=0):
+    return 1 if sum(weighted_inputs) > threshold else 0
+
+def inverse(weighted_inputs):
+    summed_input = sum(weighted_inputs)
+    return 1 / summed_input if summed_input != 0 else 0
+
+
+
+
+
+
 def step_activation(weighted_inputs):
     return 0 if sum(weighted_inputs) <= 0.5 else 1
 
@@ -234,6 +263,8 @@ possible_neurons = [
     ("Input", "Luminosity"),
     ("Input", "Maturity"),
     ("Input", "TimeAlive"),
+    ("Input", "Speed"),
+    ("Input", "Size"),
 
     # HIDDEN
     ("Hidden", "InvertSignal"),
