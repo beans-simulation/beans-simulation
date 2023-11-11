@@ -75,9 +75,16 @@ document.addEventListener("DOMContentLoaded", (_) => {
   );
 
   // botoes do grafico
-  button_organism_chart?.addEventListener("click", show_organism_chart);
+  button_population_chart?.addEventListener("click", show_population_chart);
   button_speed_chart?.addEventListener("click", show_speed_chart);
-  button_gender_chart?.addEventListener("click", show_gender_chart);
+  button_diet_chart?.addEventListener("click", show_diet_chart);
+  button_force_chart?.addEventListener("click", show_force_chart);
+  button_energy_chart?.addEventListener("click", show_energy_chart);
+  button_consumption_chart?.addEventListener("click", show_consumption_chart);
+  button_detection_chart?.addEventListener("click", show_detection_chart);
+  button_lifetime_chart?.addEventListener("click", show_lifetime_chart);
+  button_maturity_chart?.addEventListener("click", show_maturity_chart);
+  button_size_chart?.addEventListener("click", show_size_chart);
 });
 
 function destroy_objects() {

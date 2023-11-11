@@ -37,7 +37,7 @@
     "src/models/vegetable-quad-tree.ts",
     "src/models/organism-quad-tree.ts",
     "src/utils/animate.ts",
-    "src/utils/total-org-graph.ts",
+    "src/utils/chart.ts",
     "src/utils/create-context.ts",
     "src/utils/drag-screen-element.ts",
     "src/utils/generate-color.ts",
