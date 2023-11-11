@@ -133,7 +133,8 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'Maturity': organism.maturity,
         'TimeAlive': organism.get_time_alive_in_seconds(),
         'Speed': organism.speed.magnitude(),
-        'Size': organism.radius
+        'Size': organism.radius,
+        'Tick': globals.tick
     }
 
     return input_values
@@ -195,4 +196,21 @@ function set_luminosity() {
     const luminosity = (sinusoidal_value + 1) / 2;
 
     globals.luminosity = luminosity; // setando na variável global
+}
+
+// Muda o valor de tick alternadamente para 0 e 1 a cada 5 passos
+function add_tick_step(){
+    
+    // Soma um passo
+    globals.tick_step_count = globals.tick_step_count + 1;
+
+    if(globals.tick_step_count % globals.tick_period === 0){ // Checa se é divisível por tick_period (5)
+        // Troca os valores de tick e tick_aux
+        var aux = globals.tick;
+        globals.tick = globals.tick_aux;
+        globals.tick_aux = aux;
+
+        // Reseta os passos
+        globals.tick_step_count = 0
+    }
 }

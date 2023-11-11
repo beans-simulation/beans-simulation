@@ -262,6 +262,7 @@ possible_neurons = [
     ("Input", "TimeAlive"),
     ("Input", "Speed"),
     ("Input", "Size"),
+    ("Input", "Tick"),
 
     # HIDDEN
     ("Hidden", "InvertSignal"),
