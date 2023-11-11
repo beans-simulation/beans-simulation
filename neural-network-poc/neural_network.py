@@ -827,8 +827,7 @@ def create_network():
         Neuron('Output', 'Accelerate', 6),
         Neuron('Output', 'Rotate', 7),
         Neuron('Output', 'DesireToReproduce', 8),
-        Neuron('Output', 'DesireToEat', 9),
-        Neuron('Input', 'Tick', 10)
+        Neuron('Output', 'DesireToEat', 9)
     ]
 
     # Criando as conexões entre os neurônios
@@ -838,8 +837,7 @@ def create_network():
         Connection(1, 6, round(random.random(), MAX_DECIMAL_PLACES)),   # Constant --> Accelerate
         Connection(2, 8, round(random.random(), MAX_DECIMAL_PLACES)),   # Maturity --> DesireToReproduce
         Connection(3, 5, round(random.random(), MAX_DECIMAL_PLACES)),   # EnergyLevel --> Cos
-        Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES)),   # Cos --> DesireToEat
-        Connection(10, 9, round(random.random(), MAX_DECIMAL_PLACES)),   # Tick --> DesireToEat
+        Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES))   # Cos --> DesireToEat
     ]
 
     # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
