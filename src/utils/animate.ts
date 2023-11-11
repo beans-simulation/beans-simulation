@@ -96,8 +96,9 @@ function animate(context: CanvasRenderingContext2D | null) {
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
     const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 10);
 
-    set_luminosity(); // setando a variavel global
-    set_temperature(); // setando a variavel global
+    set_luminosity(); // Atualizando a variável global de luminosidade
+    set_temperature(); // Atualizando a variável global de temperatura
+    add_tick_step(); // Adicionando um passo ao tick global
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
