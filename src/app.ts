@@ -334,7 +334,7 @@ async function import_pyodide(){
   // Rodar fora do loop, para carregar as bibliotecas
   pyodide.runPython(`
   from pyodide_importer import register_hook
-  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
+  modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/feature/pgt-149/neural-network-poc/"
   register_hook(modules_url)
 
   import neural_network
