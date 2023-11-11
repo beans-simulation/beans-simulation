@@ -131,7 +131,9 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'NumOfTargetsInView': num_of_targets_in_view,
         'Luminosity': globals.luminosity,
         'Maturity': organism.maturity,
-        'TimeAlive': organism.get_time_alive_in_seconds()
+        'TimeAlive': organism.get_time_alive_in_seconds(),
+        'Speed': organism.speed.magnitude(),
+        'Size': organism.radius
     }
 
     return input_values
