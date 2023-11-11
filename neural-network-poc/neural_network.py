@@ -33,6 +33,32 @@ def sin(weighted_inputs):
 def cos(weighted_inputs):
     return math.cos(sum(weighted_inputs))
 
+def tanh(weighted_inputs):
+    return math.tanh(sum(weighted_inputs))
+
+def logarithmic(weighted_inputs):
+    summed_input = sum(weighted_inputs)
+    return math.log(summed_input) if summed_input > 0 else 0  # Para evitar erro de log(0)
+
+def sigmoid(weighted_inputs):
+    return 1 / (1 + math.exp(-sum(weighted_inputs)))
+
+def relu(weighted_inputs):
+    return max(0, sum(weighted_inputs))
+
+def gaussian(weighted_inputs, mean=0, variance=1):
+    x = sum(weighted_inputs)
+    return math.exp(-((x - mean) ** 2) / (2 * variance))
+
+def step_function(weighted_inputs, threshold=0):
+    return 1 if sum(weighted_inputs) > threshold else 0
+
+def inverse(weighted_inputs):
+    summed_input = sum(weighted_inputs)
+    return 1 / summed_input if summed_input != 0 else 0
+
+
+
 def step_activation(weighted_inputs):
     return 0 if sum(weighted_inputs) <= 0.5 else 1
 
@@ -234,6 +260,9 @@ possible_neurons = [
     ("Input", "Luminosity"),
     ("Input", "Maturity"),
     ("Input", "TimeAlive"),
+    ("Input", "Speed"),
+    ("Input", "Size"),
+    ("Input", "Tick"),
 
     # HIDDEN
     ("Hidden", "InvertSignal"),
@@ -241,6 +270,13 @@ possible_neurons = [
     ("Hidden", "PiecewiseConstant"),
     ("Hidden", "Sin"),
     ("Hidden", "Cos"),
+    ("Hidden", "Tanh"),
+    ("Hidden", "Log"),
+    ("Hidden", "Sigmoid"),
+    ("Hidden", "ReLu"),
+    ("Hidden", "Gaussian"),
+    ("Hidden", "Step"),
+    ("Hidden", "Inverse"),
 
     # OUTPUT
     ("Output", "Accelerate"),
@@ -256,6 +292,13 @@ neuron_functions = { # (nome_do_neuronio, nome_da_funcao)
     "Absolute": absolute,
     "Sin": sin,
     "Cos": cos,
+    "Tanh": tanh,
+    "Log": logarithmic,
+    "Sigmoid": sigmoid,
+    "ReLu": relu,
+    "Gaussian": gaussian,
+    "Step": step_function,
+    "Inverse": inverse,
     "DesireToEat": step_activation,
     "DesireToReproduce": step_activation
 }
@@ -794,7 +837,7 @@ def create_network():
         Connection(1, 6, round(random.random(), MAX_DECIMAL_PLACES)),   # Constant --> Accelerate
         Connection(2, 8, round(random.random(), MAX_DECIMAL_PLACES)),   # Maturity --> DesireToReproduce
         Connection(3, 5, round(random.random(), MAX_DECIMAL_PLACES)),   # EnergyLevel --> Cos
-        Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES)),   # Cos --> DesireToEat
+        Connection(5, 9, round(random.random(), MAX_DECIMAL_PLACES))   # Cos --> DesireToEat
     ]
 
     # Para a primeira geração de redes neurais, as mutações serão apenas construtivas (e não destrutivas) 
@@ -863,7 +906,9 @@ def create_network():
 #     'NumOfTargetsInView': 4,
 #     'Luminosity': 0.5,
 #     'Maturity': 5,
-#     'TimeAlive': 234
+#     'TimeAlive': 234,
+#     'Speed': 23,
+#     'Size': 9,
 # }
 
 # for i in range(0, 3):

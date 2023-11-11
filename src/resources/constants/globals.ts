@@ -17,7 +17,11 @@ class GlobalPreferences {
   public luminosity_cycle_time = 180; // Tempo em segundos do ciclo dia-noite
   public luminosity: number = 0;
   public temperature: number = 0;
-  public noise:number = 0;
+  public noise: number = 0;
+  public tick: number = 0; // Tick temporal que alterna entre 0 e 1
+  public tick_aux: number = 1; // Guarda o inverso do tick
+  public tick_period: number = 5; // Guarda o número de passos (frames) que leva para alternar o tick
+  public tick_step_count: number = 0; // Guarda quantos passos já passaram desde a última alteração do tick
 }
 
 const globals = new GlobalPreferences();
