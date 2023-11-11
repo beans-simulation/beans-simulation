@@ -35,19 +35,15 @@ const input_slider_vegetables = document.getElementById(
 ) as HTMLInputElement | null;
 
 // labels inputs iniciais
-const label_vegetable_rate = document.getElementById(
-  "label_vegetable_rate"
-);
+const label_vegetable_rate = document.getElementById("label_vegetable_rate");
 const label_mutation_probability = document.getElementById(
   "label_mutation_probability"
 );
 const label_mutation_magnitude = document.getElementById(
   "label_mutation_magnitude"
 );
-const label_organisms_amount =
-  document.getElementById("label_organisms");
-const label_vegetables_amount =
-  document.getElementById("label_vegetables");
+const label_organisms_amount = document.getElementById("label_organisms");
+const label_vegetables_amount = document.getElementById("label_vegetables");
 
 // grupos de componentes
 const group_initial_inputs = document.getElementById("initial_inputs");
@@ -57,3 +53,9 @@ const group_extra_panel = document.getElementById("extra_panel");
 
 // cronometro
 const label_timer = document.getElementById("label_timer");
+
+// grafico
+const chart = document.getElementById("plotly-graph");
+const button_organism_chart = document.getElementById("button_layout_1");
+const button_speed_chart = document.getElementById("button_layout_2");
+const button_gender_chart = document.getElementById("button_layout_3");
