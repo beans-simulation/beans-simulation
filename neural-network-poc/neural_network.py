@@ -890,29 +890,29 @@ def create_network():
 
 # Teste da função de criar redes da primeira geração
 
-input_values_test = {
-    'EnergyLevel': 45,
-    'Temperature': 70,
-    'Health': 8,
-    'AngleToClosestFood': 5,
-    'DistToClosestFood': 68,
-    'NumOfFoodInView': 90,
-    'AngleToClosestOrganism': 66,
-    'DistToClosestOrganism': 12,
-    'NumOfOrganismsInView': 4,
-    'AngleToClosestTarget': 66,
-    'DistToClosestTarget': 12,
-    'NumOfTargetsInView': 4,
-    'Luminosity': 0.5,
-    'Maturity': 5,
-    'TimeAlive': 234,
-    'Speed': 23,
-    'Size': 9,
-}
+# input_values_test = {
+#     'EnergyLevel': 45,
+#     'Temperature': 70,
+#     'Health': 8,
+#     'AngleToClosestFood': 5,
+#     'DistToClosestFood': 68,
+#     'NumOfFoodInView': 90,
+#     'AngleToClosestOrganism': 66,
+#     'DistToClosestOrganism': 12,
+#     'NumOfOrganismsInView': 4,
+#     'AngleToClosestTarget': 66,
+#     'DistToClosestTarget': 12,
+#     'NumOfTargetsInView': 4,
+#     'Luminosity': 0.5,
+#     'Maturity': 5,
+#     'TimeAlive': 234,
+#     'Speed': 23,
+#     'Size': 9,
+# }
 
-for i in range(0, 3):
-    print(f"\n\n-------------- REDE {i} --------------\n")
-    nn = create_network()
-    nn.print_network_info()
+# for i in range(0, 3):
+#     print(f"\n\n-------------- REDE {i} --------------\n")
+#     nn = create_network()
+#     nn.print_network_info()
 
-    print(nn.feed_forward(input_values_test))
+#     print(nn.feed_forward(input_values_test))
