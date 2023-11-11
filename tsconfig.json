@@ -22,6 +22,7 @@
     "src/resources/interfaces/drawable.ts",
     "src/resources/interfaces/organism-status.ts",
     "src/resources/interfaces/sex.ts",
+    "src/resources/interfaces/chart.ts",
     "src/utils/generate-integer.ts",
     "src/models/timer.ts",
     "src/models/vector.ts",

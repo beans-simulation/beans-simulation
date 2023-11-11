@@ -1,4 +1,3 @@
-
 const { canvas, context } = create_context();
 
 if (!canvas || !context) throw new Error("Couldn't find canvas element");
@@ -75,6 +74,11 @@ document.addEventListener("DOMContentLoaded", (_) => {
     label_vegetable_rate,
     update_vegetables_apparition_interval
   );
+
+  // botoes do grafico
+  button_organism_chart?.addEventListener("click", show_organism_chart);
+  button_speed_chart?.addEventListener("click", show_speed_chart);
+  button_gender_chart?.addEventListener("click", show_gender_chart);
 });
 
 function destroy_objects() {
@@ -170,10 +174,9 @@ async function start_simulation() {
   // document.getElementById("baixar-dados").classList.remove("d-none"); // FIND DADOS
 
   if (!is_running) {
-    const pyodide = await import_pyodide()
+    const pyodide = await import_pyodide();
     main(pyodide);
     animate(context);
-
   }
 
   is_running = true;
@@ -314,7 +317,6 @@ function despausa() {
 //   setTimeout(despausa, 10);
 // }
 
-
 function main(pyodide: Pyodide) {
   if (!global_timer.is_paused && pyodide) {
     requestAnimationFrame(() => main(pyodide));
@@ -331,20 +333,18 @@ function main(pyodide: Pyodide) {
 
         # print("py", values["AngleToClosestFood"])
         nn = neural_network.create_network()
-        print("Output:", nn.feed_forward(values))
       `);
     });
   }
 }
 
-
-async function import_pyodide(){
+async function import_pyodide() {
   console.log("Carregando Pyodide...");
   let pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
   const micropip = pyodide.pyimport("micropip");
   await micropip.install("pyodide-importer");
-    // Rodar fora do loop, para carregar as bibliotecas
+  // Rodar fora do loop, para carregar as bibliotecas
   pyodide.runPython(`
   from pyodide_importer import register_hook
   modules_url = "https://raw.githubusercontent.com/beans-simulation/beans-simulation/main/neural-network-poc/"
@@ -352,8 +352,8 @@ async function import_pyodide(){
 
   import neural_network
   import js
-  `)
+  `);
   // var values = feed_neural_network()
   // pyodide.registerJsModule("input_values", values);
-  return pyodide
+  return pyodide;
 }
