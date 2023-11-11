@@ -83,8 +83,7 @@ class Organism extends Point implements Drawable {
     this.diet = dna.diet;
     this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
-    this.minimal_consumption =
-      0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
+    this.minimal_consumption = 0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
     this.max_energy_consumption_rate =
       this.minimal_consumption +
       Math.pow(this.initial_radius * 1.5, 2) *
@@ -98,7 +97,7 @@ class Organism extends Point implements Drawable {
     this.max_energy = Math.pow(this.radius, 2) * 6;
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
-    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.05/1000; // tempo para maturidade é 5% do tempo de vida
+    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.03/1000; // tempo para maturidade é 3% do tempo de vida
     this.neural_network_id = neural_network_id;
 
 

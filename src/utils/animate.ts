@@ -144,31 +144,22 @@ function animate(context: CanvasRenderingContext2D | null) {
       }
       const desire_to_reproduce = output.get("DesireToReproduce");
       const desire_to_eat = output.get("DesireToEat");
-      // console.log(desire_to_reproduce)
-      // console.log(desire_to_eat)
 
-      if(desire_to_reproduce == 1){
-        if((organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total)){
-          // console.log("tempo pra unlock", organism.time_to_unlock_next_reproduction_miliseconds)
-          // console.log("timer total", global_timer.total)
-          if(organism.energy > organism.max_energy*0.2){ // se tiver a energia acima de 20% do máximo
-            if(organism.maturity > 0.6){ // está maduro
-              console.log("chamada da função de reprodução")
-              organism.sexually_procreate(qtreeOrganisms, vision)
-              // console.log("tempo next unlock", organism.time_to_unlock_next_reproduction_miliseconds)
-            }else{
-              console.log("vou comer")
-              desireToEat(desire_to_eat, organism)
-            }
-          }
-        }else{
-          console.log("vou comer")
-          desireToEat(desire_to_eat, organism)
+      if (organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total) {
+        console.log("tempo pra unlock", organism.time_to_unlock_next_reproduction_miliseconds);
+
+        if (desire_to_reproduce == 1 && organism.energy > organism.max_energy * 0.2 && organism.maturity == 1) {
+          console.log("chamada reproduçao");
+          organism.sexually_procreate(qtreeOrganisms, vision);
+        } else if (desire_to_eat == 1) {
+          console.log("quero comer");
+          desireToEat(desire_to_eat, organism);
         }
-      } else{
-        console.log("vou comer")
-        desireToEat(desire_to_eat, organism)
+      } else if (desire_to_eat == 1) {
+        console.log("espera pra reproduzir");
+        desireToEat(desire_to_eat, organism);
       }
+
 
       organism.roam();
     });
