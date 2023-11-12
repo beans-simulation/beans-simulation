@@ -50,6 +50,7 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
+  public time_to_unlock_next_reproduction_miliseconds: number = 0;
   public neural_network_id: number | null;
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
@@ -93,25 +94,21 @@ class Organism extends Point implements Drawable {
     this.lifespan = dna.lifespan;
     this.percentage_to_mature = dna.percentage_to_mature;
     this.lifetime_in_miliseconds = this.lifespan * 1000;
-    
+
     this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
-    this.minimal_consumption =
-      0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
-    this.max_energy_consumption_rate =
-      this.minimal_consumption +
-      Math.pow(this.initial_radius * 1.5, 2) *
-        Math.pow(this.max_speed, 2) *
-        0.00012;
+    this.minimal_consumption = 0.0032 * ((this.radius * this.radius) ** 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
+    this.max_energy_consumption_rate = this.minimal_consumption + ((this.initial_radius * 1.5) * (this.initial_radius * 1.5)) * (this.max_speed * this.max_speed) * 0.00012;
     this.status = organism_status.roaming;
 
     this.dna = dna;
     this.other_color = this.get_other_color(this.color);
     this.detection_radius = this.initial_detection_radius;
-    this.max_energy = Math.pow(this.radius, 2) * 6;
-    this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
+    this.max_energy = (this.radius * this.radius) * 6;
+    this.fixed_max_energy = (this.initial_radius * 1.5 * this.initial_radius * 1.5) * 6; // Usada para obter valores não-variáveis no gráfico
+
     this.birth_moment_in_milliseconds = global_timer.total;
-    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000; 
+    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000;
     this.neural_network_id = neural_network_id;
     this.input_neurons_list = [];
 
@@ -130,7 +127,7 @@ class Organism extends Point implements Drawable {
 
       this.input_neurons_list = globals.pyodide.globals.get('input_neurons');
     }
-    
+
 
     // this.energy = this.max_energy * 0.75
     if (parent_id) {
@@ -203,7 +200,7 @@ class Organism extends Point implements Drawable {
           if (Math.random() < 1) {
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
-            
+
 
             // REPRODUÇÃO DAS REDES
             const this_nn_id = this.neural_network_id;
@@ -241,7 +238,7 @@ class Organism extends Point implements Drawable {
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
         partner.is_ready_to_reproduce = false;
-
+        this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+3) * 1000
       }
     }
   }
@@ -253,8 +250,9 @@ class Organism extends Point implements Drawable {
 
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
-    this.consumed_energy_rate =
-      Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
+    const speed_magnitude = this.speed.magnitude()// Atualiza de acordo com a velocidade atual
+    this.consumed_energy_rate = (this.radius * this.radius) * (speed_magnitude * speed_magnitude) * 0.0002;
+
     const achieved_age_limit =
       global_timer.total - this.birth_moment_in_milliseconds >
       this.lifetime_in_miliseconds;
@@ -263,30 +261,29 @@ class Organism extends Point implements Drawable {
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit && this.min_max_temperature_tolerated[0] <= globals.temperature && this.min_max_temperature_tolerated[1] >= globals.temperature) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
-
-      // TODO:  -------------- REVER SE ESSA PARTE DO CÓDIGO É NECESSÁRIA ------------------
-      // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
-      // if (Math.random() < (0.0005 * this.food_eaten) / 10) {
-      //   // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
-      //   // Remover reproducao assexuada
-      //   if (Math.random() <= this.procreation_probability) {
-      //     // NINHADA
-      //     if(this.maturity == 1){
-      //       this.litter_size = generate_integer(
-      //         this.litter_interval[0],
-      //         this.litter_interval[1] + 1
-      //       );
-      //       for (var i = 0; i < this.litter_size; i++) {
-      //         if (Math.random() < 0.2) {
-      //           // Para espaçar os nascimentos
-      //           // this.assexually_procreate();
-      //         }
-      //       }
-      //     }
-
-      //   }
-      // }
     } else {
+      // this.kill();
+      // Consoles de morte
+      if (this.energy <= 0){
+        console.log(`O indivíduo ${this.id} veio a falecer de fome :(`);
+      }
+      
+      else if (achieved_age_limit){
+        console.log(`O indivíduo ${this.id} tava velho e morreu de velhice...`);
+      }
+      
+      else if (globals.temperature <= this.min_max_temperature_tolerated[0]){
+        console.log(`O indivíduo ${this.id} morreu de hipotermia pq fez muito muito frio pra ele... :{`);
+      } 
+      
+      else if (this.min_max_temperature_tolerated[0] > globals.temperature){
+        console.log(`O indivíduo ${this.id} simplesmente derreteu devido ao calor... :{`);
+      }
+
+      else {
+        console.log('faleceu de capitalismo')
+      }
+      
       return 1
       // this.kill();
     }
@@ -299,7 +296,7 @@ class Organism extends Point implements Drawable {
     this.avoid_space_limits();
 
     if (this.maturity < 1) {
-      // Calcula o valor da maturidade
+
       const maturity = time_alive / this.time_to_maturity_in_seconds;
 
       // o valor tem que estar entre zero e 1
@@ -336,7 +333,7 @@ class Organism extends Point implements Drawable {
       this.radius = this.radius + this.radius * this.body_growth_rate;
       // this.detection_radius *= 1.03;
     }
-    this.max_energy = Math.pow(this.radius, 2) * 6;
+    this.max_energy = (this.radius * this.radius) * 6;
   }
 
   private get nearRightBorder() {
@@ -446,7 +443,7 @@ class Organism extends Point implements Drawable {
       this
     );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       if (close_organisms.length !== 0) {
         this.run_away(close_organisms[closest_index] as Organism);
       }
@@ -496,7 +493,7 @@ class Organism extends Point implements Drawable {
       is_searching_vegetable
     );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_eating = true;
       this.is_roaming = false;
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
@@ -534,7 +531,7 @@ class Organism extends Point implements Drawable {
       this
     );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_eating = true;
       this.is_roaming = false;
 
@@ -556,6 +553,10 @@ class Organism extends Point implements Drawable {
       this.energy = this.max_energy;
     }
     organism.kill();
+
+    // Log de morte
+    console.log(`O organismo ${organism.id} foi devorado :(`);
+
     this.increase_size();
     this.food_eaten++;
   }
@@ -663,7 +664,7 @@ class Organism extends Point implements Drawable {
     Se aproxima do parceiro e faz o crossover
     */
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_roaming = false;
       this.is_eating = false;
 

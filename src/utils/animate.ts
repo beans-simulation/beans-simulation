@@ -16,6 +16,9 @@ function is_close_to_target(organism: Organism, distance_closest_target:number){
   return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
 
 function accelerate(value: number, organism: Organism) {
+  if(value == 0){
+    return
+  }
   let speed_copy = organism.speed.copy(); // Copiando para não alterar o vetor original no meio do cálculo
 
   speed_copy = speed_copy.normalize().multiply(value);
@@ -23,27 +26,23 @@ function accelerate(value: number, organism: Organism) {
   organism.speed = organism.speed.add(speed_copy);
 }
 
-function rotate(value: number, organism: Organism, output: {}) {
+function rotate(value: number, organism: Organism) {
+  if(value == 0){
+    return
+  }
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
   organism.is_rotating = false;
-}
-
-function desireToReproduce(value: number, organism: Organism) {
-  // TODO: chamar a função reprodução
-  // console.log('Calling DesireToReproduce with value:', value);
 }
 
 function desireToEat(value: number, organism: Organism) {
   if(value == 0){ // não deseja comer
     return
   }
-  // console.log("fome", value)
   organism.is_eating = true;
 
   if(organism.closest_target){
     if (is_close_to_target(organism, organism.distance_closest_target)) {
-      // console.log("comendo", organism.closest_target)
       organism.eat(organism.closest_target as any)
     }
   }else{
@@ -70,9 +69,7 @@ function desireToEat(value: number, organism: Organism) {
 // Define a mapping between keys and functions
 const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, output:{}) => void } = {
   'Accelerate': accelerate,
-  'Rotate': rotate,
-  'DesireToReproduce': desireToReproduce,
-  'DesireToEat': desireToEat,
+  'Rotate': rotate
 };
 
 function animate(context: CanvasRenderingContext2D | null) {
@@ -123,12 +120,6 @@ function animate(context: CanvasRenderingContext2D | null) {
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
       // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
-      // vai ser substituído pelo output de desireToReproduce da rede neural
-      if(organism.maturity > 0.6){ // Requisitos para reprodução
-        organism.sexually_procreate(qtreeOrganisms, vision)
-      }
-
-
       // Pyodide
       const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
       const valuesJSON = JSON.stringify(values);
@@ -151,8 +142,18 @@ function animate(context: CanvasRenderingContext2D | null) {
           map_outputs_from_net[key](value,organism,output);
         }
       }
+      const desire_to_reproduce = output.get("DesireToReproduce");
+      const desire_to_eat = output.get("DesireToEat");
 
+const can_reproduce = organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total;
+const has_energy_and_maturity_for_reproduction = desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2;
+
+if(can_reproduce && has_energy_and_maturity_for_reproduction){
+    return organism.sexually_procreate(qtreeOrganisms, vision)
+}
+desireToEat(desire_to_eat, organism)
       // organism.roam();
+
     });
 
     // qtreeOrganisms.display(context);
