@@ -270,9 +270,9 @@ class Organism extends Point implements Drawable {
         console.log(`O indivíduo ${this.id} tava velho e morreu de velhice...`);
       }
 
-      else if (globals.temperature <= this.min_max_temperature_tolerated[0]){
+      else if (globals.temperature < this.min_max_temperature_tolerated[0]){
         console.log(`O indivíduo ${this.id} morreu de hipotermia pq fez muito muito frio pra ele... :{`);
-      } else if (this.min_max_temperature_tolerated[0] > globals.temperature){
+      } else if (this.min_max_temperature_tolerated[1] > globals.temperature){
         console.log(`O indivíduo ${this.id} simplesmente derreteu devido ao calor... :{`);
       }
 
