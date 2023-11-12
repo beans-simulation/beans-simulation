@@ -50,22 +50,3 @@ const group_extra_panel = document.getElementById("extra_panel");
 
 // cronometro
 const label_timer = document.getElementById("label_timer");
-
-// grafico
-const chart = document.getElementById("plotly-graph");
-const button_population_chart = document.getElementById(
-  "button_population_chart"
-);
-const button_detection_chart = document.getElementById(
-  "button_detection_chart"
-);
-const button_energy_chart = document.getElementById("button_energy_chart");
-const button_lifetime_chart = document.getElementById("button_lifetime_chart");
-const button_speed_chart = document.getElementById("button_speed_chart");
-const button_force_chart = document.getElementById("button_force_chart");
-const button_maturity_chart = document.getElementById("button_maturity_chart");
-const button_diet_chart = document.getElementById("button_diet_chart");
-const button_size_chart = document.getElementById("button_size_chart");
-const button_consumption_chart = document.getElementById(
-  "button_consumption_chart"
-);
