@@ -143,6 +143,7 @@ async function start_simulation() {
     const pyodide = await import_pyodide();
     unset_btn_loading(button_start_simulation);
     globals.pyodide = pyodide;
+    start_chart_interval();
   }
   const n_organisms =
     parseInt(input_slider_organisms?.value || "0") * globals.universe_size;

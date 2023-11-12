@@ -166,6 +166,20 @@ const show_lifetime_chart = get_show_line_function([7], labels[7]);
 const show_maturity_chart = get_show_line_function([8], labels[8]);
 const show_size_chart = get_show_line_function([9], labels[9]);
 
+function fill_data_by_organism(organism: Organism, data: ChartDataByOrganism) {
+  const { sum } = data;
+
+  sum.detection_radius += organism.detection_radius;
+  sum.diet += organism.diet;
+  sum.energy_consumption += organism.max_energy_consumption_rate;
+  sum.energy += organism.max_energy;
+  sum.force += organism.max_force;
+  sum.lifetime += organism.lifetime_in_miliseconds;
+  sum.maturity += organism.maturity;
+  sum.radius += organism.radius;
+  sum.speed += organism.max_speed;
+}
+
 function formatChartData(data_by_organism: ChartDataByOrganism): ChartData {
   const { sum, time } = data_by_organism;
   const number_of_organisms = Organism.organisms.length;
@@ -186,10 +200,6 @@ function formatChartData(data_by_organism: ChartDataByOrganism): ChartData {
     },
   };
 }
-
-const format_time_for_chart = (formatted_time: string) => {
-  return formatted_time;
-};
 
 async function updateChart(data_by_organism: ChartDataByOrganism) {
   if (!chart) return;
@@ -219,4 +229,37 @@ async function updateChart(data_by_organism: ChartDataByOrganism) {
     },
     line_numbers
   );
+}
+
+// Intervalo do grafico ----------------------------
+let chart_interval: number | null = null;
+
+function start_chart_interval() {
+  if (chart_interval) return;
+
+  chart_interval = setInterval(() => {
+    if (global_timer.is_paused) return;
+
+    const data_by_organism: ChartDataByOrganism = {
+      sum: {
+        detection_radius: 0,
+        diet: 0,
+        energy_consumption: 0,
+        energy: 0,
+        force: 0,
+        lifetime: 0,
+        maturity: 0,
+        radius: 0,
+        speed: 0,
+      },
+      time: global_timer.formatted_timer_for_chart,
+      number_of_organisms: Organism.organisms.length,
+    };
+
+    Organism.organisms.forEach((organism) => {
+      fill_data_by_organism(organism, data_by_organism);
+    });
+
+    updateChart(data_by_organism);
+  }, 1000);
 }
