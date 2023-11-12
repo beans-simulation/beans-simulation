@@ -49,7 +49,7 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
-  public time_to_unlock_next_reproduction_miliseconds: number=0;
+  public time_to_unlock_next_reproduction_miliseconds: number = 0;
   public neural_network_id: number | null;
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
@@ -191,7 +191,6 @@ class Organism extends Point implements Drawable {
 
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
       if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
-        console.log("me aproximando")
         this.is_reproducing = true;
         partner.is_reproducing = true;
         // NINHADA

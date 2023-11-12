@@ -139,7 +139,7 @@ function animate(context: CanvasRenderingContext2D | null) {
       const desire_to_eat = output.get("DesireToEat");
 
       if (organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total) {
-        if (desire_to_reproduce == 1 && organism.energy > organism.max_energy * 0.2 && organism.maturity == 1) {
+        if (desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2) {
           console.log("chama reproduçao")
           organism.sexually_procreate(qtreeOrganisms, vision);
         } else{
