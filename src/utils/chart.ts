@@ -1,11 +1,11 @@
 // Constantes
-const AMOUNT_OF_TRACES = 5;
+const AMOUNT_OF_TRACES = 10;
 
 const trace_model: Partial<Plotly.ScatterData> = {
   x: [],
   y: [],
   mode: "lines+markers",
-  visible: true,
+  visible: false,
   type: "scatter",
 };
 
@@ -98,12 +98,17 @@ const show_line = { visible: true };
 // Montando o layout inicial ----------------------------
 // quantidade de linhas (1 por gráfico)
 const line_numbers = Array.from({ length: AMOUNT_OF_TRACES }).map((_, i) => i);
-const traces = line_numbers.map(() => JSON.parse(JSON.stringify(trace_model)));
 
 // layout principal com caracteristicas da primeira label
 const layout: Partial<Plotly.Layout> = {
   ...labels[0],
-  xaxis: { title: "Timestamp", showline: true, domain: [0], showgrid: true },
+  xaxis: {
+    title: "Tempo",
+    showline: true,
+    domain: [0],
+    showgrid: true,
+    rangemode: "tozero",
+  },
   legend: {
     orientation: "h",
     traceorder: "reversed",
@@ -117,11 +122,22 @@ const layout: Partial<Plotly.Layout> = {
   },
 };
 
-if (chart) {
-  // mostrar linha do primeiro grafico
-  traces[0].visible = true;
-  Plotly.newPlot(chart, traces, layout);
+function reset_chart() {
+  if (chart) {
+    const traces = line_numbers.map(() =>
+      JSON.parse(JSON.stringify(trace_model))
+    );
+
+    Plotly.purge(chart);
+
+    // mostrar linha do primeiro grafico
+    traces[0].visible = true;
+    Plotly.newPlot(chart, traces, layout);
+    console.log(traces);
+  }
 }
+
+reset_chart();
 
 // Funcoes para mostrar e esconder linhas ----------------------------
 function get_show_line_function(lineIndexes: number[], label: ChartLabel) {
@@ -150,26 +166,57 @@ const show_lifetime_chart = get_show_line_function([7], labels[7]);
 const show_maturity_chart = get_show_line_function([8], labels[8]);
 const show_size_chart = get_show_line_function([9], labels[9]);
 
-function updateData() {
+function formatChartData(data_by_organism: ChartDataByOrganism): ChartData {
+  const { sum, time } = data_by_organism;
+  const number_of_organisms = Organism.organisms.length;
+
+  return {
+    population: number_of_organisms,
+    time,
+    average: {
+      detection_radius: sum.detection_radius / number_of_organisms,
+      diet: sum.diet / number_of_organisms,
+      energy_consumption: sum.energy_consumption / number_of_organisms,
+      energy: sum.energy / number_of_organisms,
+      force: sum.force / number_of_organisms,
+      lifetime: sum.lifetime / number_of_organisms,
+      maturity: sum.maturity / number_of_organisms,
+      size: sum.radius / number_of_organisms,
+      speed: sum.speed / number_of_organisms,
+    },
+  };
+}
+
+const format_time_for_chart = (formatted_time: string) => {
+  return formatted_time;
+};
+
+async function updateChart(data_by_organism: ChartDataByOrganism) {
   if (!chart) return;
 
-  var now = new Date();
-  var formattedTime = now.toISOString(); // Format datetime as string
+  const formatedData = formatChartData(data_by_organism);
 
-  var newY = Organism.organisms.length;
+  const x = line_numbers.map(() => [formatedData.time]);
 
-  const x = line_numbers.map(() => [formattedTime]);
+  const data_per_line = [
+    [formatedData.population],
+    [formatedData.average.speed],
+    [formatedData.average.diet],
+    [formatedData.average.force],
+    [formatedData.average.energy],
+    [formatedData.average.energy_consumption],
+    [formatedData.average.detection_radius],
+    [formatedData.average.lifetime],
+    [formatedData.average.maturity],
+    [formatedData.average.size],
+  ];
 
   Plotly.extendTraces(
     chart,
     {
       x,
-      y: [[newY], [-newY], [newY / 2], [-newY / 2], [0]],
+      y: data_per_line,
     },
     line_numbers
   );
-
-  setTimeout(updateData, 1000);
 }
-
-updateData();

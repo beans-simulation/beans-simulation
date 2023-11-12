@@ -64,11 +64,6 @@ document.addEventListener("DOMContentLoaded", (_) => {
     update_mutation_magnitude
   );
   add_on_change_event_input(
-    input_mutation_probability,
-    label_mutation_probability,
-    update_mutation_probability
-  );
-  add_on_change_event_input(
     input_vegetable_rate,
     label_vegetable_rate,
     update_vegetables_apparition_interval
@@ -196,6 +191,9 @@ async function start_simulation() {
     }
   } else if (isPaused) {
     despausa();
+    reset_chart();
+  } else {
+    reset_chart();
   }
 
   is_running = true;
