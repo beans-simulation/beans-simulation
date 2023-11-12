@@ -26,11 +26,6 @@ function rotate(value: number, organism: Organism, output: {}) {
   organism.is_rotating = false;
 }
 
-function desireToReproduce(value: number, organism: Organism) {
-  // TODO: chamar a função reprodução
-  // console.log('Calling DesireToReproduce with value:', value);
-}
-
 function desireToEat(value: number, organism: Organism) {
   if(value == 0){ // não deseja comer
     return
@@ -66,9 +61,7 @@ function desireToEat(value: number, organism: Organism) {
 // Define a mapping between keys and functions
 const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, output:{}) => void } = {
   'Accelerate': accelerate,
-  'Rotate': rotate,
-  // 'DesireToReproduce': desireToReproduce,
-  // 'DesireToEat': desireToEat,
+  'Rotate': rotate
 };
 
 function animate(context: CanvasRenderingContext2D | null) {
@@ -115,12 +108,6 @@ function animate(context: CanvasRenderingContext2D | null) {
       let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
       // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
-      // vai ser substituído pelo output de desireToReproduce da rede neural
-      if(organism.maturity == 1){ // Requisitos para reprodução
-        // organism.sexually_procreate(qtreeOrganisms, vision)
-      }
-
-
       // Pyodide
       const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
       const valuesJSON = JSON.stringify(values);
@@ -146,17 +133,12 @@ function animate(context: CanvasRenderingContext2D | null) {
       const desire_to_eat = output.get("DesireToEat");
 
       if (organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total) {
-        console.log("tempo pra unlock", organism.time_to_unlock_next_reproduction_miliseconds);
-
         if (desire_to_reproduce == 1 && organism.energy > organism.max_energy * 0.2 && organism.maturity == 1) {
-          console.log("chamada reproduçao");
           organism.sexually_procreate(qtreeOrganisms, vision);
         } else if (desire_to_eat == 1) {
-          console.log("quero comer");
           desireToEat(desire_to_eat, organism);
         }
       } else if (desire_to_eat == 1) {
-        console.log("espera pra reproduzir");
         desireToEat(desire_to_eat, organism);
       }
 
