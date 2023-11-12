@@ -13,7 +13,6 @@
   },
   "files": [
     "src/utils/loadWasmFile.ts",
-    "src/resources/types/plotly.ts",
     "src/resources/types/pyodide.ts",
     "src/resources/constants/globals.ts",
     "src/resources/constants/page-elements.ts",
@@ -21,7 +20,6 @@
     "src/resources/interfaces/drawable.ts",
     "src/resources/interfaces/organism-status.ts",
     "src/resources/interfaces/sex.ts",
-    "src/resources/interfaces/chart.ts",
     "src/utils/generate-integer.ts",
     "src/models/timer.ts",
     "src/models/vector.ts",
@@ -37,7 +35,6 @@
     "src/models/vegetable-quad-tree.ts",
     "src/models/organism-quad-tree.ts",
     "src/utils/animate.ts",
-    "src/utils/chart.ts",
     "src/utils/create-context.ts",
     "src/utils/drag-screen-element.ts",
     "src/utils/generate-color.ts",

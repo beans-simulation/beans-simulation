@@ -96,18 +96,6 @@ class Timer implements ITimer {
   get is_paused(): boolean {
     return !this.interval;
   }
-
-  get formatted_timer_for_chart(): string {
-    const hours = this.hours ? this.hours + "h" : "";
-    const minutes = this.minutes ? this.minutes + "m" : "";
-    const seconds = this.seconds ? this.seconds + "s" : "";
-
-    if (!hours && !minutes && !seconds) {
-      return "0s";
-    }
-
-    return `${hours}${minutes}${seconds}`;
-  }
 }
 
 const global_timer = new Timer();
