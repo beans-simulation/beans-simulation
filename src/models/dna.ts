@@ -7,17 +7,27 @@ class DNA {
   public readonly litter_interval: number[];
   public readonly sex: sex_type;
   public readonly diet: number;
+  public readonly metabolic_rate: number;
+  public readonly min_max_temperature_tolerated: number[];
+  public readonly body_growth_rate: number;
+  public readonly lifespan: number;
+  public readonly percentage_to_mature: number;
   private genome: ConstructorParameters<typeof DNA>;
 
   constructor(
     initial_radius: number,
-    max_speed: number,
-    max_force: number,
-    color: string,
-    initial_detection_radius: number,
-    litter_interval: number[],
-    sex: sex_type,
-    diet: number
+      max_speed: number,
+      max_force: number,
+      color: string,
+      initial_detection_radius: number,
+      litter_interval: number[],
+      sex: sex_type,
+      diet: number,
+      metabolic_rate: number,
+      min_max_temperature_tolerated: number[],
+      body_growth_rate: number,
+      lifespan: number,
+      percentage_to_mature: number,
   ) {
     this.initial_radius = initial_radius;
     this.max_speed = max_speed;
@@ -27,16 +37,26 @@ class DNA {
     this.litter_interval = litter_interval;
     this.sex = sex; // string que pode ser XX (fêmea) ou XY (macho)
     this.diet = diet; // se for 0 é herbívoro, se for 1 é carnívoro
+    this.metabolic_rate =  metabolic_rate;
+    this.min_max_temperature_tolerated = min_max_temperature_tolerated;
+    this.body_growth_rate = body_growth_rate;
+    this.lifespan = lifespan;
+    this.percentage_to_mature = percentage_to_mature;
 
     this.genome = [
-      this.initial_radius,
-      this.max_speed,
-      this.max_force,
+      initial_radius,
+      max_speed,
+      max_force,
       color,
       initial_detection_radius,
       litter_interval,
       sex,
-      diet
+      diet,
+      metabolic_rate,
+      min_max_temperature_tolerated,
+      body_growth_rate,
+      lifespan,
+      percentage_to_mature
     ]
   }
 
@@ -45,17 +65,27 @@ class DNA {
     return this.genome;
   }
 
-  private get_positive_mutation(value: number) {
-    const new_value = this.new_mutation(value);
+  private get_positive_mutation(value: number, step: number) {
+    const new_value = this.new_mutation(value, step);
     return new_value >= 0 ? new_value : 0;
   }
 
-  private get_offspring_detection_radius(initial_radius: number) {
-    const value = this.new_mutation(this.initial_detection_radius);
+  private get_mutation_between_zero_one(value: number, step: number) {
+    const new_value = this.new_mutation(value, step);
+    if (new_value >= 1){
+      return 1
+    } else if(new_value <= 0){
+      return 0
+    } 
+    return new_value;
+  }
+
+  private get_offspring_detection_radius(initial_radius: number, step: number) {
+    const value = this.new_mutation(this.initial_detection_radius, step);
     return value < initial_radius ? initial_radius : value;
   }
 
-  private variate_litter(min: number, max: number) {
+  private variate_range(min: number, max: number) {
     const maximumRange = Math.floor(globals.mutation_magnitude * 10) + 2;
     // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
     const min_variation = generate_integer(0, maximumRange);
@@ -76,20 +106,20 @@ class DNA {
     };
   }
 
-  private get_litter_mutation(): number[] {
-    const min_litter = this.litter_interval[0];
-    const max_litter = this.litter_interval[1];
+  private get_range_mutation(values_array: number[]): number[] {
+    const min_value = values_array[0];
+    const max_value = values_array[1];
 
     if (Math.random() < globals.mutation_probability) {
-      const { min, max } = this.variate_litter(min_litter, max_litter);
+      const { min, max } = this.variate_range(min_value, max_value);
 
       const min_mutated = min >= 0 ? min : 0;
-      const max_mutated = max >= min_litter ? max : min_litter + 1;
+      const max_mutated = max >= min_value ? max : min_value + 1;
 
       return [min_mutated, max_mutated];
     }
 
-    return [min_litter, max_litter];
+    return [min_value, max_value];
   }
 
   private get_new_mutation_multiplier() {
@@ -119,12 +149,12 @@ class DNA {
     return minimum <= 0 ? value * 0.01 : minimum;
   }
 
-  private new_mutation(value: number) {
+  private new_mutation(value: number, step: number) {
     // exemplo: valor = 20;  magnitude_mutacao = 0.05 || 5%
     if (Math.random() < globals.mutation_probability) {
       // Quanto menor for probabilidade_mutacao, menor será a chance da mutação ocorrer
       const multiplier = this.get_new_mutation_multiplier();
-      const variation = value * globals.mutation_magnitude * multiplier;
+      const variation = value + Math.random() * step * globals.mutation_magnitude * multiplier;
 
       const minimum = this.get_minimum(value, variation);
       const double_variation = variation * 2; //  puxo o point de referência para o menor valor possível. Logo, o resultado variará de
@@ -209,24 +239,43 @@ class DNA {
   public mutate() {
     // raio inicial
     const offspring_initial_radius = this.get_positive_mutation(
-      this.initial_radius
+      this.initial_radius, 0.5
     );
 
     // velocidade máxima
-    const offspring_max_speed = this.get_positive_mutation(this.max_speed);
+    const offspring_max_speed = this.get_positive_mutation(this.max_speed, 2);
 
     // força máxima
-    var offspring_max_force = this.new_mutation(this.max_force);
+    var offspring_max_force = this.new_mutation(this.max_force, 2);
 
     // color
     var offspring_color = this.get_color_mutation();
 
     // raio de detecção inicial
     const offspring_initial_detection_radius =
-      this.get_offspring_detection_radius(offspring_initial_radius);
+      this.get_offspring_detection_radius(offspring_initial_radius, 0.5);
 
     // tamanho da ninhada
-    const offspring_litter_interval = this.get_litter_mutation();
+    const offspring_litter_interval = this.get_range_mutation(this.litter_interval);
+
+    // dieta
+    const offspring_diet = this.get_mutation_between_zero_one(this.diet, 0.1);
+    
+    // taxa metabolica
+    const offspring_metabolic_rate = this.get_positive_mutation(this.metabolic_rate, 1);
+
+    // temperatura mais baixa suportada
+    const offspring_min_max_temperature_tolerated = this.get_range_mutation(this.min_max_temperature_tolerated);
+
+    // taxa de crescimento corporal
+    const offspring_body_growth_rate = this.get_mutation_between_zero_one(this.body_growth_rate, 0.1);
+
+    // tempo de vida
+    const offspring_lifespan = this.get_positive_mutation(this.lifespan, 0.5);
+
+    // tempo até ficar maduro
+    const offspring_percentage_to_mature = this.get_mutation_between_zero_one(this.percentage_to_mature, 0.1);
+
 
     return new DNA(
       offspring_initial_radius,
@@ -236,7 +285,12 @@ class DNA {
       offspring_initial_detection_radius,
       offspring_litter_interval,
       this.sex,
-      this.diet
+      offspring_diet,
+      offspring_metabolic_rate,
+      offspring_min_max_temperature_tolerated,
+      offspring_body_growth_rate,
+      offspring_lifespan,
+      offspring_percentage_to_mature
     );
   }
 

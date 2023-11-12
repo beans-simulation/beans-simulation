@@ -33,7 +33,7 @@ class Vector {
     return this;
   }
 
-  // subtracttrai um vector especificado do atual e retorna o próprio vector (atualizado), e não um novo
+  // subtratrai um vector especificado do atual e retorna o próprio vector (atualizado), e não um novo
   subtract(vector: Vector) {
     this.x -= vector.x;
     this.y -= vector.y;

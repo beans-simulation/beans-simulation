@@ -10,6 +10,14 @@ function generate_organism(x: number, y: number): void {
   const litter_interval = [ninhada_min, ninhada_max];
   const o_sex = Math.random() < 0.5 ? sex.female : sex.male;
   const diet = generate_float(0, 1);
+  const metabolic_rate = generate_float(0.5, 3.0);
+  const min_temp = generate_float(0, 5.0);
+  const max_temp = min_temp + generate_float(25, 30);
+  const min_max_temperature_tolerated = [min_temp, max_temp];
+  const body_growth_rate = generate_float(0, 0.4);;
+  const lifespan = generate_integer(200, 300);
+  const percentage_to_mature = generate_float(0.01, 0.03); // maturidade é atingida entre 1% e 3% da vida
+
 
   var dna = new DNA(
     initial_radius,
@@ -19,7 +27,12 @@ function generate_organism(x: number, y: number): void {
     initial_detection_radius,
     litter_interval,
     o_sex,
-    diet
+    diet,
+    metabolic_rate,
+    min_max_temperature_tolerated,
+    body_growth_rate,
+    lifespan,
+    percentage_to_mature
   );
 
   let neural_network_id = null;

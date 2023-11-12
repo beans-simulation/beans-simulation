@@ -29,7 +29,7 @@ class Organism extends Point implements Drawable {
   public is_rotating = false;
   public is_running_away = false;
   public is_ready_to_reproduce = false;
-  public lifetime_in_miliseconds = generate_integer(200, 300) * 1000; // tempo de vida do organism
+  public lifetime_in_miliseconds: number; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
   public max_energy_consumption_rate: number;
@@ -64,6 +64,12 @@ class Organism extends Point implements Drawable {
   public closest_organism: Point | null = null;
   public diet: number;
   public diet_variant: number;
+  public metabolic_rate: number;
+  public min_max_temperature_tolerated: number[];
+  public body_growth_rate: number;
+  public lifespan: number;
+  public percentage_to_mature: number;
+  public input_neurons_list: string[] | null;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -81,6 +87,13 @@ class Organism extends Point implements Drawable {
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
     this.diet = dna.diet;
+    this.metabolic_rate =  dna.metabolic_rate;
+    this.min_max_temperature_tolerated = dna.min_max_temperature_tolerated;
+    this.body_growth_rate = dna.body_growth_rate;
+    this.lifespan = dna.lifespan;
+    this.percentage_to_mature = dna.percentage_to_mature;
+    this.lifetime_in_miliseconds = this.lifespan * 1000;
+
     this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
     this.minimal_consumption = 0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
@@ -97,8 +110,25 @@ class Organism extends Point implements Drawable {
     this.max_energy = Math.pow(this.radius, 2) * 6;
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
-    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds*0.03/1000; // tempo para maturidade é 3% do tempo de vida
+    this.time_to_maturity_in_seconds = (this.lifetime_in_miliseconds*this.percentage_to_mature)/1000;
     this.neural_network_id = neural_network_id;
+    this.input_neurons_list = [];
+
+    // Pegando os neurônios do organismo com base no ID da rede
+    if (globals.pyodide){
+      globals.pyodide.runPython(`
+        import json
+
+        this_nn_id = json.loads('${JSON.stringify(this.neural_network_id)}')
+
+        # Pegando a redes através do ID
+        this_nn = neural_network.NeuralNetwork.neural_networks.get(f"{this_nn_id}")
+        input_neurons = [neuron.name for neuron in this_nn.neurons if neuron.neuron_type == "Input"]
+
+      `);
+
+      this.input_neurons_list = globals.pyodide.globals.get('input_neurons');
+    }
 
 
     // this.energy = this.max_energy * 0.75
@@ -122,13 +152,9 @@ class Organism extends Point implements Drawable {
   }
 
   // Método de reprodução (com mutações)
-  private create_child(offspring_dna: DNA) {
+  private create_child(offspring_dna: DNA, neural_network_id: number | null) {
     this.procreation_count++;
-    let neural_network_id = null;
 
-    // if(globals.pyodide){
-    //   neural_network_id = create_neural_network(globals.pyodide)
-    // }
     const offspring = new Organism(
       this.position.x,
       this.position.y,
@@ -149,7 +175,7 @@ class Organism extends Point implements Drawable {
 
   assexually_procreate() {
     const offspring_dna = this.dna.mutate();
-    return this.create_child(offspring_dna);
+    return this.create_child(offspring_dna, null);
   }
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
@@ -165,6 +191,7 @@ class Organism extends Point implements Drawable {
 
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
       if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
+        console.log("me aproximando")
         this.is_reproducing = true;
         partner.is_reproducing = true;
         // NINHADA
@@ -176,7 +203,7 @@ class Organism extends Point implements Drawable {
           if (Math.random() < 1) {
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
-            const child = this.create_child(offspring_dna_mutated);
+
 
             // REPRODUÇÃO DAS REDES
             const this_nn_id = this.neural_network_id;
@@ -203,7 +230,7 @@ class Organism extends Point implements Drawable {
 
               `);
 
-              child.neural_network_id = globals.pyodide.globals.get('child_nn_id');
+              this.create_child(offspring_dna_mutated, globals.pyodide.globals.get('child_nn_id'));
             }
           }
         }
@@ -218,10 +245,12 @@ class Organism extends Point implements Drawable {
       }
     }
   }
+
   get_time_alive_in_seconds() {
     // TODO: checar se o valor está fazendo sentido
     return (global_timer.total - this.birth_moment_in_milliseconds) / 1000;
   }
+
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
     this.consumed_energy_rate =
@@ -233,30 +262,7 @@ class Organism extends Point implements Drawable {
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
-      this.energy -= this.consumed_energy_rate + this.minimal_consumption;
-
-      // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
-      if (Math.random() < (0.0005 * this.food_eaten) / 10) {
-        // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
-        // Remover reproducao assexuada
-        if (Math.random() <= this.procreation_probability) {
-          // NINHADA
-          if(this.maturity == 1){
-            this.litter_size = generate_integer(
-              this.litter_interval[0],
-              this.litter_interval[1] + 1
-            );
-            for (var i = 0; i < this.litter_size; i++) {
-              if (Math.random() < 0.2) {
-                // Para espaçar os nascimentos
-                // this.assexually_procreate();
-              }
-            }
-          }
-
-        }
-      }
-      // console.log(this.energy)
+      this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
     } else {
       this.kill();
     }
@@ -265,11 +271,17 @@ class Organism extends Point implements Drawable {
     // TODO: elaborar lógica para alterar saúde (health) do organismo
     this.health = 85
 
-    //Delimitação de bordas
+    // Delimitação de bordas
     this.avoid_space_limits();
 
     if (this.maturity < 1) {
       // Calcula o valor da maturidade
+      // console.log("-----")
+      // console.log("lifetime", this.lifetime_in_miliseconds)
+      // console.log("alive",time_alive)
+      // console.log("time to maturity", this.time_to_maturity_in_seconds)
+      // console.log("percentage", this.percentage_to_mature)
+
       const maturity = time_alive / this.time_to_maturity_in_seconds;
 
       // o valor tem que estar entre zero e 1
@@ -283,7 +295,7 @@ class Organism extends Point implements Drawable {
     }
 
 
-    //Delimitação de bordas
+    // Delimitação de bordas
     this.create_space_delimitation();
     // Atualização da velocidade (soma vector velocidade com o vector aceleração)
     this.speed.add(this.acceleration);
@@ -301,8 +313,8 @@ class Organism extends Point implements Drawable {
   increase_size() {
     const max_radius = this.initial_radius * 1.5;
     if (this.radius < max_radius) {
-      this.radius *= 1.05;
-      this.detection_radius *= 1.03;
+      this.radius = this.radius + this.radius * this.body_growth_rate;
+      // this.detection_radius *= 1.03;
     }
     this.max_energy = Math.pow(this.radius, 2) * 6;
   }

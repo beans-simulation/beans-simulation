@@ -16,11 +16,17 @@ function is_close_to_target(organism: Organism, distance_closest_target:number){
   return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
 
 function accelerate(value: number, organism: Organism) {
+  if(value == 0){
+    return
+  }
+  let speed_copy = organism.speed.copy(); // Copiando para não alterar o vetor original no meio do cálculo
 
-  // organism.accelerate(value)
+  speed_copy = speed_copy.normalize().multiply(value);
+
+  organism.speed = organism.speed.add(speed_copy);
 }
 
-function rotate(value: number, organism: Organism, output: {}) {
+function rotate(value: number, organism: Organism) {
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
   organism.is_rotating = false;
@@ -34,7 +40,6 @@ function desireToEat(value: number, organism: Organism) {
 
   if(organism.closest_target){
     if (is_close_to_target(organism, organism.distance_closest_target)) {
-      console.log("comendo", organism.closest_target)
       organism.eat(organism.closest_target as any)
     }
   }else{
@@ -85,8 +90,9 @@ function animate(context: CanvasRenderingContext2D | null) {
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
     const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 10);
 
-    set_luminosity(); // setando a variavel global
-    set_temperature(); // setando a variavel global
+    set_luminosity(); // Atualizando a variável global de luminosidade
+    set_temperature(); // Atualizando a variável global de temperatura
+    add_tick_step(); // Adicionando um passo ao tick global
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
@@ -134,16 +140,18 @@ function animate(context: CanvasRenderingContext2D | null) {
 
       if (organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total) {
         if (desire_to_reproduce == 1 && organism.energy > organism.max_energy * 0.2 && organism.maturity == 1) {
+          console.log("chama reproduçao")
           organism.sexually_procreate(qtreeOrganisms, vision);
-        } else if (desire_to_eat == 1) {
+        } else{
+          console.log("quero comer")
           desireToEat(desire_to_eat, organism);
         }
-      } else if (desire_to_eat == 1) {
+      } else{
+        console.log("esperando reprodução")
         desireToEat(desire_to_eat, organism);
       }
+      // organism.roam();
 
-
-      organism.roam();
     });
 
     // qtreeOrganisms.display(context);
