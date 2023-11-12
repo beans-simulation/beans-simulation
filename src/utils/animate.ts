@@ -27,6 +27,9 @@ function accelerate(value: number, organism: Organism) {
 }
 
 function rotate(value: number, organism: Organism) {
+  if(value == 0){
+    return
+  }
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
   organism.is_rotating = false;
@@ -140,14 +143,11 @@ function animate(context: CanvasRenderingContext2D | null) {
 
       if (organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total) {
         if (desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2) {
-          console.log("chama reproduçao")
           organism.sexually_procreate(qtreeOrganisms, vision);
         } else{
-          console.log("quero comer")
           desireToEat(desire_to_eat, organism);
         }
       } else{
-        console.log("esperando reprodução")
         desireToEat(desire_to_eat, organism);
       }
       // organism.roam();

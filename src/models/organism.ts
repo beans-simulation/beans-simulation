@@ -274,12 +274,6 @@ class Organism extends Point implements Drawable {
     this.avoid_space_limits();
 
     if (this.maturity < 1) {
-      // Calcula o valor da maturidade
-      // console.log("-----")
-      // console.log("lifetime", this.lifetime_in_miliseconds)
-      // console.log("alive",time_alive)
-      // console.log("time to maturity", this.time_to_maturity_in_seconds)
-      // console.log("percentage", this.percentage_to_mature)
 
       const maturity = time_alive / this.time_to_maturity_in_seconds;
 
