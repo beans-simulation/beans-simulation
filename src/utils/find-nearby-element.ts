@@ -14,12 +14,12 @@ function find_nearby_element<T extends Organism | Vegetable>(
   }
 
   for (let i = closest_elements.length - 1; i >= 0; i--) {
-    let d2 =
-      Math.pow(organism.position.x - closest_elements[i].position.x, 2) +
-      Math.pow(organism.position.y - closest_elements[i].position.y, 2);
-    if (d2 <= min_distance) {
-      min_distance = d2;
-      closest_index = i;
+    let distance_x = organism.position.x - closest_elements[i].position.x
+    let distance_y = organism.position.y - closest_elements[i].position.y
+    let squared_distance =(distance_x*distance_x) + (distance_y*distance_y)
+    if (squared_distance <= min_distance) {
+        min_distance = squared_distance;
+        closest_index = i;
     }
   }
   return [min_distance, closest_elements, closest_index];

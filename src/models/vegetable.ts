@@ -10,7 +10,7 @@ class Vegetable extends Point implements Drawable {
     this.position = new Vector(x, y);
     this.radius = radius;
     // a energia do pedaço de vegetable é proporcinal à sua área
-    this.energy = Math.floor(Math.PI * Math.pow(this.radius, 2)) * 15;
+    this.energy = Math.floor(Math.PI * (this.radius * this.radius)) * 15;
 
     Vegetable.vegetables.push(this);
 
