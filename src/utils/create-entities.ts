@@ -16,7 +16,7 @@ function generate_organism(x: number, y: number): void {
   const min_max_temperature_tolerated = [min_temp, max_temp];
   const body_growth_rate = generate_float(0, 0.4);;
   const lifespan = generate_integer(200, 300);
-  const percentage_to_mature = generate_float(0.3, 0.6);
+  const percentage_to_mature = generate_float(0.01, 0.03); // maturidade é atingida entre 1% e 3% da vida
 
 
   var dna = new DNA(
