@@ -141,13 +141,13 @@ function animate(context: CanvasRenderingContext2D | null) {
       const desire_to_reproduce = output.get("DesireToReproduce");
       const desire_to_eat = output.get("DesireToEat");
 
-const can_reproduce = organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total;
-const has_energy_and_maturity_for_reproduction = desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2;
+      const can_reproduce = organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total;
+      organism.is_ready_to_reproduce = desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2
 
-if(can_reproduce && has_energy_and_maturity_for_reproduction){
-    return organism.sexually_procreate(qtreeOrganisms, vision)
-}
-desireToEat(desire_to_eat, organism)
+      if(can_reproduce && organism.is_ready_to_reproduce){
+        return organism.sexually_procreate(qtreeOrganisms, vision)
+      }
+      desireToEat(desire_to_eat, organism)
       // organism.roam();
 
     });

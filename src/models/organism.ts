@@ -176,7 +176,6 @@ class Organism extends Point implements Drawable {
   }
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
-    this.is_ready_to_reproduce = true;
     // Pega o genoma do organismo atual
     let current_organism_genome = this.dna.get_genome();
     // Procura parceiros e o parceiro mais proximo
@@ -187,7 +186,7 @@ class Organism extends Point implements Drawable {
       let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
 
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
-      if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
+      if (this.approach_partner(min_distance, possible_partners, closest_index) && partner.is_ready_to_reproduce){
         this.is_reproducing = true;
         partner.is_reproducing = true;
         // NINHADA
