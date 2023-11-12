@@ -16,8 +16,11 @@ function is_close_to_target(organism: Organism, distance_closest_target:number){
   return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
 
 function accelerate(value: number, organism: Organism) {
+  let speed_copy = organism.speed.copy(); // Copiando para não alterar o vetor original no meio do cálculo
 
-  // organism.accelerate(value)
+  speed_copy = speed_copy.normalize().multiply(value);
+
+  organism.speed = organism.speed.add(speed_copy);
 }
 
 function rotate(value: number, organism: Organism, output: {}) {
@@ -93,8 +96,9 @@ function animate(context: CanvasRenderingContext2D | null) {
     const qtreeVegetables = new VegetableQuadTree(canvasRectangle, 10);
     const qtreeOrganisms = new OrganismQuadTree(canvasRectangle, 10);
 
-    set_luminosity(); // setando a variavel global
-    set_temperature(); // setando a variavel global
+    set_luminosity(); // Atualizando a variável global de luminosidade
+    set_temperature(); // Atualizando a variável global de temperatura
+    add_tick_step(); // Adicionando um passo ao tick global
 
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
@@ -144,7 +148,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         }
       }
 
-      organism.roam();
+      // organism.roam();
     });
 
     // qtreeOrganisms.display(context);

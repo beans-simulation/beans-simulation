@@ -68,6 +68,7 @@ class Organism extends Point implements Drawable {
   public body_growth_rate: number;
   public lifespan: number;
   public percentage_to_mature: number;
+  public input_neurons_list: string[] | null;
   //   private _status: organism_status_type;
 
   constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
@@ -111,7 +112,24 @@ class Organism extends Point implements Drawable {
     this.birth_moment_in_milliseconds = global_timer.total;
     this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000; 
     this.neural_network_id = neural_network_id;
+    this.input_neurons_list = [];
 
+    // Pegando os neurônios do organismo com base no ID da rede
+    if (globals.pyodide){
+      globals.pyodide.runPython(`
+        import json
+
+        this_nn_id = json.loads('${JSON.stringify(this.neural_network_id)}')
+
+        # Pegando a redes através do ID
+        this_nn = neural_network.NeuralNetwork.neural_networks.get(f"{this_nn_id}")
+        input_neurons = [neuron.name for neuron in this_nn.neurons if neuron.neuron_type == "Input"]
+
+      `);
+
+      this.input_neurons_list = globals.pyodide.globals.get('input_neurons');
+    }
+    
 
     // this.energy = this.max_energy * 0.75
     if (parent_id) {
@@ -134,13 +152,9 @@ class Organism extends Point implements Drawable {
   }
 
   // Método de reprodução (com mutações)
-  private create_child(offspring_dna: DNA) {
+  private create_child(offspring_dna: DNA, neural_network_id: number | null) {
     this.procreation_count++;
-    let neural_network_id = null;
 
-    if(globals.pyodide){
-      neural_network_id = create_neural_network(globals.pyodide)
-    }
     const offspring = new Organism(
       this.position.x,
       this.position.y,
@@ -161,7 +175,7 @@ class Organism extends Point implements Drawable {
 
   assexually_procreate() {
     const offspring_dna = this.dna.mutate();
-    return this.create_child(offspring_dna);
+    return this.create_child(offspring_dna, null);
   }
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
@@ -188,7 +202,35 @@ class Organism extends Point implements Drawable {
           if (Math.random() < 1) {
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
-            this.create_child(offspring_dna_mutated);
+            
+
+            // REPRODUÇÃO DAS REDES
+            const this_nn_id = this.neural_network_id;
+            const partner_nn_id = partner.neural_network_id;
+
+            const this_nn_id_JSON = JSON.stringify(this_nn_id);
+            const partner_nn_id_JSON = JSON.stringify(partner_nn_id);
+
+            if (globals.pyodide){
+              globals.pyodide.runPython(`
+                import json
+
+                this_nn_id = json.loads('${this_nn_id_JSON}')
+                partner_nn_id = json.loads('${partner_nn_id_JSON}')
+
+                # Pegando as redes através de seus IDs
+                this_nn = neural_network.NeuralNetwork.neural_networks.get(f"{this_nn_id}")
+                partner_nn = neural_network.NeuralNetwork.neural_networks.get(f"{partner_nn_id}")
+
+                # Criando a rede filha
+                child_nn = neural_network.breed_neural_networks(this_nn, partner_nn)
+
+                child_nn_id = child_nn.id
+
+              `);
+
+              this.create_child(offspring_dna_mutated, globals.pyodide.globals.get('child_nn_id'));
+            }
           }
         }
 
@@ -221,6 +263,7 @@ class Organism extends Point implements Drawable {
     if (this.energy > 0 && !achieved_age_limit) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
 
+      // TODO:  -------------- REVER SE ESSA PARTE DO CÓDIGO É NECESSÁRIA ------------------
       // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
       // if (Math.random() < (0.0005 * this.food_eaten) / 10) {
       //   // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
@@ -250,7 +293,7 @@ class Organism extends Point implements Drawable {
     // TODO: elaborar lógica para alterar saúde (health) do organismo
     this.health = 85
 
-    //Delimitação de bordas
+    // Delimitação de bordas
     this.avoid_space_limits();
 
     if (this.maturity < 1) {
@@ -268,7 +311,7 @@ class Organism extends Point implements Drawable {
     }
 
 
-    //Delimitação de bordas
+    // Delimitação de bordas
     this.create_space_delimitation();
     // Atualização da velocidade (soma vector velocidade com o vector aceleração)
     this.speed.add(this.acceleration);
