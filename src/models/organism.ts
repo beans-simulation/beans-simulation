@@ -258,6 +258,25 @@ class Organism extends Point implements Drawable {
     if (this.energy > 0 && !achieved_age_limit) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
     } else {
+      // Consoles de morte
+      if (this.energy <= 0){
+        console.log(`O indivíduo ${this.id} veio a falecer de fome :(`);
+      }
+
+      else if (achieved_age_limit){
+        console.log(`O indivíduo ${this.id} tava velho e morreu de velhice...`);
+      }
+
+      else if (globals.temperature < this.min_max_temperature_tolerated[0]){
+        console.log(`O indivíduo ${this.id} morreu de hipotermia pq fez muito muito frio pra ele... :{`);
+      } else if (this.min_max_temperature_tolerated[1] > globals.temperature){
+        console.log(`O indivíduo ${this.id} simplesmente derreteu devido ao calor... :{`);
+      }
+
+      else {
+        console.log(`O indivíduo ${this.id} foi de drake e josh, foi de americanas, foi de arrasta pra cima`)
+      }
+
       this.kill();
     }
 
@@ -524,6 +543,10 @@ class Organism extends Point implements Drawable {
       this.energy = this.max_energy;
     }
     organism.kill();
+
+    // Log de morte
+    console.log(`O organismo ${organism.id} foi devorado :(`);
+
     this.increase_size();
     this.food_eaten++;
   }
