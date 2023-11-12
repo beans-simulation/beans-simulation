@@ -96,19 +96,16 @@ class Organism extends Point implements Drawable {
 
     this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
-    this.minimal_consumption = 0.0032 * Math.pow(Math.pow(this.radius, 2), 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
-    this.max_energy_consumption_rate =
-      this.minimal_consumption +
-      Math.pow(this.initial_radius * 1.5, 2) *
-        Math.pow(this.max_speed, 2) *
-        0.00012;
+    this.minimal_consumption = 0.0032 * ((this.radius * this.radius) ** 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
+    this.max_energy_consumption_rate = this.minimal_consumption + ((this.initial_radius * 1.5) * (this.initial_radius * 1.5)) * (this.max_speed * this.max_speed) * 0.00012;
     this.status = organism_status.roaming;
 
     this.dna = dna;
     this.other_color = this.get_other_color(this.color);
     this.detection_radius = this.initial_detection_radius;
-    this.max_energy = Math.pow(this.radius, 2) * 6;
-    this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
+    this.max_energy = (this.radius * this.radius) * 6;
+    this.fixed_max_energy = (this.initial_radius * 1.5 * this.initial_radius * 1.5) * 6; // Usada para obter valores não-variáveis no gráfico
+
     this.birth_moment_in_milliseconds = global_timer.total;
     this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000;
     this.neural_network_id = neural_network_id;
@@ -252,8 +249,9 @@ class Organism extends Point implements Drawable {
 
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
-    this.consumed_energy_rate =
-      Math.pow(this.radius, 2) * Math.pow(this.speed.magnitude(), 2) * 0.0002; // Atualiza de acordo com a velocidade atual
+    const speed_magnitude = this.speed.magnitude()// Atualiza de acordo com a velocidade atual
+    this.consumed_energy_rate = (this.radius * this.radius) * (speed_magnitude * speed_magnitude) * 0.0002;
+
     const achieved_age_limit =
       global_timer.total - this.birth_moment_in_milliseconds >
       this.lifetime_in_miliseconds;
@@ -309,7 +307,7 @@ class Organism extends Point implements Drawable {
       this.radius = this.radius + this.radius * this.body_growth_rate;
       // this.detection_radius *= 1.03;
     }
-    this.max_energy = Math.pow(this.radius, 2) * 6;
+    this.max_energy = (this.radius * this.radius) * 6;
   }
 
   private get nearRightBorder() {
@@ -419,7 +417,7 @@ class Organism extends Point implements Drawable {
       this
     );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       if (close_organisms.length !== 0) {
         this.run_away(close_organisms[closest_index] as Organism);
       }
@@ -469,7 +467,7 @@ class Organism extends Point implements Drawable {
       is_searching_vegetable
     );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_eating = true;
       this.is_roaming = false;
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
@@ -507,7 +505,7 @@ class Organism extends Point implements Drawable {
       this
     );
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_eating = true;
       this.is_roaming = false;
 
@@ -636,7 +634,7 @@ class Organism extends Point implements Drawable {
     Se aproxima do parceiro e faz o crossover
     */
 
-    if (min_distance <= Math.pow(this.detection_radius, 2)) {
+    if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_roaming = false;
       this.is_eating = false;
 
