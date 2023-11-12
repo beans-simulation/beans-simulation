@@ -49,6 +49,7 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
+  public time_to_unlock_next_reproduction_miliseconds: number = 0;
   public neural_network_id: number | null;
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
@@ -236,7 +237,7 @@ class Organism extends Point implements Drawable {
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
         partner.is_ready_to_reproduce = false;
-
+        this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+3) * 1000
       }
     }
   }
@@ -259,30 +260,22 @@ class Organism extends Point implements Drawable {
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
-
-      // TODO:  -------------- REVER SE ESSA PARTE DO CÓDIGO É NECESSÁRIA ------------------
-      // a reprodução está atrelada a alimentação, se nao comer, nao consegue reproduzir
-      // if (Math.random() < (0.0005 * this.food_eaten) / 10) {
-      //   // Número baixo pois testa a cada frame. Quando mais comeu, maiores as chances
-      //   // Remover reproducao assexuada
-      //   if (Math.random() <= this.procreation_probability) {
-      //     // NINHADA
-      //     if(this.maturity == 1){
-      //       this.litter_size = generate_integer(
-      //         this.litter_interval[0],
-      //         this.litter_interval[1] + 1
-      //       );
-      //       for (var i = 0; i < this.litter_size; i++) {
-      //         if (Math.random() < 0.2) {
-      //           // Para espaçar os nascimentos
-      //           // this.assexually_procreate();
-      //         }
-      //       }
-      //     }
-
-      //   }
-      // }
     } else {
+      // Consoles de morte
+      if (this.energy <= 0){
+        console.log(`O indivíduo ${this.id} veio a falecer de fome :(`);
+      }
+
+      if (achieved_age_limit){
+        console.log(`O indivíduo ${this.id} tava velho e morreu de velhice...`);
+      }
+
+      if (globals.temperature <= this.min_max_temperature_tolerated[0]){
+        console.log(`O indivíduo ${this.id} morreu de hipotermia pq fez muito muito frio pra ele... :{`);
+      } else if (this.min_max_temperature_tolerated[0] > globals.temperature){
+        console.log(`O indivíduo ${this.id} simplesmente derreteu devido ao calor... :{`);
+      }
+
       this.kill();
     }
 
@@ -294,7 +287,7 @@ class Organism extends Point implements Drawable {
     this.avoid_space_limits();
 
     if (this.maturity < 1) {
-      // Calcula o valor da maturidade
+
       const maturity = time_alive / this.time_to_maturity_in_seconds;
 
       // o valor tem que estar entre zero e 1
@@ -549,6 +542,10 @@ class Organism extends Point implements Drawable {
       this.energy = this.max_energy;
     }
     organism.kill();
+
+    // Log de morte
+    console.log(`O organismo ${organism.id} foi devorado :(`);
+
     this.increase_size();
     this.food_eaten++;
   }

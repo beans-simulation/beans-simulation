@@ -25,6 +25,9 @@ function is_close_to_target(
 }
 
 function accelerate(value: number, organism: Organism) {
+  if (value == 0) {
+    return;
+  }
   let speed_copy = organism.speed.copy(); // Copiando para não alterar o vetor original no meio do cálculo
 
   speed_copy = speed_copy.normalize().multiply(value);
@@ -32,15 +35,13 @@ function accelerate(value: number, organism: Organism) {
   organism.speed = organism.speed.add(speed_copy);
 }
 
-function rotate(value: number, organism: Organism, output: {}) {
+function rotate(value: number, organism: Organism) {
+  if (value == 0) {
+    return;
+  }
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
   organism.is_rotating = false;
-}
-
-function desireToReproduce(value: number, organism: Organism) {
-  // TODO: chamar a função reprodução
-  // console.log('Calling DesireToReproduce with value:', value);
 }
 
 function desireToEat(value: number, organism: Organism) {
@@ -48,7 +49,6 @@ function desireToEat(value: number, organism: Organism) {
     // não deseja comer
     return;
   }
-  // console.log("fome", value)
   organism.is_eating = true;
 
   if (organism.closest_target) {
@@ -82,8 +82,6 @@ const map_outputs_from_net: {
 } = {
   Accelerate: accelerate,
   Rotate: rotate,
-  DesireToReproduce: desireToReproduce,
-  DesireToEat: desireToEat,
 };
 
 function fill_data_by_organism(organism: Organism, data: ChartDataByOrganism) {
@@ -152,6 +150,21 @@ function update_organism(
       map_outputs_from_net[key](value, organism, output);
     }
   }
+
+  const desire_to_reproduce = output.get("DesireToReproduce");
+  const desire_to_eat = output.get("DesireToEat");
+
+  const can_reproduce =
+    organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total;
+  const has_energy_and_maturity_for_reproduction =
+    desire_to_reproduce == 1 &&
+    organism.maturity == 1 &&
+    organism.energy > organism.max_energy * 0.2;
+
+  if (can_reproduce && has_energy_and_maturity_for_reproduction) {
+    return organism.sexually_procreate(qtreeOrganisms, vision);
+  }
+  desireToEat(desire_to_eat, organism);
 
   // organism.roam();
 }
