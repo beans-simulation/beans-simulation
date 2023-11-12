@@ -110,7 +110,7 @@ class Organism extends Point implements Drawable {
     this.max_energy = Math.pow(this.radius, 2) * 6;
     this.fixed_max_energy = Math.pow(this.initial_radius * 1.5, 2) * 6; // Usada para obter valores não-variáveis no gráfico
     this.birth_moment_in_milliseconds = global_timer.total;
-    this.time_to_maturity_in_seconds = (this.lifetime_in_miliseconds*this.percentage_to_mature)/1000;
+    this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000;
     this.neural_network_id = neural_network_id;
     this.input_neurons_list = [];
 
