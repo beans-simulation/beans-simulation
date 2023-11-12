@@ -64,15 +64,22 @@ document.addEventListener("DOMContentLoaded", (_) => {
     update_mutation_magnitude
   );
   add_on_change_event_input(
-    input_mutation_probability,
-    label_mutation_probability,
-    update_mutation_probability
-  );
-  add_on_change_event_input(
     input_vegetable_rate,
     label_vegetable_rate,
     update_vegetables_apparition_interval
   );
+
+  // botoes do grafico
+  button_population_chart?.addEventListener("click", show_population_chart);
+  button_speed_chart?.addEventListener("click", show_speed_chart);
+  button_diet_chart?.addEventListener("click", show_diet_chart);
+  button_force_chart?.addEventListener("click", show_force_chart);
+  button_energy_chart?.addEventListener("click", show_energy_chart);
+  button_consumption_chart?.addEventListener("click", show_consumption_chart);
+  button_detection_chart?.addEventListener("click", show_detection_chart);
+  button_lifetime_chart?.addEventListener("click", show_lifetime_chart);
+  button_maturity_chart?.addEventListener("click", show_maturity_chart);
+  button_size_chart?.addEventListener("click", show_size_chart);
 });
 
 function destroy_objects() {
@@ -135,7 +142,7 @@ async function start_simulation() {
     set_btn_loading(button_start_simulation);
     const pyodide = await import_pyodide();
     unset_btn_loading(button_start_simulation);
-    globals.pyodide = pyodide
+    globals.pyodide = pyodide;
   }
   const n_organisms =
     parseInt(input_slider_organisms?.value || "0") * globals.universe_size;
@@ -184,6 +191,9 @@ async function start_simulation() {
     }
   } else if (isPaused) {
     despausa();
+    reset_chart();
+  } else {
+    reset_chart();
   }
 
   is_running = true;
@@ -324,7 +334,7 @@ function unset_btn_loading(btn: HTMLElement | null) {
   }
 }
 
-async function import_pyodide(){
+async function import_pyodide() {
   console.log("Carregando Pyodide...");
   const pyodide = await loadPyodide();
   globals.pyodide = pyodide;
