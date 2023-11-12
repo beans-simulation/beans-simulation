@@ -29,6 +29,7 @@ class Organism extends Point implements Drawable {
   public is_rotating = false;
   public is_running_away = false;
   public is_ready_to_reproduce = false;
+  public is_organism_dead = 0;
   public lifetime_in_miliseconds: number; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
@@ -260,7 +261,7 @@ class Organism extends Point implements Drawable {
     const time_alive = this.get_time_alive_in_seconds();
 
     // Taxa de diminuição de energy
-    if (this.energy > 0 && !achieved_age_limit) {
+    if (this.energy > 0 && !achieved_age_limit && this.min_max_temperature_tolerated[0] <= globals.temperature && this.min_max_temperature_tolerated[1] >= globals.temperature) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
 
       // TODO:  -------------- REVER SE ESSA PARTE DO CÓDIGO É NECESSÁRIA ------------------
@@ -286,7 +287,8 @@ class Organism extends Point implements Drawable {
       //   }
       // }
     } else {
-      this.kill();
+      return 1
+      // this.kill();
     }
 
     // Alteração do atributo de health
@@ -324,6 +326,8 @@ class Organism extends Point implements Drawable {
     // Reseta a aceleração para 0 a cada ciclo
     this.acceleration.multiply(0);
     this.display(context);
+
+    return 0
   }
 
   increase_size() {
@@ -749,6 +753,17 @@ class Organism extends Point implements Drawable {
   }
 
   kill() {
+    if (globals.pyodide){
+      globals.pyodide.runPython(`
+        import json
+
+        this_nn_id = json.loads('${JSON.stringify(this.neural_network_id)}')
+
+        # Deletando a rede através do ID
+        print('${this.id}', ' died')
+        neural_network.NeuralNetwork.neural_networks.pop(f"{this_nn_id}")
+      `);
+    }
     Organism.organisms = Organism.organisms.filter((item) => item !== this);
   }
 
