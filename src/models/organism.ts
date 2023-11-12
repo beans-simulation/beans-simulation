@@ -232,10 +232,8 @@ class Organism extends Point implements Drawable {
 
         this.energy = (this.energy/2); // Mudar a logica?
         this.is_reproducing = false;
-        this.is_ready_to_reproduce = false;
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
-        partner.is_ready_to_reproduce = false;
         this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+3) * 1000
       }
     }

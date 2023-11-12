@@ -143,7 +143,6 @@ function animate(context: CanvasRenderingContext2D | null) {
 
       const can_reproduce = organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total;
       organism.is_ready_to_reproduce = desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2
-
       if(can_reproduce && organism.is_ready_to_reproduce){
         return organism.sexually_procreate(qtreeOrganisms, vision)
       }
