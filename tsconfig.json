@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2017" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-    "lib": ["ES2017", "DOM"],
+    "lib": ["ES2017", "DOM", "dom.iterable"],
     "outFile": "./public/js/main.js",
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
     "strict": true,

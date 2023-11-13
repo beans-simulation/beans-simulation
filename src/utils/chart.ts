@@ -232,6 +232,12 @@ async function updateChart(data_by_organism: ChartDataByOrganism) {
   );
 }
 
+function resize_chart(width: number, height: number) {
+  if (chart) {
+    Plotly.relayout(chart, { width, height });
+  }
+}
+
 // Intervalo do grafico ----------------------------
 let chart_interval: number | null = null;
 

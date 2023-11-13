@@ -240,6 +240,7 @@ color: #f1f1f1;
   backdrop-filter: blur(3px);
   color: #fff;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 .tab-title {
@@ -261,6 +262,7 @@ color: #f1f1f1;
 .tab-body {
   padding: 10px;
   min-width: 300px;
+  height: calc(100% - 60px);
 }
 
 .close-btn > i {
