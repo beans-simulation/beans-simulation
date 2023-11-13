@@ -279,7 +279,7 @@ class Organism extends Point implements Drawable {
         console.log(`O indivíduo ${this.id} foi de drake e josh, foi de americanas, foi de arrasta pra cima`)
       }
 
-      this.kill();
+      return 1
     }
 
     // Alteração do atributo de health
@@ -566,6 +566,10 @@ class Organism extends Point implements Drawable {
       this.energy = this.max_energy;
     }
     element.kill();
+    // Log de morte
+    if(element instanceof Organism){
+      console.log(`O organismo ${element.id} foi devorado :(`);
+    }
 
     this.increase_size();
     this.food_eaten++;

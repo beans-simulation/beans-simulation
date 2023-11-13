@@ -122,6 +122,7 @@ function animate(context: CanvasRenderingContext2D | null) {
     Organism.organisms.forEach(( organism) => {
       if(organism.update(context) === 1){
         organism.kill();
+        debugger;
         return;
       }
       // organism.roam();
