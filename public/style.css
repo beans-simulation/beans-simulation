@@ -260,7 +260,7 @@ color: #f1f1f1;
 
 .tab-body {
   padding: 10px;
-  max-width: 500px;
+  min-width: 300px;
 }
 
 .close-btn > i {

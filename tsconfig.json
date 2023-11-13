@@ -40,6 +40,7 @@
     "src/utils/chart.ts",
     "src/utils/create-context.ts",
     "src/utils/drag-screen-element.ts",
+    "src/utils/resize-screen-element.ts",
     "src/utils/generate-color.ts",
     "src/utils/generate-float.ts",
     "src/utils/generate-integer.ts",
