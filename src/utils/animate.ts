@@ -108,7 +108,6 @@ function animate(context: CanvasRenderingContext2D | null) {
     set_temperature(); // Atualizando a variável global de temperatura
     add_tick_step(); // Adicionando um passo ao tick global
 
-
     Vegetable.vegetables.forEach((vegetable) => {
       vegetable.display(context);
 

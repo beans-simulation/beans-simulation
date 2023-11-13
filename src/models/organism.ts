@@ -543,10 +543,12 @@ class Organism extends Point implements Drawable {
     if (this.energy > this.max_energy) {
       this.energy = this.max_energy;
     }
-    organism.kill();
 
     // Log de morte
     console.log(`O organismo ${organism.id} foi simplesmente AMASSADO, comido, devorado, papado`);
+
+    organism.kill();
+   
 
     this.increase_size();
     this.food_eaten++;
@@ -562,6 +564,12 @@ class Organism extends Point implements Drawable {
     if (this.energy > this.max_energy) {
       this.energy = this.max_energy;
     }
+
+    if (element instanceof Organism){
+      // Log de morte
+      console.log(`O organismo ${element.id} foi simplesmente AMASSADO, comido, devorado, papado pelo organismo ${this.id}`);
+    }
+    
     element.kill();
 
     this.increase_size();
