@@ -29,7 +29,7 @@ var is_paused = false;
 
 // cria mais vegetables ao longo do tempo
 // a função setInterval() permite que ele chame o loop a cada x milisegundos
-let vegetable_generation_interval: number;
+let vegetable_generation_interval: number | null;
 
 function add_on_change_event_input(
   input: HTMLInputElement | null,
@@ -99,20 +99,30 @@ function criaVegetablesGradativo() {
 }
 
 function update_vegetables_apparition_interval(vegetable_rate?: string) {
-  if (vegetable_rate) {
-    const new_interval = 1000 / Number(vegetable_rate);
-    if (new_interval <= 1000) {
-      if (vegetable_generation_interval) {
-        clearInterval(vegetable_generation_interval);
-      }
+  if (vegetable_rate == undefined || vegetable_rate == null) {
+    return;
+  }
+  const rate = Number(vegetable_rate);
+  if (rate == 0 && vegetable_generation_interval) {
+    // Rate é igual a zero, então nenhum vegetal deve ser gerado
+    clearInterval(vegetable_generation_interval);
+    vegetable_generation_interval = null; //resetando o intervalo para parar de gerar
+    return;
+  }
 
-      vegetable_generation_interval = setInterval(
-        criaVegetablesGradativo,
-        new_interval
-      );
+  const new_interval = 1000 / rate;
+  if (new_interval <= 1000) {
+    // Se já existir um intervalo, reseta ele
+    if (vegetable_generation_interval) {
+      clearInterval(vegetable_generation_interval);
     }
+    vegetable_generation_interval = setInterval(
+      criaVegetablesGradativo,
+      new_interval
+    );
   }
 }
+
 
 function update_mutation_probability(value?: string) {
   if (value) {
