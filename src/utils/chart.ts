@@ -7,6 +7,7 @@ const trace_model: Partial<Plotly.ScatterData> = {
   mode: "lines+markers",
   visible: false,
   type: "scatter",
+  name: "",
 };
 
 const labels: ChartLabel[] = [
@@ -132,7 +133,7 @@ function reset_chart() {
 
     // mostrar linha do primeiro grafico
     traces[0].visible = true;
-    Plotly.newPlot(chart, traces, layout);
+    Plotly.newPlot(chart, traces, layout, { responsive: true });
     console.log(traces);
   }
 }
