@@ -263,6 +263,9 @@ possible_neurons = [
     ("Input", "Speed"),
     ("Input", "Size"),
     ("Input", "Tick"),
+    ("Input", "ClosestOrganismR"),
+    ("Input", "ClosestOrganismG"),
+    ("Input", "ClosestOrganismB"),
 
     # HIDDEN
     ("Hidden", "InvertSignal"),

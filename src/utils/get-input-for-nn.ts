@@ -16,6 +16,9 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
     var num_of_food_in_view: number = 0;
     var num_of_organisms_in_view: number = 0;
     var num_of_targets_in_view: number = 0;
+    var r_closest_organism: null | number = 0;
+    var g_closest_organism: null | number = 0;
+    var b_closest_organism: null | number = 0;
 
 
     // Só faz os cálculos se o organismo tiver algum desses neurônios de enxergar alvos
@@ -43,6 +46,9 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
             distance_closest_organism = organism_distance_and_index[0]
             index_closest_organism = organism_distance_and_index[1]
             angle_closest_organism = get_angle_to_closest_element(organism, organisms_in_view[index_closest_organism])
+            r_closest_organism = organism.r;
+            g_closest_organism = organism.g;
+            b_closest_organism = organism.b;
 
             organism.angle_closest_organism = angle_closest_organism
             organism.distance_closest_organism = distance_closest_organism
@@ -78,6 +84,9 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
                 distance_closest_organism = organism_distance_and_index[0]
                 index_closest_organism = organism_distance_and_index[1]
                 angle_closest_organism = get_angle_to_closest_element(organism, organisms_in_view[index_closest_organism])
+                r_closest_organism = organism.r
+                g_closest_organism = organism.g
+                b_closest_organism = organism.b
 
                 organism.angle_closest_organism = angle_closest_organism
                 organism.distance_closest_organism = distance_closest_organism
@@ -134,7 +143,10 @@ function get_input_values_for_neuralnet(organism: Organism, qtreeOrganisms: Orga
         'TimeAlive': organism.get_time_alive_in_seconds(),
         'Speed': organism.speed.magnitude(),
         'Size': organism.radius,
-        'Tick': globals.tick
+        'Tick': globals.tick,
+        'ClosestOrganismR': r_closest_organism,
+        'ClosestOrganismG': g_closest_organism,
+        'ClosestOrganismB': b_closest_organism
     }
 
     return input_values

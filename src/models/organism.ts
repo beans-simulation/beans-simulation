@@ -11,6 +11,9 @@ class Organism extends Point implements Drawable {
   public childrenIds?: number[];
   public circle_radius = 1;
   public color: string;
+  public r: number;
+  public g: number;
+  public b: number;
   private consumed_energy_rate = 0;
   public detection_radius: number;
   public distance_make_circle = 2;
@@ -83,6 +86,10 @@ class Organism extends Point implements Drawable {
     this.max_speed = dna.max_speed;
     this.max_force = dna.max_force;
     this.color = dna.color;
+    const {r, g, b} = this.parseRGB(this.color);
+    this.r = r;
+    this.g = g;
+    this.b = b;
     this.initial_detection_radius = dna.initial_detection_radius;
     this.litter_interval = dna.litter_interval; //ninhada
     this.sex = dna.sex;
@@ -146,6 +153,19 @@ class Organism extends Point implements Drawable {
       .match(/\d+/)
       ?.map((c) => Math.floor(parseInt(c) * 0.4));
     return `rgba(${multiplied_colors?.join(",")})`;
+  }
+
+  private parseRGB(rgbString: string) {
+    const regex = /rgb\((\d+),(\d+),(\d+)\)/;
+    const match = rgbString.match(regex);
+    if (!match) {
+      throw new Error('Invalid RGB string');
+    }
+    return {
+      r: parseInt(match[1], 10),
+      g: parseInt(match[2], 10),
+      b: parseInt(match[3], 10),
+    };
   }
 
   // Método de reprodução (com mutações)
