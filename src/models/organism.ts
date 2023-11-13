@@ -177,7 +177,6 @@ class Organism extends Point implements Drawable {
   }
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
-    this.is_ready_to_reproduce = true;
     // Pega o genoma do organismo atual
     let current_organism_genome = this.dna.get_genome();
     // Procura parceiros e o parceiro mais proximo
@@ -188,7 +187,7 @@ class Organism extends Point implements Drawable {
       let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
 
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
-      if (this.approach_partner(min_distance, possible_partners, closest_index) ){ //&& partner.is_ready_to_reproduce
+      if (this.approach_partner(min_distance, possible_partners, closest_index) && partner.is_ready_to_reproduce){
         this.is_reproducing = true;
         partner.is_reproducing = true;
         // NINHADA
@@ -234,10 +233,8 @@ class Organism extends Point implements Drawable {
 
         this.energy = (this.energy/2); // Mudar a logica?
         this.is_reproducing = false;
-        this.is_ready_to_reproduce = false;
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
-        partner.is_ready_to_reproduce = false;
         this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+3) * 1000
       }
     }
@@ -267,25 +264,22 @@ class Organism extends Point implements Drawable {
       if (this.energy <= 0){
         console.log(`O indivíduo ${this.id} veio a falecer de fome :(`);
       }
-      
+
       else if (achieved_age_limit){
         console.log(`O indivíduo ${this.id} tava velho e morreu de velhice...`);
       }
-      
-      else if (globals.temperature <= this.min_max_temperature_tolerated[0]){
+
+      else if (globals.temperature < this.min_max_temperature_tolerated[0]){
         console.log(`O indivíduo ${this.id} morreu de hipotermia pq fez muito muito frio pra ele... :{`);
-      } 
-      
-      else if (this.min_max_temperature_tolerated[0] > globals.temperature){
+      } else if (this.min_max_temperature_tolerated[1] > globals.temperature){
         console.log(`O indivíduo ${this.id} simplesmente derreteu devido ao calor... :{`);
       }
 
       else {
-        console.log('faleceu de capitalismo')
+        console.log(`O indivíduo ${this.id} foi de drake e josh, foi de americanas, foi de arrasta pra cima`)
       }
-      
-      return 1
-      // this.kill();
+
+      this.kill();
     }
 
     // Alteração do atributo de health
