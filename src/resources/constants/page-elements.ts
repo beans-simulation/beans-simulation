@@ -52,6 +52,9 @@ const group_extra_panel = document.getElementById("extra_panel");
 // cronometro
 const label_timer = document.getElementById("label_timer");
 
+// tabs
+const tab_chart = document.getElementById("tab_graficos");
+
 // grafico
 const chart = document.getElementById("plotly-graph");
 const button_population_chart = document.getElementById(
