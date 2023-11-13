@@ -1,9 +1,29 @@
-function drag_mouse_down(event: MouseEvent) {
-  event.preventDefault();
-  // when mouse move inside component
-  document.onmousemove = element_drag;
-  // when user releases mouse button
-  document.onmouseup = stop_drag_element;
+function get_new_x(parent: HTMLElement, element: HTMLElement, event_x: number) {
+  const middleTabX = innerWidth - event_x - parent.clientWidth / 2;
+
+  const minX = 5;
+  const maxX = innerWidth - parent.clientWidth - 5;
+
+  const title_size = element.clientWidth;
+  if (event_x - title_size / 2 <= 0) {
+    return maxX;
+  }
+  return middleTabX <= minX ? minX : middleTabX;
+}
+
+function get_new_y(parent: HTMLElement, element: HTMLElement, event_y: number) {
+  const middleTabY = event_y - element.clientHeight / 2;
+
+  const minY = 5;
+  const maxY = innerHeight - parent.clientHeight - 5;
+
+  const title_size = element.clientHeight;
+
+  if (event_y - title_size / 2 <= 0) {
+    return minY;
+  }
+
+  return middleTabY >= maxY ? maxY : middleTabY;
 }
 
 function element_drag(event: MouseEvent) {
@@ -12,14 +32,11 @@ function element_drag(event: MouseEvent) {
   const parent = element?.parentElement;
 
   if (element && parent) {
-    const middleTabX = innerWidth - event.x - parent.clientWidth / 2;
-    const middleTabY = event.y - element!.clientHeight / 2;
+    const x = get_new_x(parent, element, event.x);
+    const y = get_new_y(parent, element, event.y);
 
-    const minX = 5;
-    const maxY = innerHeight - parent.scrollHeight;
-
-    const x = middleTabX <= minX ? minX : middleTabX;
-    const y = middleTabY >= maxY ? maxY : middleTabY;
+    // controlar a posicao atraves do right e top
+    if (parent.style.left) parent.style.left = "";
 
     // set the element's new position:
     parent.style.right = x + "px";
@@ -30,15 +47,17 @@ function element_drag(event: MouseEvent) {
 function stop_drag_element() {
   document.onmouseup = null;
   document.onmousemove = null;
+  document.onmouseleave = null;
 }
 
 function drag_screen_element(element: Element) {
-  // se for uma tab
-  if (element.classList.contains("tab-info")) {
-    // inserir o evento de arrastar na div de titulo (primeiro filho dentro da tab)
-    (element.children[0] as HTMLDivElement).onmousedown = drag_mouse_down;
-  } else {
-    // otherwise, move the DIV from anywhere inside the DIV:
-    (element as HTMLDivElement).onmousedown = drag_mouse_down;
-  }
+  (element as HTMLDivElement).onmousedown = (event) => {
+    event.preventDefault();
+    // when mouse move inside component
+    document.onmousemove = element_drag;
+    // when user releases mouse button
+    document.onmouseup = stop_drag_element;
+    // when mouse go outside of title
+    element.addEventListener("mouseleave", stop_drag_element);
+  };
 }

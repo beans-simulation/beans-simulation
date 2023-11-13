@@ -44,7 +44,12 @@ function add_on_change_event_input(
 }
 
 document.addEventListener("DOMContentLoaded", (_) => {
-  document.querySelectorAll(".tab-info").forEach(drag_screen_element);
+  document.querySelectorAll(".tab-title").forEach(drag_screen_element);
+  button_resize_chart?.addEventListener("mousedown", (event) => {
+    if (tab_chart) {
+      resize_screen_element_and_chart(event, tab_chart, 1);
+    }
+  });
 
   // botoes de controle da simulacao
   button_set_default?.addEventListener("click", set_input_defaults);

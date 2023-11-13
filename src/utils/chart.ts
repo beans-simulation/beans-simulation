@@ -7,6 +7,7 @@ const trace_model: Partial<Plotly.ScatterData> = {
   mode: "lines+markers",
   visible: false,
   type: "scatter",
+  name: "",
 };
 
 const labels: ChartLabel[] = [
@@ -132,7 +133,7 @@ function reset_chart() {
 
     // mostrar linha do primeiro grafico
     traces[0].visible = true;
-    Plotly.newPlot(chart, traces, layout);
+    Plotly.newPlot(chart, traces, layout, { responsive: true });
     console.log(traces);
   }
 }
@@ -229,6 +230,12 @@ async function updateChart(data_by_organism: ChartDataByOrganism) {
     },
     line_numbers
   );
+}
+
+function resize_chart(width: number, height: number) {
+  if (chart) {
+    Plotly.relayout(chart, { width, height });
+  }
 }
 
 // Intervalo do grafico ----------------------------

@@ -9,6 +9,7 @@ const button_set_default = document.getElementById("button_set_default");
 const button_start_simulation = document.getElementById(
   "button_start_simulation"
 );
+const button_resize_chart = document.getElementById("button_resize_chart");
 
 // inputs iniciais
 const input_vegetable_rate = document.getElementById(
@@ -50,6 +51,9 @@ const group_extra_panel = document.getElementById("extra_panel");
 
 // cronometro
 const label_timer = document.getElementById("label_timer");
+
+// tabs
+const tab_chart = document.getElementById("tab_graficos");
 
 // grafico
 const chart = document.getElementById("plotly-graph");
