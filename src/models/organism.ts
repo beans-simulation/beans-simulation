@@ -132,8 +132,7 @@ class Organism extends Point implements Drawable {
     if (parent_id) {
       this.energy =
         this.max_energy *
-        (0.75 + Math.random() / 4) * // / parent.litter_size
-        0.6; // Começa com uma parcela da energy máxima
+        (0.75 + Math.random() / 4) * 0.6; // Começa com uma parcela da energy máxima
     } else {
       this.energy = this.max_energy * 0.75;
     }
@@ -246,13 +245,21 @@ class Organism extends Point implements Drawable {
 
   // Método para atualizar o estado do organism
   update(context: CanvasRenderingContext2D) {
-    const speed_magnitude = this.speed.magnitude()// Atualiza de acordo com a velocidade atual
+    var speed_magnitude = this.speed.magnitude()// Atualiza de acordo com a velocidade atual
+
+    // Como o limite de velocidade max do organismo só acontece depois no código, vamos 
+    // limitar o valor da magnitute agora para que não entre o valor incorreto no cálculo
+    if(speed_magnitude > this.max_speed){
+      speed_magnitude = this.max_speed;
+    }
+
     this.consumed_energy_rate = (this.radius * this.radius) * (speed_magnitude * speed_magnitude) * 0.0002;
 
     const achieved_age_limit =
       global_timer.total - this.birth_moment_in_milliseconds >
       this.lifetime_in_miliseconds;
     const time_alive = this.get_time_alive_in_seconds();
+
 
     // Taxa de diminuição de energy
     if (this.energy > 0 && !achieved_age_limit) {
@@ -545,7 +552,7 @@ class Organism extends Point implements Drawable {
     organism.kill();
 
     // Log de morte
-    console.log(`O organismo ${organism.id} foi devorado :(`);
+    console.log(`O organismo ${organism.id} foi simplesmente AMASSADO, comido, devorado, papado`);
 
     this.increase_size();
     this.food_eaten++;
