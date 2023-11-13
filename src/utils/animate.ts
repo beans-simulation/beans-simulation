@@ -9,15 +9,24 @@ function create_background(context: CanvasRenderingContext2D) {
   context.strokeStyle = "white";
   context.stroke();
 }
-function is_close_to_target(organism: Organism, distance_closest_target:number){
+function is_close_to_target(
+  organism: Organism,
+  distance_closest_target: number
+) {
   const detection_radius_squared = organism.detection_radius ** 2;
   const eat_distance_squared = EAT_DISTANCE ** 2;
 
-  return distance_closest_target <= (detection_radius_squared < eat_distance_squared ? detection_radius_squared : eat_distance_squared);}
+  return (
+    distance_closest_target <=
+    (detection_radius_squared < eat_distance_squared
+      ? detection_radius_squared
+      : eat_distance_squared)
+  );
+}
 
 function accelerate(value: number, organism: Organism) {
-  if(value == 0){
-    return
+  if (value == 0) {
+    return;
   }
   let speed_copy = organism.speed.copy(); // Copiando para não alterar o vetor original no meio do cálculo
 
@@ -27,8 +36,8 @@ function accelerate(value: number, organism: Organism) {
 }
 
 function rotate(value: number, organism: Organism) {
-  if(value == 0){
-    return
+  if (value == 0) {
+    return;
   }
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
@@ -36,30 +45,30 @@ function rotate(value: number, organism: Organism) {
 }
 
 function desireToEat(value: number, organism: Organism) {
-  if(value == 0){ // não deseja comer
-    return
+  if (value == 0) {
+    // não deseja comer
+    return;
   }
   organism.is_eating = true;
 
-  if(organism.closest_target){
+  if (organism.closest_target) {
     if (is_close_to_target(organism, organism.distance_closest_target)) {
-      organism.eat(organism.closest_target as any)
+      organism.eat(organism.closest_target as any);
     }
-  }else{
+  } else {
     // ALIMENTAÇÃO EMERGENCIAL
     // caso nao exista target, ele esteja morrendo de fome e existir outra opção de alimento
 
-    if(organism.energy<(organism.max_energy*0.1)){
-      if(organism.closest_food){
+    if (organism.energy < organism.max_energy * 0.1) {
+      if (organism.closest_food) {
         if (is_close_to_target(organism, organism.distance_closest_food)) {
-          organism.eat(organism.closest_food as any)
+          organism.eat(organism.closest_food as any);
         }
-      }else if(organism.closest_organism){
+      } else if (organism.closest_organism) {
         if (is_close_to_target(organism, organism.distance_closest_organism)) {
-          organism.eat(organism.closest_organism as any)
+          organism.eat(organism.closest_organism as any);
         }
       }
-
     }
   }
 
@@ -67,9 +76,11 @@ function desireToEat(value: number, organism: Organism) {
 }
 
 // Define a mapping between keys and functions
-const map_outputs_from_net: { [key: string]: (value: number, organism: Organism, output:{}) => void } = {
-  'Accelerate': accelerate,
-  'Rotate': rotate
+const map_outputs_from_net: {
+  [key: string]: (value: number, organism: Organism, output: {}) => void;
+} = {
+  Accelerate: accelerate,
+  Rotate: rotate,
 };
 
 function animate(context: CanvasRenderingContext2D | null) {
@@ -108,17 +119,25 @@ function animate(context: CanvasRenderingContext2D | null) {
       qtreeOrganisms.insert(organism);
     });
 
-    Organism.organisms.forEach(( organism) => {
+    Organism.organisms.forEach((organism) => {
       organism.update(context);
       // organism.roam();
 
-
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
-      let vision = new Circle(organism.position.x, organism.position.y, organism.detection_radius);
+      let vision = new Circle(
+        organism.position.x,
+        organism.position.y,
+        organism.detection_radius
+      );
       // vision.display(context) // Descomentar para ver o raio de visão dos organismos
 
       // Pyodide
-      const values = get_input_values_for_neuralnet(organism, qtreeOrganisms, qtreeVegetables, vision);
+      const values = get_input_values_for_neuralnet(
+        organism,
+        qtreeOrganisms,
+        qtreeVegetables,
+        vision
+      );
       const valuesJSON = JSON.stringify(values);
       const network_id_JSON = JSON.stringify(organism.neural_network_id);
       pyodide.runPython(`
@@ -130,28 +149,32 @@ function animate(context: CanvasRenderingContext2D | null) {
 
         output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
-      let output = pyodide.globals.get('output_nn').toJs();
+      let output = pyodide.globals.get("output_nn").toJs();
       // console.log(output)
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
         if (map_outputs_from_net[key]) {
-          map_outputs_from_net[key](value,organism,output);
+          map_outputs_from_net[key](value, organism, output);
         }
       }
       const desire_to_reproduce = output.get("DesireToReproduce");
       const desire_to_eat = output.get("DesireToEat");
 
-      const can_reproduce = organism.time_to_unlock_next_reproduction_miliseconds <= global_timer.total;
-      organism.is_ready_to_reproduce = desire_to_reproduce == 1 && organism.maturity == 1 && organism.energy > organism.max_energy * 0.2
-      if(can_reproduce && organism.is_ready_to_reproduce){
-        return organism.sexually_procreate(qtreeOrganisms, vision)
-      }
-      desireToEat(desire_to_eat, organism)
-      // organism.roam();
+      const can_reproduce =
+        organism.time_to_unlock_next_reproduction_miliseconds <=
+        global_timer.total;
+      organism.is_ready_to_reproduce =
+        desire_to_reproduce == 1 &&
+        organism.maturity == 1 &&
+        organism.energy > organism.max_energy * 0.2;
 
+      if (can_reproduce && organism.is_ready_to_reproduce) {
+        return organism.sexually_procreate(qtreeOrganisms, vision);
+      }
+      desireToEat(desire_to_eat, organism);
+      // organism.roam();
     });
 
     // qtreeOrganisms.display(context);
   }
-
 }
