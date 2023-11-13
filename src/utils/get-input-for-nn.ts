@@ -190,7 +190,7 @@ function set_luminosity() {
     const cycle = (2 * Math.PI * global_timer.total / 1000) / globals.luminosity_cycle_time;
 
     // Calculando o valor senoidal e ajustando o ciclo para começar em 0.5
-    const sinusoidal_value = Math.sin(cycle + Math.PI / 2);
+    const sinusoidal_value = Math.sin(cycle);
 
     // Reescalando o valor para variar de 0 a 1 (ao invés de -1 a 1), que são os ranges da luminosidade
     const luminosity = (sinusoidal_value + 1) / 2;
