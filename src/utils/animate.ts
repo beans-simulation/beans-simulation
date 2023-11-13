@@ -119,8 +119,12 @@ function animate(context: CanvasRenderingContext2D | null) {
       qtreeOrganisms.insert(organism);
     });
 
-    Organism.organisms.forEach((organism) => {
-      organism.update(context);
+    Organism.organisms.forEach(( organism) => {
+      if(organism.update(context) === 1){
+        organism.kill();
+        debugger;
+        return;
+      }
       // organism.roam();
 
       // Transforma o radius de detecção em um objeto círculo para podermos manipulá-lo
@@ -147,7 +151,8 @@ function animate(context: CanvasRenderingContext2D | null) {
         input_values = json.loads('${valuesJSON}')
         network_id = json.loads('${network_id_JSON}')
 
-        output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
+        if(neural_network.NeuralNetwork.neural_networks.get(f"{network_id}")):
+          output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
       let output = pyodide.globals.get("output_nn").toJs();
       // console.log(output)
