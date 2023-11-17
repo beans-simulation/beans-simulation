@@ -83,7 +83,7 @@ class Organism extends Point implements Drawable {
     if (parent_id) {
       this.parent_id = parent_id;
     }
-    
+
     this.initial_radius = dna.initial_radius;
     this.max_speed = dna.max_speed;
     this.max_force = dna.max_force;
@@ -103,15 +103,15 @@ class Organism extends Point implements Drawable {
     this.minimal_consumption = 0.0032 * ((this.radius * this.radius) ** 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
     this.max_energy_consumption_rate = this.minimal_consumption + ((this.initial_radius * 1.5) * (this.initial_radius * 1.5)) * (this.max_speed * this.max_speed) * 0.00012;
     this.status = organism_status.roaming;
-    
+
     this.dna = dna;
     this.other_color = this.get_other_color(this.color);
     this.detection_radius = this.initial_detection_radius;
     this.max_energy = (this.radius * this.radius) * 6;
     this.fixed_max_energy = (this.initial_radius * 1.5 * this.initial_radius * 1.5) * 6; // Usada para obter valores não-variáveis no gráfico
-    
+
     this.birth_moment_in_milliseconds = global_timer.total;
-    this.time_to_unlock_next_reproduction_miliseconds = (this.birth_moment_in_milliseconds) + this.add_time_to_reproduction * 1000 
+    this.time_to_unlock_next_reproduction_miliseconds = (this.birth_moment_in_milliseconds) + this.add_time_to_reproduction * 1000
     this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000;
     this.neural_network_id = neural_network_id;
     this.input_neurons_list = [];
@@ -193,7 +193,7 @@ class Organism extends Point implements Drawable {
       let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
 
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
-      if (this.approach_partner(min_distance, possible_partners, closest_index) && partner.is_ready_to_reproduce){
+      if (this.approach_partner(min_distance, possible_partners, closest_index)){
         this.is_reproducing = true;
         partner.is_reproducing = true;
         // NINHADA
@@ -243,7 +243,7 @@ class Organism extends Point implements Drawable {
         partner.is_reproducing = false;
         this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_reproduction) * 1000;
         this.time_to_unlock_next_meal_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_meal) * 1000;
-        debugger;
+        // debugger;
       }
     }
   }
@@ -257,7 +257,7 @@ class Organism extends Point implements Drawable {
   update(context: CanvasRenderingContext2D) {
     var speed_magnitude = this.speed.magnitude()// Atualiza de acordo com a velocidade atual
 
-    // Como o limite de velocidade max do organismo só acontece depois no código, vamos 
+    // Como o limite de velocidade max do organismo só acontece depois no código, vamos
     // limitar o valor da magnitute agora para que não entre o valor incorreto no cálculo
     if(speed_magnitude > this.max_speed){
       speed_magnitude = this.max_speed;
@@ -561,7 +561,7 @@ class Organism extends Point implements Drawable {
     console.log(`O organismo ${organism.id} foi simplesmente AMASSADO, comido, devorado, papado`);
 
     organism.kill();
-   
+
 
     this.increase_size();
     this.food_eaten++;
@@ -582,7 +582,7 @@ class Organism extends Point implements Drawable {
       // Log de morte
       console.log(`O organismo ${element.id} foi simplesmente AMASSADO, comido, devorado, papado pelo organismo ${this.id}`);
     }
-    
+
     element.kill();
 
     this.increase_size();
@@ -676,14 +676,15 @@ class Organism extends Point implements Drawable {
     Se aproxima do parceiro e faz o crossover
     */
 
-    if (min_distance <= this.detection_radius*this.detection_radius) {
+    const partner = close_organisms[closest_index] as Organism
+    if (min_distance <= this.detection_radius*this.detection_radius && partner.is_ready_to_reproduce) {
       this.is_roaming = false;
       this.is_eating = false;
 
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
         return true
       } else if (close_organisms.length != 0) {
-        this.pursue((close_organisms[closest_index] as Organism), true);
+        this.pursue(partner, true);
       }
     }
     return false
