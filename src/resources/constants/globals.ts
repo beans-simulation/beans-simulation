@@ -22,6 +22,8 @@ class GlobalPreferences {
   public tick_aux: number = 1; // Guarda o inverso do tick
   public tick_period: number = 5; // Guarda o número de passos (frames) que leva para alternar o tick
   public tick_step_count: number = 0; // Guarda quantos passos já passaram desde a última alteração do tick
+
+  public count: number = 0;
 }
 
 const globals = new GlobalPreferences();
