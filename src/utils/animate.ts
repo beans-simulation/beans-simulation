@@ -42,10 +42,13 @@ function rotate(value: number, organism: Organism) {
   organism.is_rotating = true;
   organism.speed.rotate_degrees(value);
   organism.is_rotating = false;
-}
+  }
 
 function desireToEat(value: number, organism: Organism) {
-  if (value == 0) {
+
+  const can_eat = 
+        organism.time_to_unlock_next_meal_miliseconds <= global_timer.total;
+  if (value == 0 || !can_eat) {
     // não deseja comer
     return;
   }
@@ -122,7 +125,6 @@ function animate(context: CanvasRenderingContext2D | null) {
     Organism.organisms.forEach(( organism) => {
       if(organism.update(context) === 1){
         organism.kill();
-        debugger;
         return;
       }
       // organism.roam();
@@ -154,7 +156,7 @@ function animate(context: CanvasRenderingContext2D | null) {
         if(neural_network.NeuralNetwork.neural_networks.get(f"{network_id}")):
           output_nn = neural_network.NeuralNetwork.neural_networks.get(f"{network_id}").feed_forward(input_values)
       `);
-      let output = pyodide.globals.get("output_nn").toJs();
+      let output = pyodide.globals.get("output_nn").toJs(); 
       // console.log(output)
       // Chamando as funções com base no output da rede
       for (const [key, value] of output) {
@@ -164,11 +166,12 @@ function animate(context: CanvasRenderingContext2D | null) {
       }
       const desire_to_reproduce = output.get("DesireToReproduce");
       const desire_to_eat = output.get("DesireToEat");
-
-      const can_reproduce =
+      
+      var can_reproduce =
         organism.time_to_unlock_next_reproduction_miliseconds <=
         global_timer.total;
-      organism.is_ready_to_reproduce =
+
+      organism.is_ready_to_reproduce 
         desire_to_reproduce == 1 &&
         organism.maturity == 1 &&
         organism.energy > organism.max_energy * 0.2;
@@ -176,6 +179,7 @@ function animate(context: CanvasRenderingContext2D | null) {
       if (can_reproduce && organism.is_ready_to_reproduce) {
         return organism.sexually_procreate(qtreeOrganisms, vision);
       }
+
       desireToEat(desire_to_eat, organism);
       // organism.roam();
     });

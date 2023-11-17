@@ -28,7 +28,7 @@ class Organism extends Point implements Drawable {
   public is_roaming = false; //vagar sem direção
   public is_rotating = false;
   public is_running_away = false;
-  public is_ready_to_reproduce = false;
+  public is_ready_to_reproduce = true;
   public is_organism_dead = 0;
   public lifetime_in_miliseconds: number; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
@@ -39,7 +39,7 @@ class Organism extends Point implements Drawable {
   public max_force: number;
   public minimal_consumption: number; // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
   public other_color: string;
-  public parent_id?: number;
+  public parent_id?: number[];
   public position: Vector;
   public procreation_count = 0;
   public procreation_probability = 0.5;
@@ -50,7 +50,10 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
-  public time_to_unlock_next_reproduction_miliseconds: number = 0;
+  public time_to_unlock_next_reproduction_miliseconds: number;
+  public add_time_to_reproduction: number = 1;
+  public time_to_unlock_next_meal_miliseconds: number = 0;
+  public add_time_to_meal: number = 3;
   public neural_network_id: number | null;
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
@@ -73,13 +76,14 @@ class Organism extends Point implements Drawable {
   public input_neurons_list: string[] | null;
   //   private _status: organism_status_type;
 
-  constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number) {
+  constructor(x: number, y: number, dna: DNA, neural_network_id: number | null, parent_id?: number[]) {
     super(x, y);
     this.id = Organism.id++;
     this.position = new Vector(x, y);
     if (parent_id) {
       this.parent_id = parent_id;
     }
+    
     this.initial_radius = dna.initial_radius;
     this.max_speed = dna.max_speed;
     this.max_force = dna.max_force;
@@ -94,20 +98,20 @@ class Organism extends Point implements Drawable {
     this.lifespan = dna.lifespan;
     this.percentage_to_mature = dna.percentage_to_mature;
     this.lifetime_in_miliseconds = this.lifespan * 1000;
-
     this.diet_variant = generate_float(0,1); // utilizado para gerar aletoriedade na dieta do organismo
     this.radius = this.initial_radius;
     this.minimal_consumption = 0.0032 * ((this.radius * this.radius) ** 0.75); // Seguindo a lei de Kleiber para a taxa metabólica dos seres vivos
     this.max_energy_consumption_rate = this.minimal_consumption + ((this.initial_radius * 1.5) * (this.initial_radius * 1.5)) * (this.max_speed * this.max_speed) * 0.00012;
     this.status = organism_status.roaming;
-
+    
     this.dna = dna;
     this.other_color = this.get_other_color(this.color);
     this.detection_radius = this.initial_detection_radius;
     this.max_energy = (this.radius * this.radius) * 6;
     this.fixed_max_energy = (this.initial_radius * 1.5 * this.initial_radius * 1.5) * 6; // Usada para obter valores não-variáveis no gráfico
-
+    
     this.birth_moment_in_milliseconds = global_timer.total;
+    this.time_to_unlock_next_reproduction_miliseconds = (this.birth_moment_in_milliseconds) + this.add_time_to_reproduction * 1000 
     this.time_to_maturity_in_seconds = this.lifetime_in_miliseconds* this.percentage_to_mature/1000;
     this.neural_network_id = neural_network_id;
     this.input_neurons_list = [];
@@ -149,17 +153,20 @@ class Organism extends Point implements Drawable {
   }
 
   // Método de reprodução (com mutações)
-  private create_child(offspring_dna: DNA, neural_network_id: number | null) {
+  private create_child(offspring_dna: DNA, neural_network_id: number | null, parent_id: number[]) {
     this.procreation_count++;
 
     const offspring = new Organism(
       this.position.x,
       this.position.y,
       offspring_dna,
-      neural_network_id
+      neural_network_id,
+      parent_id
     );
 
     this.childrenIds ? this.childrenIds.push(offspring.id) : [offspring.id];
+
+    offspring.time_to_unlock_next_meal_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_meal) * 1000;
 
     return offspring;
   }
@@ -172,7 +179,7 @@ class Organism extends Point implements Drawable {
 
   assexually_procreate() {
     const offspring_dna = this.dna.mutate();
-    return this.create_child(offspring_dna, null);
+    return this.create_child(offspring_dna, null, [this.id]);
   }
 
   sexually_procreate(qtree: OrganismQuadTree, vision: Circle) {
@@ -225,7 +232,7 @@ class Organism extends Point implements Drawable {
 
               `);
 
-              this.create_child(offspring_dna_mutated, globals.pyodide.globals.get('child_nn_id'));
+              this.create_child(offspring_dna_mutated, globals.pyodide.globals.get('child_nn_id'), [this.id, partner.id]);
             }
           }
         }
@@ -234,7 +241,9 @@ class Organism extends Point implements Drawable {
         this.is_reproducing = false;
         partner.energy = (partner.energy/2);
         partner.is_reproducing = false;
-        this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+3) * 1000
+        this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_reproduction) * 1000;
+        this.time_to_unlock_next_meal_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_meal) * 1000;
+        debugger;
       }
     }
   }
@@ -575,10 +584,6 @@ class Organism extends Point implements Drawable {
     }
     
     element.kill();
-    // Log de morte
-    if(element instanceof Organism){
-      console.log(`O organismo ${element.id} foi devorado :(`);
-    }
 
     this.increase_size();
     this.food_eaten++;
@@ -768,7 +773,6 @@ class Organism extends Point implements Drawable {
         this_nn_id = json.loads('${JSON.stringify(this.neural_network_id)}')
 
         # Deletando a rede através do ID
-        print('${this.id}', ' died')
         neural_network.NeuralNetwork.neural_networks.pop(f"{this_nn_id}")
       `);
     }
