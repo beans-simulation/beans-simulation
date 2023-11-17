@@ -583,7 +583,9 @@ class Organism extends Point implements Drawable {
       console.log(`O organismo ${element.id} foi simplesmente AMASSADO, comido, devorado, papado pelo organismo ${this.id}`);
     }
     
-    element.kill();
+    if(element && Organism.organisms.includes(this) ){
+      element.kill();
+    }
 
     this.increase_size();
     this.food_eaten++;
