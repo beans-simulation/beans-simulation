@@ -114,7 +114,7 @@ class DNA {
       const { min, max } = this.variate_range(min_value, max_value);
 
       const min_mutated = min >= 0 ? min : 0;
-      const max_mutated = max >= min_value ? max : min_value + 1;
+      const max_mutated = max <= max_value ? max : max_value;
 
       return [min_mutated, max_mutated];
     }

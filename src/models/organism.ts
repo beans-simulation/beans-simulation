@@ -50,7 +50,7 @@ class Organism extends Point implements Drawable {
   public speed = new Vector(0.0001, 0.0001);
   private status: organism_status_type;
   private time_to_maturity_in_seconds: number;
-  public time_to_unlock_next_reproduction_miliseconds: number = 0;
+  public time_to_unlock_next_reproduction_miliseconds: number = 2000;
   public neural_network_id: number | null;
   public index_closest_food: number = -1;
   public distance_closest_food: number = -1;
@@ -160,6 +160,7 @@ class Organism extends Point implements Drawable {
     );
 
     this.childrenIds ? this.childrenIds.push(offspring.id) : [offspring.id];
+    this.roam();
 
     return offspring;
   }
@@ -186,7 +187,7 @@ class Organism extends Point implements Drawable {
       let partner_genome = partner.dna.get_genome(); // Pega o genoma do parceiro
 
       // Se a aproximação for bem-sucedida e o parceiro ainda estiver pronto...
-      if (this.approach_partner(min_distance, possible_partners, closest_index) && partner.is_ready_to_reproduce){
+      if (this.approach_partner(min_distance, possible_partners, closest_index)){
         this.is_reproducing = true;
         partner.is_reproducing = true;
         // NINHADA
@@ -195,7 +196,7 @@ class Organism extends Point implements Drawable {
           this.litter_interval[1] + 1
         );
         for (var i = 0; i < this.litter_size; i++) {
-          if (Math.random() < 1) {
+          if (Math.random() < 1) { // isso sempre vai ser menor que 1..........
             let offspring_dna = this.crossover_dnas(current_organism_genome, partner_genome);
             const offspring_dna_mutated = offspring_dna.mutate();
 
@@ -263,7 +264,7 @@ class Organism extends Point implements Drawable {
 
 
     // Se está vivo
-    if (this.energy > 0 && !achieved_age_limit && this.min_max_temperature_tolerated[0] <= globals.temperature && this.min_max_temperature_tolerated[1] >= globals.temperature) {
+    if (this.energy > 0 && !achieved_age_limit) {
       this.energy -= this.consumed_energy_rate + this.minimal_consumption * this.metabolic_rate;
     } else {
       // this.kill();
@@ -670,15 +671,15 @@ class Organism extends Point implements Drawable {
     /*
     Se aproxima do parceiro e faz o crossover
     */
-
-    if (min_distance <= this.detection_radius*this.detection_radius) {
+    const partner = close_organisms[closest_index] as Organism
+    if (min_distance <= this.detection_radius*this.detection_radius && (partner.is_ready_to_reproduce)) {
       this.is_roaming = false;
       this.is_eating = false;
 
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
         return true
       } else if (close_organisms.length != 0) {
-        this.pursue((close_organisms[closest_index] as Organism), true);
+        this.pursue(partner, true);
       }
     }
     return false
