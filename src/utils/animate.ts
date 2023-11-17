@@ -39,11 +39,9 @@ function rotate(value: number, organism: Organism) {
   if (value == 0) {
     return;
   }
-  if(organism.can_rotate){
-    organism.is_rotating = true;
-    organism.speed.rotate_degrees(value);
-    organism.is_rotating = false;
-  }
+  organism.is_rotating = true;
+  organism.speed.rotate_degrees(value);
+  organism.is_rotating = false;
   }
 
 function desireToEat(value: number, organism: Organism) {
@@ -169,27 +167,17 @@ function animate(context: CanvasRenderingContext2D | null) {
       const desire_to_reproduce = output.get("DesireToReproduce");
       const desire_to_eat = output.get("DesireToEat");
       
-      if(globals.count == 0){
-        var can_reproduce = true
-          // organism.time_to_unlock_next_reproduction_miliseconds <=
-          // global_timer.total;
-  
-        organism.is_ready_to_reproduce = true;
-          // desire_to_reproduce == 1 &&
-          // organism.maturity == 1 &&
-          // organism.energy > organism.max_energy * 0.2;
-      } else {
-        var can_reproduce = false;
-      }
+      var can_reproduce =
+        organism.time_to_unlock_next_reproduction_miliseconds <=
+        global_timer.total;
 
-      console.log
+      organism.is_ready_to_reproduce 
+        desire_to_reproduce == 1 &&
+        organism.maturity == 1 &&
+        organism.energy > organism.max_energy * 0.2;
 
       if (can_reproduce && organism.is_ready_to_reproduce) {
         return organism.sexually_procreate(qtreeOrganisms, vision);
-      }
-
-      if(organism.parent_id) {
-        console.log('tempo pra prox comida do filhao:', can_reproduce)
       }
 
       desireToEat(desire_to_eat, organism);

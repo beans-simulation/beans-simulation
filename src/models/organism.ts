@@ -30,7 +30,6 @@ class Organism extends Point implements Drawable {
   public is_running_away = false;
   public is_ready_to_reproduce = true;
   public is_organism_dead = 0;
-  public can_rotate: boolean = true;
   public lifetime_in_miliseconds: number; // tempo de vida do organism
   public litter_interval: number[]; //ninhada
   public litter_size = 0;
@@ -197,8 +196,6 @@ class Organism extends Point implements Drawable {
       if (this.approach_partner(min_distance, possible_partners, closest_index) && partner.is_ready_to_reproduce){
         this.is_reproducing = true;
         partner.is_reproducing = true;
-        this.can_rotate = true;
-        partner.can_rotate = true;
         // NINHADA
         this.litter_size = generate_integer(
           this.litter_interval[0],
@@ -247,7 +244,6 @@ class Organism extends Point implements Drawable {
         this.time_to_unlock_next_reproduction_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_reproduction) * 1000;
         this.time_to_unlock_next_meal_miliseconds = (this.get_time_alive_in_seconds()+this.add_time_to_meal) * 1000;
         debugger;
-        globals.count = 1;
       }
     }
   }
@@ -683,7 +679,6 @@ class Organism extends Point implements Drawable {
     if (min_distance <= this.detection_radius*this.detection_radius) {
       this.is_roaming = false;
       this.is_eating = false;
-      this.can_rotate = false;
 
       if (min_distance <= EAT_DISTANCE * EAT_DISTANCE) {
         return true

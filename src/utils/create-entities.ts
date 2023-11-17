@@ -5,8 +5,8 @@ function generate_organism(x: number, y: number): void {
   const max_force = generate_float(0.01, 0.05);
   const color = generate_color();
   const initial_detection_radius = generate_float(40, 120);
-  const ninhada_min = generate_integer(10, 12);
-  const ninhada_max = ninhada_min + generate_integer(12, 18);
+  const ninhada_min = generate_integer(1, 2);
+  const ninhada_max = ninhada_min + generate_integer(3, 8);
   const litter_interval = [ninhada_min, ninhada_max];
   const o_sex = Math.random() < 0.5 ? sex.female : sex.male;
   const diet = generate_float(0, 1);
