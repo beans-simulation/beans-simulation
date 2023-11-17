@@ -76,7 +76,7 @@ class DNA {
       return 1
     } else if(new_value <= 0){
       return 0
-    } 
+    }
     return new_value;
   }
 
@@ -260,7 +260,7 @@ class DNA {
 
     // dieta
     const offspring_diet = this.get_mutation_between_zero_one(this.diet, 0.1);
-    
+
     // taxa metabolica
     const offspring_metabolic_rate = this.get_positive_mutation(this.metabolic_rate, 1);
 
