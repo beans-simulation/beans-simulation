@@ -387,11 +387,6 @@ class Organism extends Point implements Drawable {
     return null;
   }
 
-  accelerate(value: number){
-    // TOOD: implemetar função aceleração com base no valor de output da rede
-  }
-
-
   create_space_delimitation() {
     this.create_canvas_space_delimitation();
     this.avoid_space_limits();
@@ -632,9 +627,11 @@ class Organism extends Point implements Drawable {
   // Método que calcula a força de redirecionamento em direção a um alvo
   // REDIRECIONAMENTO = VELOCIDADE DESEJADA - VELOCIDADE
   pursue(target: Organism | Vegetable, to_reproduce: boolean = false) {
+    // debugger;
     if (target instanceof Organism && !to_reproduce) {
       target.is_running_away = true;
     }
+
     // O vector da velocidade desejada é o vector de posição do alvo menos o da própria posição
     let desired_speed = target.position.subtract_new(this.position); // Um vector apontando da localização dele para o alvo
     // Amplia a velocidade desejada para a velocidade máxima
@@ -643,6 +640,9 @@ class Organism extends Point implements Drawable {
     // Redirecionamento = velocidade desejada - velocidade
     let redirection = desired_speed.subtract_new(this.speed);
     redirection.limit(this.max_force); // Limita o redirectionamento para a força máxima
+    // rotacionando para o target, mas adicionando 50% do valor, para gerar um movimento mais suave
+    const rotation_value = get_angle_to_closest_element(this, target)*0.5;
+    this.speed.rotate_degrees(rotation_value);
 
     // Soma a força de redirecionamento à aceleração
     this.apply_force(redirection);
@@ -677,9 +677,8 @@ class Organism extends Point implements Drawable {
     /*
     Se aproxima do parceiro e faz o crossover
     */
-
     const partner = close_organisms[closest_index] as Organism
-    if (min_distance <= this.detection_radius*this.detection_radius && partner.is_ready_to_reproduce) {
+    if (min_distance <= this.detection_radius*this.detection_radius && (partner.is_ready_to_reproduce)) {
       this.is_roaming = false;
       this.is_eating = false;
 

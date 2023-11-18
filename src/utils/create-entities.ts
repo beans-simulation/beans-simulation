@@ -18,7 +18,6 @@ function generate_organism(x: number, y: number): void {
   const lifespan = generate_integer(200, 300);
   const percentage_to_mature = generate_float(0.01, 0.03); // maturidade é atingida entre 1% e 3% da vida
 
-
   var dna = new DNA(
     initial_radius,
     max_speed,
